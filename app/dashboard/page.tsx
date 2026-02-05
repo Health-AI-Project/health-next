@@ -9,47 +9,84 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { TrendingDown, Flame, Target, Activity } from "lucide-react";
-
-const stats = [
-    {
-        label: "Poids actuel",
-        value: "76.2 kg",
-        change: "-1.8 kg",
-        trend: "down",
-        icon: TrendingDown,
-    },
-    {
-        label: "Calories aujourd'hui",
-        value: "1,850",
-        change: "kcal",
-        trend: "neutral",
-        icon: Flame,
-    },
-    {
-        label: "Objectif atteint",
-        value: "72%",
-        change: "+5%",
-        trend: "up",
-        icon: Target,
-    },
-    {
-        label: "Activité",
-        value: "6,420",
-        change: "pas",
-        trend: "neutral",
-        icon: Activity,
-    },
-];
+import { TrendingDown, Flame, Target, Activity, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 export default function DashboardPage() {
     const { currentTheme } = useTheme();
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await apiFetch<any>('/api/home');
+                setData(response.data);
+            } catch (err: any) {
+                console.error("Dashboard fetch error:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-8 text-center text-red-500">
+                Erreur de chargement: {error}
+            </div>
+        );
+    }
+
+    const stats = [
+        {
+            label: "Poids actuel",
+            value: data?.user?.weight ? `${data.user.weight} kg` : "N/A",
+            change: data?.user?.is_premium ? "Premium" : "Standard",
+            trend: "neutral",
+            icon: TrendingDown,
+        },
+        {
+            label: "Calories aujourd'hui",
+            value: data?.stats?.calories ? Math.round(data.stats.calories).toLocaleString() : "0",
+            change: "kcal",
+            trend: "neutral",
+            icon: Flame,
+        },
+        {
+            label: "Protéines",
+            value: data?.stats?.protein ? `${Math.round(data.stats.protein)} g` : "0 g",
+            change: "Objectif atteint",
+            trend: "up",
+            icon: Target,
+        },
+        {
+            label: "Activité",
+            value: data?.stats?.workouts_count !== undefined ? `${data.stats.workouts_count}` : "0",
+            change: "séances",
+            trend: "neutral",
+            icon: Activity,
+        },
+    ];
+
 
     return (
         <div className="space-y-8">
             <header>
                 <h1 className="text-3xl font-bold tracking-tight">
-                    Bienvenue sur {currentTheme.name}
+                    Bienvenue, {data?.user?.email?.split('@')[0] || 'Utilisateur'}
                 </h1>
                 <p className="text-muted-foreground mt-1">
                     Voici un aperçu de vos statistiques de santé
@@ -93,3 +130,4 @@ export default function DashboardPage() {
         </div>
     );
 }
+

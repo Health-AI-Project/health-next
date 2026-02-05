@@ -13,25 +13,7 @@ import {
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard } from "@/components/charts/chart-card";
 
-const generateWeightData = () => {
-    const data = [];
-    let weight = 78;
-    const today = new Date();
-
-    for (let i = 29; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        weight = weight + (Math.random() - 0.52) * 0.5;
-        data.push({
-            date: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
-            poids: parseFloat(weight.toFixed(1)),
-            objectif: 75,
-        });
-    }
-    return data;
-};
-
-const weightData = generateWeightData();
+const weightData: any[] = [];
 
 export function WeightEvolutionChart() {
     const colors = useChartColors();
@@ -42,8 +24,8 @@ export function WeightEvolutionChart() {
             description="Suivi sur les 30 derniers jours"
             className="h-full"
         >
-            <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] min-h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                     <LineChart
                         data={weightData}
                         margin={{ top: 5, right: 20, left: 0, bottom: 5 }}

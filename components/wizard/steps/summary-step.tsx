@@ -9,7 +9,7 @@ import {
 import { ArrowLeft, Check, User, Scale, Target, AlertTriangle } from "lucide-react";
 
 export function SummaryStep() {
-    const { data, prevStep, reset } = useWizardStore();
+    const { data, prevStep, nextStep, reset } = useWizardStore();
 
     const getGoalLabels = () => {
         return (data.goals || [])
@@ -28,9 +28,8 @@ export function SummaryStep() {
     };
 
     const handleSubmit = () => {
-        console.log("Données soumises:", data);
-        alert("Inscription réussie ! Consultez la console pour les données.");
-        reset();
+        // console.log("Données de simulation:", data);
+        nextStep();
     };
 
     return (

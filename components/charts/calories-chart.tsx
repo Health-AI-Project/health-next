@@ -14,15 +14,7 @@ import {
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard } from "@/components/charts/chart-card";
 
-const caloriesData = [
-    { jour: "Lun", calories: 2100, objectif: 2000 },
-    { jour: "Mar", calories: 1850, objectif: 2000 },
-    { jour: "Mer", calories: 2250, objectif: 2000 },
-    { jour: "Jeu", calories: 1950, objectif: 2000 },
-    { jour: "Ven", calories: 2400, objectif: 2000 },
-    { jour: "Sam", calories: 2150, objectif: 2000 },
-    { jour: "Dim", calories: 1900, objectif: 2000 },
-];
+const caloriesData: any[] = [];
 
 export function CaloriesChart() {
     const colors = useChartColors();
@@ -33,8 +25,8 @@ export function CaloriesChart() {
             description="Consommation vs objectif cette semaine"
             className="h-full"
         >
-            <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[300px] min-h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                     <BarChart
                         data={caloriesData}
                         margin={{ top: 5, right: 20, left: 0, bottom: 5 }}

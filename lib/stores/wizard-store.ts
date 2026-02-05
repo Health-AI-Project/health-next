@@ -21,7 +21,7 @@ interface WizardState {
 
 export const useWizardStore = create<WizardState>((set, get) => ({
     currentStep: 0,
-    totalSteps: 5,
+    totalSteps: 6,
     data: {},
     direction: 1,
 
@@ -62,4 +62,5 @@ export const STEP_TITLES = [
     "Vos objectifs",
     "Vos allergies",
     "Récapitulatif",
+    "Créer votre compte",
 ];

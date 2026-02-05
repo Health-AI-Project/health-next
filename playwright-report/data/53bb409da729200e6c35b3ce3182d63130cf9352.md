@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - img "Logo HealthNext" [ref=e5]
+        - generic [ref=e7]: HealthNext
+      - navigation "Navigation principale" [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e10]
+          - text: Dashboard
+        - link "Nutrition" [ref=e15] [cursor=pointer]:
+          - /url: /dashboard/nutrition
+          - img [ref=e16]
+          - text: Nutrition
+        - link "Analytics" [ref=e19] [cursor=pointer]:
+          - /url: /dashboard/analytics
+          - img [ref=e20]
+          - text: Analytics
+        - link "Clients" [ref=e22] [cursor=pointer]:
+          - /url: /dashboard/clients
+          - img [ref=e23]
+          - text: Clients
+        - link "Paramètres" [ref=e28] [cursor=pointer]:
+          - /url: /dashboard/settings
+          - img [ref=e29]
+          - text: Paramètres
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - text: Entreprise
+          - generic [ref=e34]:
+            - combobox "Sélectionner une entreprise" [ref=e35]:
+              - option "HealthNext" [selected]
+              - option "Gym Club"
+              - option "FitLife Pro"
+              - option "Wellness Center"
+            - img
+        - generic [ref=e36]:
+          - text: Mode
+          - generic [ref=e37]:
+            - button "Mode clair" [ref=e38]:
+              - img
+            - button "Mode sombre" [ref=e39]:
+              - img
+            - button "Mode système" [ref=e40]:
+              - img
+    - main [ref=e41]:
+      - generic [ref=e43]: "Erreur de chargement: API error: 404"
+  - region "Notifications alt+T"
+  - generic [ref=e48] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e49]:
+      - img [ref=e50]
+    - generic [ref=e53]:
+      - button "Open issues overlay" [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]: "0"
+          - generic [ref=e57]: "1"
+        - generic [ref=e58]: Issue
+      - button "Collapse issues badge" [ref=e59]:
+        - img [ref=e60]
+  - alert [ref=e62]
+```

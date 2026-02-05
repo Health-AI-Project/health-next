@@ -15,8 +15,9 @@ import { WeightStep } from "@/components/wizard/steps/weight-step";
 import { GoalsStep } from "@/components/wizard/steps/goals-step";
 import { AllergiesStep } from "@/components/wizard/steps/allergies-step";
 import { SummaryStep } from "@/components/wizard/steps/summary-step";
+import { SignupStep } from "@/components/wizard/steps/signup-step";
 
-const STEPS = [AgeStep, WeightStep, GoalsStep, AllergiesStep, SummaryStep];
+const STEPS = [AgeStep, WeightStep, GoalsStep, AllergiesStep, SummaryStep, SignupStep];
 
 export function WizardContainer() {
     const { currentStep, totalSteps, direction } = useWizardStore();
