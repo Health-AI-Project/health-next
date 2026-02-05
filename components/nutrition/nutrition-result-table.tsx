@@ -37,14 +37,23 @@ export function NutritionResultTable({
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const result = await saveNutritionData(editedData);
-            if (result.success) {
-                onDataUpdate?.(editedData);
-                setIsEditMode(false);
-                toast.success("Modifications sauvegardées", {
-                    description: "Les données nutritionnelles ont été mises à jour.",
-                });
-            }
+            // Save each item individually
+            const savePromises = editedData.map(item =>
+                saveNutritionData(item.id, {
+                    name: item.name,
+                    calories: item.calories,
+                    proteins: item.proteins,
+                    carbs: item.carbs,
+                    fats: item.fats,
+                })
+            );
+            await Promise.all(savePromises);
+
+            onDataUpdate?.(editedData);
+            setIsEditMode(false);
+            toast.success("Modifications sauvegardées", {
+                description: "Les données nutritionnelles ont été mises à jour.",
+            });
         } catch {
             toast.error("Erreur de sauvegarde", {
                 description: "Impossible de sauvegarder les modifications.",
