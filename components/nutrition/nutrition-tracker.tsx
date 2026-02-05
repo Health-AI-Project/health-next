@@ -21,7 +21,7 @@ export function NutritionTracker() {
         });
 
         try {
-            const result = await analyzeImage();
+            const result = await analyzeImage(file);
             setNutritionData(result);
             toast.success("Analyse terminée", {
                 description: `${result.length} aliments détectés dans votre repas.`,
