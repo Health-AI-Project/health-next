@@ -3,7 +3,14 @@
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,11 +33,7 @@ export function SignupStep() {
     const [isLoading, setIsLoading] = useState(false);
     const { data: session } = authClient.useSession();
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<SignupFormValues>({
+    const form = useForm<SignupFormValues>({
         resolver: zodResolver(signupSchema),
         defaultValues: {
             email: "",
@@ -97,60 +100,74 @@ export function SignupStep() {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        placeholder="votre@email.com"
-                        {...register("email")}
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" noValidate>
+                <div className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="votre@email.com"
+                                        autoComplete="email"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                    {errors.email && (
-                        <p className="text-sm text-red-500">{errors.email.message}</p>
-                    )}
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Mot de passe</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        autoComplete="new-password"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="password">Mot de passe</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        {...register("password")}
-                    />
-                    {errors.password && (
-                        <p className="text-sm text-red-500">{errors.password.message}</p>
-                    )}
+                <div className="flex justify-between pt-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="lg"
+                        onClick={prevStep}
+                        className="gap-2"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Retour
+                    </Button>
+                    <Button
+                        type="submit"
+                        size="lg"
+                        disabled={isLoading}
+                        className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <UserPlus className="h-4 w-4" />
+                        )}
+                        Créer mon compte
+                    </Button>
                 </div>
-            </div>
-
-            <div className="flex justify-between pt-4">
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={prevStep}
-                    className="gap-2"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Retour
-                </Button>
-                <Button
-                    type="submit"
-                    size="lg"
-                    disabled={isLoading}
-                    className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                >
-                    {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        <UserPlus className="h-4 w-4" />
-                    )}
-                    Créer mon compte
-                </Button>
-            </div>
-        </form>
+            </form>
+        </Form>
     );
 }

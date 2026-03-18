@@ -2,6 +2,7 @@
 
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
     GOALS_OPTIONS,
     ALLERGIES_OPTIONS,
@@ -38,45 +39,53 @@ export function SummaryStep() {
                 <h3 className="text-lg font-medium">Récapitulatif de vos informations</h3>
 
                 <div className="grid gap-4">
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/50">
-                        <User className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
-                        <div>
-                            <p className="font-medium">Âge</p>
-                            <p className="text-muted-foreground">{data.age} ans</p>
-                        </div>
-                    </div>
+                    <Card className="bg-accent/50 border-0">
+                        <CardContent className="flex items-start gap-3 p-4">
+                            <User className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
+                            <div>
+                                <p className="font-medium">Âge</p>
+                                <p className="text-muted-foreground">{data.age} ans</p>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/50">
-                        <Scale className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
-                        <div>
-                            <p className="font-medium">Poids</p>
-                            <p className="text-muted-foreground">{data.weight} kg</p>
-                        </div>
-                    </div>
+                    <Card className="bg-accent/50 border-0">
+                        <CardContent className="flex items-start gap-3 p-4">
+                            <Scale className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
+                            <div>
+                                <p className="font-medium">Poids</p>
+                                <p className="text-muted-foreground">{data.weight} kg</p>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/50">
-                        <Target className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
-                        <div>
-                            <p className="font-medium">Objectifs</p>
-                            <ul className="text-muted-foreground list-disc list-inside">
-                                {getGoalLabels().map((goal, index) => (
-                                    <li key={index}>{goal}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
+                    <Card className="bg-accent/50 border-0">
+                        <CardContent className="flex items-start gap-3 p-4">
+                            <Target className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
+                            <div>
+                                <p className="font-medium">Objectifs</p>
+                                <ul className="text-muted-foreground list-disc list-inside">
+                                    {getGoalLabels().map((goal, index) => (
+                                        <li key={index}>{goal}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/50">
-                        <AlertTriangle className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
-                        <div>
-                            <p className="font-medium">Allergies</p>
-                            <ul className="text-muted-foreground list-disc list-inside">
-                                {getAllergyLabels().map((allergy, index) => (
-                                    <li key={index}>{allergy}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
+                    <Card className="bg-accent/50 border-0">
+                        <CardContent className="flex items-start gap-3 p-4">
+                            <AlertTriangle className="h-5 w-5 text-primary mt-0.5" aria-hidden="true" />
+                            <div>
+                                <p className="font-medium">Allergies</p>
+                                <ul className="text-muted-foreground list-disc list-inside">
+                                    {getAllergyLabels().map((allergy, index) => (
+                                        <li key={index}>{allergy}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
 

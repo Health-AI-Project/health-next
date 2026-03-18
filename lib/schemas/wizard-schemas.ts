@@ -21,7 +21,9 @@ export const goalsSchema = z.object({
 });
 
 export const allergiesSchema = z.object({
-    allergies: z.array(z.string()).optional(),
+    allergies: z
+        .array(z.string())
+        .min(1, { message: "Veuillez sélectionner au moins une option" }),
 });
 
 export const GOALS_OPTIONS = [
