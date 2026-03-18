@@ -5,12 +5,19 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/providers/dynamic-theme-provider";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     LayoutDashboard,
     BarChart3,
     Settings,
     Users,
-    ChevronDown,
     Sun,
     Moon,
     Monitor,
@@ -37,11 +44,7 @@ export function Sidebar() {
 
     return (
         <aside
-            className="flex h-screen w-64 flex-col border-r bg-sidebar-background"
-            style={{
-                backgroundColor: "hsl(var(--sidebar-background))",
-                borderColor: "hsl(var(--sidebar-border))",
-            }}
+            className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar-background text-sidebar-foreground"
         >
             <div className="flex h-16 items-center gap-3 border-b px-6">
                 <currentTheme.icon className="h-8 w-8 text-primary" aria-label={`Logo ${currentTheme.name}`} />
@@ -72,30 +75,27 @@ export function Sidebar() {
 
             <div className="border-t p-4 space-y-4">
                 <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground">
+                    <Label className="text-xs font-medium text-muted-foreground">
                         Entreprise
-                    </label>
-                    <div className="relative">
-                        <select
-                            value={currentTheme.id}
-                            onChange={(e) => setTheme(e.target.value)}
-                            className="w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm pr-8 focus:outline-none focus:ring-2 focus:ring-ring"
-                            aria-label="Sélectionner une entreprise"
-                        >
+                    </Label>
+                    <Select value={currentTheme.id} onValueChange={setTheme}>
+                        <SelectTrigger aria-label="Sélectionner une entreprise">
+                            <SelectValue placeholder="Sélectionner une entreprise" />
+                        </SelectTrigger>
+                        <SelectContent>
                             {availableThemes.map((theme) => (
-                                <option key={theme.id} value={theme.id}>
+                                <SelectItem key={theme.id} value={theme.id}>
                                     {theme.name}
-                                </option>
+                                </SelectItem>
                             ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                    </div>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground">
+                    <Label className="text-xs font-medium text-muted-foreground">
                         Mode
-                    </label>
+                    </Label>
                     <div className="flex gap-1">
                         <Button
                             variant={colorMode === "light" ? "default" : "outline"}
