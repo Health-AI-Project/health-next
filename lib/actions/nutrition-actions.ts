@@ -23,14 +23,7 @@ export async function analyzeImage(file: File): Promise<NutritionData[]> {
     const response = await apiFetch<any>('/api/nutrition/upload', {
         method: 'POST',
         body: formData,
-        // Let the browser set the Content-Type for FormData
-        headers: {
-            'Content-Type': undefined as any,
-        }
     });
-
-    // Handle case where apiFetch might set Content-Type to application/json by default
-    // Our apiFetch needs a small adjustment to handle FormData
 
     return [
         {

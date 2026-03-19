@@ -90,8 +90,13 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
 - [x] P1: Migrer les blocs de contenu vers `card`.
   - Commentaire validation: migration des blocs de recapitulatif dans `components/wizard/steps/summary-step.tsx` de `div` styles vers `Card` + `CardContent` pour uniformiser les conteneurs UI.
   - Verification effectuee: controle des pages prioritaires (`app/page.tsx`, `app/dashboard/page.tsx`, `app/inscription/page.tsx` via `WizardContainer`) confirmant l'usage majoritaire de `Card` pour les blocs de contenu.
-- [ ] P2: Migrer interactions (modals, popovers, dropdowns) vers composants Shadcn UI.
-- [ ] P2: Migrer feedback/notifications vers `sonner` + `toaster`.
+- [x] P2: Migrer interactions (modals, popovers, dropdowns) vers composants Shadcn UI.
+  - Commentaire validation: ajout de `components/ui/dropdown-menu.tsx` (Shadcn + Radix) et migration de l'interaction de choix du mode dans `components/dashboard/sidebar.tsx` vers un `DropdownMenu`.
+  - Verification effectuee: diagnostics sans erreur sur `components/ui/dropdown-menu.tsx` et `components/dashboard/sidebar.tsx`, avec navigation clavier supportee nativement par Radix.
+  - Note perimetre: aucun modal/popover custom detecte a migrer dans le code actuel; le besoin interaction est couvert par `Select` (entreprise) + `DropdownMenu` (mode).
+- [x] P2: Migrer feedback/notifications vers `sonner` + `toaster`.
+  - Commentaire validation: unification des appels `toast` sur `sonner` dans `components/nutrition/nutrition-tracker.tsx` et `components/nutrition/nutrition-result-table.tsx`.
+  - Verification effectuee: `Toaster` reste monte dans `app/dashboard/layout.tsx`, garantissant l'affichage global des notifications dashboard.
 - [ ] P3: Migrer tableaux/lists avec composants standardises.
 
 ### 4) Refactor styling

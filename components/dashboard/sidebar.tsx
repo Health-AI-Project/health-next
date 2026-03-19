@@ -14,6 +14,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
     LayoutDashboard,
     BarChart3,
     Settings,
@@ -96,35 +102,34 @@ export function Sidebar() {
                     <Label className="text-xs font-medium text-muted-foreground">
                         Mode
                     </Label>
-                    <div className="flex gap-1">
-                        <Button
-                            variant={colorMode === "light" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setColorMode("light")}
-                            className="flex-1"
-                            aria-label="Mode clair"
-                        >
-                            <Sun className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant={colorMode === "dark" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setColorMode("dark")}
-                            className="flex-1"
-                            aria-label="Mode sombre"
-                        >
-                            <Moon className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant={colorMode === "system" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setColorMode("system")}
-                            className="flex-1"
-                            aria-label="Mode système"
-                        >
-                            <Monitor className="h-4 w-4" />
-                        </Button>
-                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start gap-2" aria-label="Sélectionner le mode d'affichage">
+                                {colorMode === "light" && <Sun className="h-4 w-4" aria-hidden="true" />}
+                                {colorMode === "dark" && <Moon className="h-4 w-4" aria-hidden="true" />}
+                                {colorMode === "system" && <Monitor className="h-4 w-4" aria-hidden="true" />}
+                                <span>
+                                    {colorMode === "light" && "Mode clair"}
+                                    {colorMode === "dark" && "Mode sombre"}
+                                    {colorMode === "system" && "Mode système"}
+                                </span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuItem onClick={() => setColorMode("light")}>
+                                <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode clair</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setColorMode("dark")}>
+                                <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode sombre</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setColorMode("system")}>
+                                <Monitor className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode système</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
         </aside>

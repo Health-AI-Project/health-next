@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "@/components/ui/toaster";
+import { toast } from "sonner";
 import { Edit2, Save, X, Loader2 } from "lucide-react";
 
 interface NutritionResultTableProps {

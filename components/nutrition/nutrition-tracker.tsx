@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MealUploader } from "@/components/nutrition/meal-uploader";
 import { NutritionResultTable } from "@/components/nutrition/nutrition-result-table";
 import { analyzeImage, NutritionData } from "@/lib/actions/nutrition-actions";
-import { toast } from "@/components/ui/toaster";
+import { toast } from "sonner";
 import { Utensils } from "lucide-react";
 
 export function NutritionTracker() {
