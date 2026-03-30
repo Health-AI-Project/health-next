@@ -218,6 +218,7 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
     5. `fix(lint): corriger toutes les erreurs eslint et warnings TypeScript`
     6. `chore: ajouter les artefacts de test au gitignore`
 - [ ] PR prete avec captures avant/apres.
+  - Note: contenu de la PR prepare dans `docs/PR-migration-shadcn.md`. Les captures "avant" ne sont pas disponibles car la migration P1 etait deja en place avant cette branche. La PR documente l'explication des 2 tests dashboard qui echouent (dependance backend, pas une regression UI).
 
 ## Risques
 - Regressions visuelles discretes sur certaines pages.
