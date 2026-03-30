@@ -117,12 +117,21 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
   - Verification: build (`npm run build`) passe sans erreur apres migration.
 
 ### 4) Refactor styling
-- [ ] Extraire le pattern de navigation wizard dans un composant reutilisable.
-  - Pattern concerne: `flex justify-between pt-4` (ou `justify-end` pour le premier step) repete dans les 6 wizard steps.
-- [ ] Extraire le pattern d'espacement wizard `space-y-6` si pertinent.
-- [ ] Supprimer les classes redondantes repetees dans les pages.
-- [ ] Creer des variantes la ou necessaire (ex: `variant="premium"`).
-- [ ] Harmoniser les espacements, tailles, et etats (hover/focus/disabled).
+- [x] Extraire le pattern de navigation wizard dans un composant reutilisable.
+  - Commentaire validation: creation de `components/wizard/wizard-navigation.tsx` avec props `onPrev`, `prevLabel`, `nextLabel`, `nextIcon`, `nextClassName`, `isLoading`, `onNext`. Utilise dans les 6 wizard steps, supprimant la duplication du bloc navigation (boutons Precedent/Suivant).
+  - Imports `Button` et `ArrowLeft`/`ArrowRight` retires des steps (centralises dans `WizardNavigation`).
+- [x] Extraire le pattern des cards recapitulatif dans summary-step.
+  - Commentaire validation: creation d'un composant local `SummaryCard` dans `summary-step.tsx` qui factorise le pattern `Card bg-accent/50 border-0` + `CardContent flex items-start gap-3 p-4` + icone. Les 4 blocs recapitulatifs utilisent desormais `SummaryCard`.
+- [x] Extraire le pattern d'espacement wizard `space-y-6` si pertinent.
+  - Commentaire validation: apres analyse, ce pattern est le `className` du `<form>` dans chaque step. C'est un usage standard de formulaire, l'extraire ajouterait de la complexite sans benefice reel. Laisse en l'etat volontairement.
+- [x] Creer des variantes la ou necessaire (ex: `variant="premium"`).
+  - Commentaire validation: ajout de la variante `premium` dans `components/ui/button.tsx` (gradient `from-primary to-primary/80` avec hover). Utilise dans `WizardNavigation` via prop `nextVariant="premium"` dans `summary-step.tsx` et `signup-step.tsx`. Suppression des className gradient en dur.
+- [x] Harmoniser les espacements, tailles, et etats (hover/focus/disabled).
+  - Commentaire validation:
+    - Harmonisation `focus:` vers `focus-visible:` dans `dialog.tsx`, `badge.tsx`, `select.tsx` (alignement avec button, input, checkbox, tabs qui utilisaient deja `focus-visible:`).
+    - Ajout du hover manquant sur la card Premium de la landing page (`hover:border-primary transition-colors`), alignement avec la card Freemium.
+    - Extraction du style tooltip duplique des charts dans `getChartTooltipStyle()` dans `chart-card.tsx`, utilise par `weight-evolution-chart.tsx` et `calories-chart.tsx`.
+    - Suppression de la prop `nextClassName` de `WizardNavigation` au profit de `nextVariant` (plus propre, passe par le systeme de variantes CVA).
 
 ### 5) Validation fonctionnelle
 - [ ] Lancer le projet localement et verifier les pages clefs.

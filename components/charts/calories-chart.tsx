@@ -12,7 +12,7 @@ import {
     Cell,
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
-import { ChartCard } from "@/components/charts/chart-card";
+import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
 const caloriesData: any[] = [];
 
@@ -49,14 +49,8 @@ export function CaloriesChart() {
                             tickFormatter={(value) => `${value}`}
                         />
                         <Tooltip
-                            contentStyle={{
-                                backgroundColor: colors.background,
-                                border: `1px solid ${colors.grid}`,
-                                borderRadius: "8px",
-                                color: colors.text,
-                            }}
+                            {...getChartTooltipStyle(colors)}
                             formatter={(value) => [`${value} kcal`, "Calories"]}
-                            labelStyle={{ color: colors.text }}
                         />
                         <ReferenceLine
                             y={2000}

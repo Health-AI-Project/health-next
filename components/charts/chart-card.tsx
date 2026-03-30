@@ -7,7 +7,23 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
+
+export function getChartTooltipStyle(colors: {
+    background: string;
+    grid: string;
+    text: string;
+}): { contentStyle: CSSProperties; labelStyle: CSSProperties } {
+    return {
+        contentStyle: {
+            backgroundColor: colors.background,
+            border: `1px solid ${colors.grid}`,
+            borderRadius: "8px",
+            color: colors.text,
+        },
+        labelStyle: { color: colors.text },
+    };
+}
 
 interface ChartCardProps {
     title: string;

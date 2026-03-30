@@ -162,7 +162,7 @@ export default function HomePage() {
             </Card>
 
             <Card
-              className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl"
+              className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl hover:border-primary transition-colors"
               role="listitem"
             >
               <div className="absolute top-4 right-4">

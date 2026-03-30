@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ageSchema, type AgeFormData } from "@/lib/schemas/wizard-schemas";
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Form,
@@ -15,7 +14,7 @@ import {
     FormMessage,
     FormDescription,
 } from "@/components/ui/form";
-import { ArrowRight } from "lucide-react";
+import { WizardNavigation } from "@/components/wizard/wizard-navigation";
 
 export function AgeStep() {
     const { data, updateData, nextStep } = useWizardStore();
@@ -67,12 +66,7 @@ export function AgeStep() {
                     )}
                 />
 
-                <div className="flex justify-end pt-4">
-                    <Button type="submit" size="lg" className="gap-2">
-                        Suivant
-                        <ArrowRight className="h-4 w-4" />
-                    </Button>
-                </div>
+                <WizardNavigation />
             </form>
         </Form>
     );
