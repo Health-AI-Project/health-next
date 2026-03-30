@@ -86,14 +86,15 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
 - [RESOLU 18-03-2026] `components/ui/select.tsx` a ete cree lors de cette migration et est desormais disponible.
 - Exception technique legitime: `components/nutrition/meal-uploader.tsx` conserve un `<input {...getInputProps()}>` requis par `react-dropzone` (input cache de gestion upload), non considere comme dette UI.
 - Exception semantique legitime: `components/wizard/steps/summary-step.tsx` conserve des `<ul>` et `<li>` natifs pour afficher les listes de goals et allergies. Ces elements HTML semantiques sont appropries ici (accessibilite des listes).
-- Les composants `dialog`, `tabs`, `table`, `badge` ne sont pas encore presents dans `components/ui`, alors qu'ils sont dans le perimetre cible.
-- `components/nutrition/nutrition-result-table.tsx` contient un tableau HTML natif (`<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`) a migrer vers un composant Shadcn `table` (tache P3).
-- Import `toast` non standardise: `components/wizard/steps/signup-step.tsx` importe `toast` directement depuis `"sonner"` alors que le reste du projet utilise `@/components/ui/toaster` (qui re-exporte deja `toast` depuis sonner).
+- [RESOLU 30-03-2026] Les composants `dialog`, `tabs`, `table`, `badge` ont ete installes dans `components/ui` avec leurs dependances Radix respectives.
+- [RESOLU 30-03-2026] `components/nutrition/nutrition-result-table.tsx` a ete migre de `<table>` natif vers les composants Shadcn `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`.
+- [RESOLU 30-03-2026] Import `toast` standardise dans `signup-step.tsx`: remplace `import { toast } from "sonner"` par `import { toast } from "@/components/ui/toaster"` pour uniformiser avec le reste du projet.
 
 ### Statut de l'etape 1 apres audit
 - P1 (button/input-form/card/select): termine, base solide en place.
-- P2 (dialog/tabs/badge + standardisation toast): a poursuivre.
-- P3 (table nutrition + harmonisation styling): a poursuivre.
+- P2 (dialog/tabs/badge + standardisation toast): termine (30-03-2026).
+- P3 (table nutrition): termine (30-03-2026).
+- Reste a faire: harmonisation styling (etape 4).
 
 ### 3) Migration composant par composant
 - [x] P1: Migrer les boutons vers `components/ui/button`.
@@ -105,15 +106,15 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
 - [x] P1: Migrer les blocs de contenu vers `card`.
   - Commentaire validation: migration des blocs de recapitulatif dans `components/wizard/steps/summary-step.tsx` de `div` styles vers `Card` + `CardContent` pour uniformiser les conteneurs UI.
   - Verification effectuee: controle des pages prioritaires (`app/page.tsx`, `app/dashboard/page.tsx`, `app/inscription/page.tsx` via `WizardContainer`) confirmant l'usage majoritaire de `Card` pour les blocs de contenu.
-- [ ] P2: Installer les composants Shadcn UI manquants (dialog, tabs, badge).
-  - Contexte: aucun modal, popover, dropdown ou onglet natif n'existe actuellement dans le code. Ces composants sont a creer pour les besoins futurs (freemium guard, pages settings/analytics).
-- [ ] P2: Standardiser les imports toast.
-  - A faire: remplacer `import { toast } from "sonner"` par `import { toast } from "@/components/ui/toaster"` dans `components/wizard/steps/signup-step.tsx`.
-  - Pourquoi: le fichier `components/ui/toaster.tsx` re-exporte deja `toast` depuis sonner. Utiliser un point d'entree unique facilite la maintenance (si on change de librairie de toast, un seul fichier a modifier).
-- [ ] P3: Migrer le tableau nutrition vers un composant Shadcn `table`.
-  - Fichier concerne: `components/nutrition/nutrition-result-table.tsx`.
-  - Contenu actuel: `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` natifs.
-  - A faire: installer `components/ui/table.tsx` (Shadcn) puis remplacer les elements natifs par `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`.
+- [x] P2: Installer les composants Shadcn UI manquants (dialog, tabs, badge).
+  - Commentaire validation: creation de `components/ui/dialog.tsx` (Radix Dialog), `components/ui/tabs.tsx` (Radix Tabs), `components/ui/badge.tsx` (CVA) et `components/ui/table.tsx`. Dependances `@radix-ui/react-dialog` et `@radix-ui/react-tabs` installees.
+  - Contexte: aucun modal, popover, dropdown ou onglet natif n'existait dans le code. Ces composants sont prets pour les besoins futurs (freemium guard, pages settings/analytics).
+- [x] P2: Standardiser les imports toast.
+  - Commentaire validation: remplacement de `import { toast } from "sonner"` par `import { toast } from "@/components/ui/toaster"` dans `components/wizard/steps/signup-step.tsx`.
+  - Pourquoi: le fichier `components/ui/toaster.tsx` re-exporte deja `toast` depuis sonner. Un point d'entree unique facilite la maintenance.
+- [x] P3: Migrer le tableau nutrition vers un composant Shadcn `table`.
+  - Commentaire validation: migration de `components/nutrition/nutrition-result-table.tsx` — remplacement de `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>` natifs par `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` de `@/components/ui/table`.
+  - Verification: build (`npm run build`) passe sans erreur apres migration.
 
 ### 4) Refactor styling
 - [ ] Extraire le pattern de navigation wizard dans un composant reutilisable.
