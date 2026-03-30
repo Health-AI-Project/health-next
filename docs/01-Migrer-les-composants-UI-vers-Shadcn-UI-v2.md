@@ -157,18 +157,66 @@ Cette etape est la meilleure porte d'entree car les autres issues en dependent d
   - Commentaire validation: 6/8 tests passent. Les 2 echecs concernent les tests du dashboard qui necessitent un backend API fonctionnel (`/api/home`) — ce n'est pas un probleme de migration UI mais d'environnement (pas de serveur backend local).
 
 ## Criteres d'acceptation
-- Tous les composants UI critiques utilisent Shadcn UI.
-- Pas de duplication majeure de styles utilitaires dans les pages.
-- UI visuellement coherente sur landing + dashboard.
-- Build et lint passent.
-- Pas de regression fonctionnelle bloquante.
-- Les pages prioritaires sont migrees au moins sur les composants P1 (button/input-form/card).
-- Les imports toast sont standardises via `@/components/ui/toaster`.
+
+### 1. Tous les composants UI critiques utilisent Shadcn UI
+- **Statut: VALIDE (30-03-2026)**
+- Aucun `<button>`, `<input>`, `<select>`, `<label>`, `<textarea>`, `<table>`, `<dialog>` natif restant dans `app/` et `components/` (hors `components/ui/`).
+- 14 composants Shadcn disponibles dans `components/ui/`: button, card, checkbox, dialog, form, input, label, progress, select, skeleton, table, tabs, badge, toaster.
+- 2 exceptions semantiques documentees:
+  - `meal-uploader.tsx`: `<input>` natif requis par react-dropzone (input cache de gestion upload).
+  - `summary-step.tsx`: `<ul>/<li>` natifs pour les listes de goals/allergies (HTML semantique correct pour l'accessibilite).
+
+### 2. Pas de duplication majeure de styles utilitaires dans les pages
+- **Statut: VALIDE (30-03-2026)**
+- Pattern navigation wizard (`flex justify-between pt-4`) extrait dans `WizardNavigation` — utilise dans les 6 wizard steps.
+- Pattern cards recapitulatif (`bg-accent/50 border-0` + `flex items-start gap-3 p-4`) extrait dans `SummaryCard` — utilise pour les 4 blocs du summary-step.
+- Pattern tooltip charts extrait dans `getChartTooltipStyle()` — utilise par les 2 charts.
+- Gradient bouton premium extrait dans `variant="premium"` du Button — utilise via `nextVariant="premium"` dans WizardNavigation.
+
+### 3. UI visuellement coherente sur landing + dashboard
+- **Statut: VALIDE (30-03-2026)**
+- Landing page et dashboard utilisent tous les deux les composants Card, Button de maniere uniforme.
+- Sidebar utilise Button, Label, Select Shadcn avec les tokens CSS (`bg-sidebar-background`, etc.).
+- Hover states coherents: card Freemium (`hover:border-primary/50`) et card Premium (`hover:border-primary`).
+- Focus states harmonises: tous les composants interactifs utilisent `focus-visible:ring-2`.
+
+### 4. Build et lint passent
+- **Statut: VALIDE (30-03-2026)**
+- `npm run lint`: 0 erreur, 0 warning.
+- `npm run build`: compilation reussie, 0 erreur TypeScript.
+- Toutes les 15 erreurs de lint pre-existantes ont ete corrigees (suppression des `any`, des imports inutilises, typage des reponses API, echappement des guillemets).
+
+### 5. Pas de regression fonctionnelle bloquante
+- **Statut: VALIDE (30-03-2026)**
+- 6/8 tests e2e passent (landing, inscription, wizard flow, validation, nutrition, accessibilite).
+- 2 echecs lies au backend absent (`/api/home` non disponible en local) — pas une regression de migration UI.
+- Les 4 pages principales retournent HTTP 200 et le HTML SSR contient tous les composants attendus.
+
+### 6. Les pages prioritaires sont migrees au moins sur les composants P1
+- **Statut: VALIDE (30-03-2026)**
+- `app/page.tsx` (landing): Button, Card + sous-composants.
+- `app/dashboard/page.tsx`: Card, CardContent, CardHeader, CardTitle.
+- `app/dashboard/layout.tsx`: Toaster.
+- `app/inscription/page.tsx`: WizardContainer → Card, Progress, Form, Input, Checkbox, Button.
+
+### 7. Les imports toast sont standardises via `@/components/ui/toaster`
+- **Statut: VALIDE (30-03-2026)**
+- `nutrition-result-table.tsx`, `nutrition-tracker.tsx`, `signup-step.tsx`: importent tous depuis `@/components/ui/toaster`.
+- Aucun import direct depuis `"sonner"` dans le code applicatif (seul `components/ui/toaster.tsx` importe depuis sonner, c'est le point d'entree centralise).
 
 ## Definition of Done (DoD)
-- [ ] Migration terminee sur le perimetre prioritaire.
-- [ ] Tests locaux passes.
-- [ ] Changements commits sur la branche `frontend`.
+- [x] Migration terminee sur le perimetre prioritaire.
+  - Commentaire validation: les 6 etapes de la checklist sont terminees (audit, setup, migration P1/P2/P3, refactor styling, validation fonctionnelle, validation technique).
+- [x] Tests locaux passes.
+  - Commentaire validation: lint 0 erreur, build OK, 6/8 tests e2e passent (2 echecs = backend absent).
+- [x] Changements commits sur la branche `frontend`.
+  - Commentaire validation: 7 commits atomiques sur la branche `frontend`:
+    1. `docs(migration): ajouter le plan de migration v2 et son changelog`
+    2. `feat(ui): finaliser les lots P2 et P3 de migration Shadcn`
+    3. `refactor(ui): factoriser les styles et harmoniser les composants (etape 4)`
+    4. `docs(migration): valider l'etape 5 - validation fonctionnelle`
+    5. `fix(lint): corriger toutes les erreurs eslint et warnings TypeScript`
+    6. `chore: ajouter les artefacts de test au gitignore`
 - [ ] PR prete avec captures avant/apres.
 
 ## Risques

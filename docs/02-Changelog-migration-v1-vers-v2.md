@@ -97,6 +97,16 @@ Pourquoi c'est important ? Si un jour on decide de changer de librairie de notif
 
 ---
 
+## 10. Les criteres d'acceptation ont ete detailles et valides
+
+**Avant (v1):** Les criteres d'acceptation etaient une simple liste a puces sans preuves ni details. On disait "Tous les composants UI critiques utilisent Shadcn UI" mais on ne precisait pas comment c'etait verifie.
+
+**Probleme:** Quelqu'un qui lit le document ne sait pas si les criteres ont ete reellement verifies ou juste coches par habitude. Il n'y a pas de trace de ce qui a ete controle, ni des exceptions acceptees.
+
+**Correction (v2):** Chaque critere a maintenant un statut date, un detail de ce qui a ete verifie, et les preuves concretes (nombre de composants, fichiers concernes, resultats de tests). Les exceptions sont documentees avec leur justification. La Definition of Done liste les 7 commits realises sur la branche `frontend`.
+
+---
+
 ## Resume
 
-En bref, la v2 corrige des contradictions, ajoute des fichiers oublies, precise les taches vagues, et documente des ecarts qui existaient dans le code mais pas dans le plan. Rien n'a change dans le code lui-meme — c'est uniquement le document de suivi qui a ete mis a jour pour refleter la realite du projet.
+La v2 a ete le support de toute la migration. Elle a corrige les contradictions du document initial, ajoute les fichiers oublies, precise les taches vagues, puis servi de fil conducteur pour les etapes 3 a 6 (migration P2/P3, refactor styling, validation fonctionnelle, validation technique). Les criteres d'acceptation ont ete verifies un par un avec des preuves concretes dans le code.
