@@ -14,7 +14,7 @@ import {
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
-const caloriesData: any[] = [];
+const caloriesData: Record<string, number>[] = [];
 
 export function CaloriesChart() {
     const colors = useChartColors();

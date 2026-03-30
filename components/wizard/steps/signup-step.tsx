@@ -31,7 +31,6 @@ export function SignupStep() {
     const { data: wizardData, prevStep } = useWizardStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const { data: session } = authClient.useSession();
 
     const form = useForm<SignupFormValues>({
         resolver: zodResolver(signupSchema),

@@ -32,7 +32,7 @@ function SummaryCard({
 }
 
 export function SummaryStep() {
-    const { data, prevStep, nextStep, reset } = useWizardStore();
+    const { data, prevStep, nextStep } = useWizardStore();
 
     const getGoalLabels = () => {
         return (data.goals || [])

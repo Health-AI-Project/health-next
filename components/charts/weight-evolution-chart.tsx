@@ -13,7 +13,7 @@ import {
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
-const weightData: any[] = [];
+const weightData: Record<string, number>[] = [];
 
 export function WeightEvolutionChart() {
     const colors = useChartColors();

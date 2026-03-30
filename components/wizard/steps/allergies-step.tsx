@@ -72,7 +72,7 @@ export function AllergiesStep() {
                                 Avez-vous des allergies alimentaires ?
                             </FormLabel>
                             <FormDescription id="allergies-description">
-                                Sélectionnez vos allergies ou "Aucune allergie"
+                                Sélectionnez vos allergies ou &quot;Aucune allergie&quot;
                             </FormDescription>
                             <div
                                 className="grid gap-3 pt-2"

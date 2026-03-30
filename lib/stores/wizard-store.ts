@@ -19,7 +19,7 @@ interface WizardState {
     reset: () => void;
 }
 
-export const useWizardStore = create<WizardState>((set, get) => ({
+export const useWizardStore = create<WizardState>((set) => ({
     currentStep: 0,
     totalSteps: 6,
     data: {},
