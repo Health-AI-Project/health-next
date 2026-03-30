@@ -87,6 +87,16 @@ Pourquoi c'est important ? Si un jour on decide de changer de librairie de notif
 
 ---
 
+## 9. Les artefacts de test ont ete ajoutes au `.gitignore`
+
+**Avant:** Les dossiers `playwright-report/` et `test-results/` etaient suivis par git. Ils contenaient des screenshots, des rapports HTML et des logs generes automatiquement a chaque execution des tests.
+
+**Probleme:** Ces fichiers sont generes a chaque `npm run test`. Ils changent a chaque fois, polluent l'historique git avec des diffs binaires (images PNG) et des fichiers HTML volumineux, et n'ont aucune valeur pour le code source. Chaque developpeur qui lance les tests obtient ses propres resultats — les committer n'a pas de sens.
+
+**Correction:** Ajout de `/playwright-report` et `/test-results` dans `.gitignore`, et suppression des fichiers deja suivis par git. Les resultats de test restent disponibles localement apres chaque execution, mais ne sont plus versionnes.
+
+---
+
 ## Resume
 
 En bref, la v2 corrige des contradictions, ajoute des fichiers oublies, precise les taches vagues, et documente des ecarts qui existaient dans le code mais pas dans le plan. Rien n'a change dans le code lui-meme — c'est uniquement le document de suivi qui a ete mis a jour pour refleter la realite du projet.
