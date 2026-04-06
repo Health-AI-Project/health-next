@@ -13,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
     LayoutDashboard,
     BarChart3,
@@ -22,12 +23,13 @@ import {
     Moon,
     Monitor,
     Utensils,
+    Crown,
 } from "lucide-react";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/nutrition", label: "Nutrition", icon: Utensils },
-    { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+    { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, premium: true },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
     { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
 ];
@@ -68,6 +70,12 @@ export function Sidebar() {
                         >
                             <item.icon className="h-5 w-5" aria-hidden="true" />
                             {item.label}
+                            {"premium" in item && item.premium && (
+                                <Badge variant="outline" className="ml-auto text-[10px] px-1.5 py-0 gap-1">
+                                    <Crown className="h-3 w-3" aria-hidden="true" />
+                                    Pro
+                                </Badge>
+                            )}
                         </Link>
                     );
                 })}

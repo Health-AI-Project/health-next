@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PremiumGuard } from "@/components/premium/premium-guard";
 import { Utensils, Dumbbell, Flame, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
@@ -148,12 +149,16 @@ export default function AnalyticsPage() {
                             <WeightEvolutionChart />
                             <CaloriesChart />
                         </div>
-                        <MacrosChart />
+                        <PremiumGuard feature="Repartition des macronutriments">
+                            <MacrosChart />
+                        </PremiumGuard>
                     </TabsContent>
 
                     <TabsContent value="nutrition" className="space-y-6">
                         <CaloriesChart />
-                        <MacrosChart />
+                        <PremiumGuard feature="Analyse detaillee des macronutriments">
+                            <MacrosChart />
+                        </PremiumGuard>
                     </TabsContent>
 
                     <TabsContent value="weight" className="space-y-6">
