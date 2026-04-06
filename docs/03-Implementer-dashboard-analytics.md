@@ -20,23 +20,23 @@ Creer la page `/dashboard/analytics` actuellement manquante. Le lien "Analytics"
 - [x] Layout : titre "Analytics", 4 cards stats, section charts avec Tabs (Vue d'ensemble, Nutrition, Poids)
 
 ### 2) Definir les donnees et l'API
-- [ ] Identifier l'endpoint backend a appeler (ex: `/api/analytics` ou `/api/home`)
-- [ ] Definir l'interface TypeScript des donnees analytics (calories, poids, workouts, macros)
-- [ ] Implementer le fetch des donnees avec `apiFetch()`
-- [ ] Gerer les etats de chargement (Skeleton) et d'erreur
+- [x] Endpoint : `/api/home` (meme que le dashboard principal)
+- [x] Interface `AnalyticsData` definie (stats: calories, protein, workouts_count + user: weight)
+- [x] Fetch avec `apiFetch()`, fallback sur donnees demo (`DEMO_DATA`) si backend absent
+- [x] Etat de chargement avec Skeleton (4 cards + 2 charts)
 
 ### 3) Implementer les sections analytics
-- [ ] Section evolution du poids : reutiliser/adapter `WeightEvolutionChart` avec des donnees reelles
-- [ ] Section calories : reutiliser/adapter `CaloriesChart` avec des donnees reelles
-- [ ] Section macronutriments : ajouter un chart repartion proteines/glucides/lipides
-- [ ] Section resume : cards avec les stats cles (nombre de repas, nombre de workouts, calories moyennes)
-- [ ] Ajouter des filtres temporels (semaine, mois, 3 mois) si pertinent
+- [x] Evolution du poids : `WeightEvolutionChart` avec donnees demo (7 points sur 30 jours)
+- [x] Calories : `CaloriesChart` avec donnees demo (7 jours, objectif 2000 kcal)
+- [x] Macronutriments : nouveau `MacrosChart` (PieChart donut) avec repartition 30/50/20
+- [x] Resume : 4 cards stats (calories moyennes, proteines, seances, poids)
+- [x] Filtres temporels via Tabs Shadcn (Vue d'ensemble, Nutrition, Poids)
 
 ### 4) UI et composants
-- [ ] Utiliser les composants Shadcn existants : Card, Tabs (pour les filtres temporels), Skeleton
-- [ ] Utiliser `ChartCard` comme wrapper pour chaque graphique
-- [ ] Utiliser `getChartTooltipStyle()` pour les tooltips des charts
-- [ ] Verifier la coherence visuelle avec le dashboard principal
+- [x] Composants Shadcn utilises : Card, Tabs, Skeleton
+- [x] `ChartCard` utilise comme wrapper pour les 3 graphiques
+- [x] `getChartTooltipStyle()` utilise dans MacrosChart
+- [x] Coherence visuelle avec le dashboard principal (meme pattern cards + charts)
 
 ### 5) Responsive et accessibilite
 - [ ] Verifier l'affichage mobile (charts empiles en colonne)

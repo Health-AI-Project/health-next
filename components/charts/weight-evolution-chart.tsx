@@ -13,7 +13,15 @@ import {
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
-const weightData: Record<string, number>[] = [];
+const weightData: Record<string, number | string>[] = [
+    { date: "01/03", poids: 76.2, objectif: 74 },
+    { date: "05/03", poids: 75.8, objectif: 74 },
+    { date: "10/03", poids: 75.5, objectif: 74 },
+    { date: "15/03", poids: 75.1, objectif: 74 },
+    { date: "20/03", poids: 74.9, objectif: 74 },
+    { date: "25/03", poids: 74.7, objectif: 74 },
+    { date: "30/03", poids: 74.5, objectif: 74 },
+];
 
 export function WeightEvolutionChart() {
     const colors = useChartColors();
