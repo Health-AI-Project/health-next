@@ -19,6 +19,7 @@ import {
     BarChart3,
     Settings,
     Users,
+    Dumbbell,
     Sun,
     Moon,
     Monitor,
@@ -29,6 +30,7 @@ import {
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/nutrition", label: "Nutrition", icon: Utensils },
+    { href: "/dashboard/workouts", label: "Entrainement", icon: Dumbbell, premium: true },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, premium: true },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
     { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
