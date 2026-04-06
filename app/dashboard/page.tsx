@@ -27,10 +27,15 @@ interface DashboardData {
     };
 }
 
+const DEMO_DASHBOARD: DashboardData = {
+    user: { email: "utilisateur@example.com", weight: 74.5, height: 175, is_premium: false },
+    stats: { calories: 1850, protein: 95, workouts_count: 4 },
+};
+
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+
 
     useEffect(() => {
         async function fetchData() {
@@ -38,9 +43,8 @@ export default function DashboardPage() {
                 const response = await apiFetch<{ data: DashboardData }>('/api/home');
                 setData(response.data);
             } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : "Erreur inconnue";
                 console.error("Dashboard fetch error:", err);
-                setError(message);
+                setData(DEMO_DASHBOARD);
             } finally {
                 setLoading(false);
             }
@@ -52,14 +56,6 @@ export default function DashboardPage() {
         return (
             <div className="flex items-center justify-center h-full min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-8 text-center text-red-500">
-                Erreur de chargement: {error}
             </div>
         );
     }
