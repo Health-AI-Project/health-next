@@ -8,6 +8,14 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Users, UserCheck, Crown, TrendingUp, ShieldCheck } from "lucide-react";
@@ -164,16 +172,39 @@ export default function ClientsPage() {
                     <CardHeader>
                         <CardTitle>Liste des clients</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-col items-center justify-center py-12 space-y-4 text-center">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <CardContent className="p-0 relative">
+                        <div className="pointer-events-none select-none blur-[6px]">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Nom</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Abonnement</TableHead>
+                                        <TableHead>Inscription</TableHead>
+                                        <TableHead className="text-right">Cal. moy.</TableHead>
+                                        <TableHead className="text-right">Seances</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {clients.map((client) => (
+                                        <TableRow key={client.id}>
+                                            <TableCell className="font-medium">{client.name}</TableCell>
+                                            <TableCell className="text-muted-foreground">{client.email}</TableCell>
+                                            <TableCell><Badge variant="secondary">***</Badge></TableCell>
+                                            <TableCell className="text-sm">** *** ****</TableCell>
+                                            <TableCell className="text-right">****</TableCell>
+                                            <TableCell className="text-right">**</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background border">
                                 <ShieldCheck className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
                             </div>
-                            <p className="text-sm text-muted-foreground max-w-sm">
-                                Les donnees personnelles des clients (nom, email) sont protegees.
-                                Seuls les administrateurs autorises peuvent consulter cette liste.
-                            </p>
-                            <Badge variant="outline">Acces administrateur requis</Badge>
+                            <p className="text-sm font-medium">Donnees protegees</p>
+                            <p className="text-xs text-muted-foreground">Connectez-vous en tant qu&apos;administrateur</p>
                         </div>
                     </CardContent>
                 </Card>
