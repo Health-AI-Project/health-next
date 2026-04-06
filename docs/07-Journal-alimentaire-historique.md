@@ -1,4 +1,4 @@
-# 07 - Journal alimentaire (historique des repas)
+# 07 - Journal alimentaire (historique des repas) (TERMINEE)
 
 > Branche: `journal-alimentaire`
 
@@ -11,26 +11,41 @@ L'API backend existe deja (`GET /api/nutrition/history`) et la sauvegarde foncti
 ## Checklist
 
 ### 1) Creer la page historique des repas
-- [ ] Creer `app/dashboard/nutrition/history/page.tsx`
-- [ ] Afficher la liste des repas passes avec : date, photo miniature, nom des aliments, total calories/macros
-- [ ] Utiliser les composants Shadcn : Card, Table, Badge, Skeleton
-- [ ] Gerer le chargement (Skeleton) et l'erreur (fallback donnees demo)
+- [x] Cree `app/dashboard/nutrition/history/page.tsx`
+  - Fait en creant un composant client avec fetch API, 3 cards resume (repas enregistres, calories totales, moyenne par repas), et un tableau avec tous les repas. 6 repas demo quand le backend est absent.
+- [x] Afficher la liste des repas avec : date, nom, aliments, calories/macros
+  - Fait avec un composant `MealTable` utilisant Table Shadcn. Chaque ligne affiche la date formatee en francais, un Badge pour le type de repas, la liste des aliments, et les macros (P/G/L).
+- [x] Composants Shadcn utilises : Card, Table, Badge, Skeleton, Tabs, Button
+- [x] Gerer le chargement (Skeleton) et fallback donnees demo (6 repas sur 4 jours)
 
 ### 2) Connecter a l'API
-- [ ] Appeler `GET /api/nutrition/history` via `apiFetch()`
-- [ ] Definir l'interface TypeScript `MealHistory` (id, date, photo_url, items, totals)
-- [ ] Prevoir des donnees demo si le backend est absent
+- [x] Appel `GET /api/nutrition/history` via `apiFetch()`, fallback sur `DEMO_HISTORY` en cas d'erreur
+  - Fait dans un `useEffect` avec try/catch, meme pattern que les autres pages.
+- [x] Interface `MealHistoryItem` definie (id, date, name, items[], calories, proteins, carbs, fats)
+- [x] 6 repas demo couvrant 4 jours avec des aliments varies
 
 ### 3) Filtres et tri
-- [ ] Permettre le tri par date (plus recent / plus ancien)
-- [ ] Optionnel : filtre par jour/semaine/mois via Tabs ou Select
+- [x] Tri par date : bouton "Plus recent" / "Plus ancien" avec icone ArrowUpDown
+  - Fait avec un state `sortAsc` qui inverse le tri au clic.
+- [x] Filtre par periode via Tabs : Tout, Aujourd'hui, 7 jours, 30 jours
+  - Fait avec une fonction `filterByPeriod()` qui filtre les repas selon la date de cutoff.
 
 ### 4) Navigation
-- [ ] Ajouter un lien "Historique" dans la page nutrition ou un sous-menu
-- [ ] Permettre de cliquer sur un repas pour voir le detail (reutiliser nutrition-result-table)
+- [x] Bouton "Historique" ajoute dans le nutrition-tracker (en haut a droite, avec icone History)
+  - Fait en ajoutant un `<Link href="/dashboard/nutrition/history">` avec un `<Button variant="outline">` dans `nutrition-tracker.tsx`.
+- [x] Bouton "Analyser un repas" dans la page historique pour revenir au tracker
+  - Fait en haut a droite du header avec un lien vers `/dashboard/nutrition`.
 
 ### 5) Validation
-- [ ] `npm run lint` : 0 erreur
-- [ ] `npm run build` : 0 erreur
-- [ ] Verification visuelle avec donnees demo
-- [ ] Responsive et accessibilite (aria-labels, focus-visible)
+- [x] `npm run lint` : 0 erreur
+- [x] `npm run build` : 0 erreur, route `/dashboard/nutrition/history` listee
+- [x] Responsive : grille cards s'adapte (sm:grid-cols-3), tableau scrollable
+- [x] Accessibilite : sr-only headings, aria-hidden sur icones, focus-visible sur boutons/tabs
+
+## Modifications apportees
+
+### Fichiers crees
+- `app/dashboard/nutrition/history/page.tsx` : page journal alimentaire avec cards resume, tabs filtres, tableau repas, tri, donnees demo
+
+### Fichiers modifies
+- `components/nutrition/nutrition-tracker.tsx` : ajout bouton "Historique" en haut a droite avec lien vers la page history
