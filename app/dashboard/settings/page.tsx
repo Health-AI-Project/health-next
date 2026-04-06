@@ -17,14 +17,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toaster";
 import { GOALS_OPTIONS, ALLERGIES_OPTIONS } from "@/lib/schemas/wizard-schemas";
 import { apiFetch } from "@/lib/api";
-import { Save, User, Target, CreditCard } from "lucide-react";
+import { Save, User, Target, CreditCard, Crown, Gem } from "lucide-react";
 import { useEffect, useState } from "react";
+
+type SubscriptionTier = "free" | "premium" | "premium_plus";
 
 interface UserSettings {
     email?: string;
     age?: number;
     weight?: number;
     is_premium?: boolean;
+    subscription_tier?: SubscriptionTier;
     goals?: string[];
     allergies?: string[];
 }
@@ -34,6 +37,7 @@ const DEMO_SETTINGS: UserSettings = {
     age: 28,
     weight: 74.5,
     is_premium: false,
+    subscription_tier: "free",
     goals: ["weight-loss", "wellness"],
     allergies: ["none"],
 };
@@ -317,39 +321,87 @@ export default function SettingsPage() {
                         <CardContent className="space-y-6">
                             <div className="flex items-center gap-4">
                                 <span className="text-sm font-medium">Statut actuel :</span>
-                                {settings?.is_premium ? (
-                                    <Badge>Premium</Badge>
+                                {settings?.subscription_tier === "premium_plus" ? (
+                                    <Badge className="gap-1"><Gem className="h-3 w-3" aria-hidden="true" />Premium+</Badge>
+                                ) : settings?.subscription_tier === "premium" || settings?.is_premium ? (
+                                    <Badge className="gap-1"><Crown className="h-3 w-3" aria-hidden="true" />Premium</Badge>
                                 ) : (
                                     <Badge variant="secondary">Freemium</Badge>
                                 )}
                             </div>
 
-                            {!settings?.is_premium && (
-                                <div className="rounded-lg border p-6 space-y-4">
-                                    <h3 className="text-lg font-semibold">
-                                        Passez a Premium
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Debloquez les plans nutritionnels sur mesure, le coaching
-                                        personnalise 24/7 et les analyses avancees.
-                                    </p>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold">9,99€</span>
-                                        <span className="text-muted-foreground">/mois</span>
+                            {(!settings?.subscription_tier || settings.subscription_tier === "free") && !settings?.is_premium && (
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="rounded-lg border p-6 space-y-4">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                            <Crown className="h-5 w-5 text-primary" aria-hidden="true" />
+                                            Premium
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Recommandations IA, plans nutritionnels et sportifs detailles, suivi fin des objectifs.
+                                        </p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-bold">9,99€</span>
+                                            <span className="text-muted-foreground">/mois</span>
+                                        </div>
+                                        <Button variant="premium" className="w-full gap-2">
+                                            <Crown className="h-4 w-4" aria-hidden="true" />
+                                            Passer a Premium
+                                        </Button>
                                     </div>
-                                    <Button variant="premium" className="gap-2">
-                                        Passer a Premium
-                                    </Button>
+                                    <div className="rounded-lg border border-primary p-6 space-y-4 bg-primary/5">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                            <Gem className="h-5 w-5 text-primary" aria-hidden="true" />
+                                            Premium+
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Tout Premium + integration biometrique, objets connectes et consultations nutritionnistes.
+                                        </p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-bold">19,99€</span>
+                                            <span className="text-muted-foreground">/mois</span>
+                                        </div>
+                                        <Button variant="premium" className="w-full gap-2">
+                                            <Gem className="h-4 w-4" aria-hidden="true" />
+                                            Passer a Premium+
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
 
-                            {settings?.is_premium && (
+                            {(settings?.subscription_tier === "premium" || (settings?.is_premium && settings?.subscription_tier !== "premium_plus")) && (
+                                <div className="space-y-4">
+                                    <div className="rounded-lg border border-primary/50 bg-primary/5 p-6 space-y-2">
+                                        <h3 className="text-lg font-semibold">Vous etes Premium</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Vous avez acces aux recommandations IA, plans nutritionnels et sportifs.
+                                        </p>
+                                    </div>
+                                    <div className="rounded-lg border border-primary p-6 space-y-4">
+                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                            <Gem className="h-5 w-5 text-primary" aria-hidden="true" />
+                                            Passez a Premium+
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Debloquez l&apos;integration biometrique, la connexion objets connectes et les consultations nutritionnistes.
+                                        </p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-bold">19,99€</span>
+                                            <span className="text-muted-foreground">/mois</span>
+                                        </div>
+                                        <Button variant="premium" className="gap-2">
+                                            <Gem className="h-4 w-4" aria-hidden="true" />
+                                            Passer a Premium+
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {settings?.subscription_tier === "premium_plus" && (
                                 <div className="rounded-lg border border-primary/50 bg-primary/5 p-6 space-y-2">
-                                    <h3 className="text-lg font-semibold">
-                                        Vous etes Premium
-                                    </h3>
+                                    <h3 className="text-lg font-semibold">Vous etes Premium+</h3>
                                     <p className="text-sm text-muted-foreground">
-                                        Vous avez acces a toutes les fonctionnalites avancees.
+                                        Vous avez acces a toutes les fonctionnalites, y compris l&apos;integration biometrique et les consultations nutritionnistes.
                                     </p>
                                 </div>
                             )}
