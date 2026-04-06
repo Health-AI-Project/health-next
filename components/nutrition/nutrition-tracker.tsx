@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { MealUploader } from "@/components/nutrition/meal-uploader";
 import { NutritionResultTable } from "@/components/nutrition/nutrition-result-table";
+import { MealSuggestions } from "@/components/nutrition/meal-suggestions";
 import { analyzeImage, NutritionData } from "@/lib/actions/nutrition-actions";
 import { toast } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
-import { Utensils, History } from "lucide-react";
+import { Utensils, History, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
 export function NutritionTracker() {
@@ -56,22 +57,35 @@ export function NutritionTracker() {
                         </p>
                     </div>
                 </div>
-                <Link href="/dashboard/nutrition/history">
-                    <Button variant="outline" className="gap-2">
-                        <History className="h-4 w-4" aria-hidden="true" />
-                        Historique
-                    </Button>
-                </Link>
+                <div className="flex gap-2">
+                    <Link href="/dashboard/nutrition/meal-plan">
+                        <Button variant="outline" className="gap-2">
+                            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                            Plan repas
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard/nutrition/history">
+                        <Button variant="outline" className="gap-2">
+                            <History className="h-4 w-4" aria-hidden="true" />
+                            Historique
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <MealUploader onUpload={handleUpload} isLoading={isAnalyzing} />
 
             {hasAnalyzed && (
-                <NutritionResultTable
-                    data={nutritionData}
-                    onDataUpdate={handleDataUpdate}
-                    isLoading={isAnalyzing}
-                />
+                <>
+                    <NutritionResultTable
+                        data={nutritionData}
+                        onDataUpdate={handleDataUpdate}
+                        isLoading={isAnalyzing}
+                    />
+                    {!isAnalyzing && nutritionData.length > 0 && (
+                        <MealSuggestions data={nutritionData} />
+                    )}
+                </>
             )}
         </div>
     );
