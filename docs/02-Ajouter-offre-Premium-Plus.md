@@ -1,4 +1,4 @@
-# 02 - Ajouter l'offre Premium+ sur la landing page
+# 02 - Ajouter l'offre Premium+ sur la landing page (TERMINEE)
 
 > Branche: `premium-plus` (basee sur `frontend`)
 
