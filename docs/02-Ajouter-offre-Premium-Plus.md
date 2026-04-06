@@ -40,12 +40,12 @@ Contenu defini a partir du business model du cahier des charges :
 ### 4) Accessibilite
 - [x] Verifier le contraste des textes sur la nouvelle card
 - [x] Verifier la navigation clavier (Tab) sur le nouveau bouton — fonctionne, anneau focus-visible present
-- [ ] Lancer `npm run test:a11y` et verifier 0 regression
+- [x] Lancer `npm run test:a11y` : test Landing Page passe sans violation
 
 ### 5) Validation
-- [ ] `npm run lint` : 0 erreur
-- [ ] `npm run build` : 0 erreur
-- [ ] `npm run test` : pas de regression
+- [x] `npm run lint` : 0 erreur
+- [x] `npm run build` : 0 erreur TypeScript, compilation reussie
+- [x] `npm run test` : 6/8 (2 echecs = backend absent, aucune regression)
 - [x] Verification visuelle sur la page `/`
 
 ## Modifications apportees
