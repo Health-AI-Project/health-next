@@ -17,8 +17,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
-import { Users, UserCheck, Crown, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, UserCheck, Crown, TrendingUp, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePremiumStatus } from "@/lib/hooks/use-premium-status";
 
 interface Client {
     id: string;
@@ -67,6 +69,7 @@ function isActiveRecently(dateStr: string): boolean {
 }
 
 export default function ClientsPage() {
+    const { isPremiumPlus, isLoading: tierLoading } = usePremiumStatus();
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -84,7 +87,7 @@ export default function ClientsPage() {
         fetchClients();
     }, []);
 
-    if (loading) {
+    if (loading || tierLoading) {
         return (
             <div className="space-y-8">
                 <div>
@@ -97,6 +100,27 @@ export default function ClientsPage() {
                     ))}
                 </div>
                 <Skeleton className="h-[400px]" />
+            </div>
+        );
+    }
+
+    if (!isPremiumPlus) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                    <ShieldCheck className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+                </div>
+                <h1 className="text-2xl font-bold">Acces reserve</h1>
+                <p className="text-muted-foreground max-w-md">
+                    La gestion des clients est reservee aux comptes B2B et partenaires.
+                    Contactez votre administrateur ou passez a l&apos;offre Premium+ pour acceder a cette fonctionnalite.
+                </p>
+                <Button variant="premium" className="gap-2" asChild>
+                    <a href="/dashboard/settings">
+                        <Crown className="h-4 w-4" aria-hidden="true" />
+                        Voir les offres
+                    </a>
+                </Button>
             </div>
         );
     }
