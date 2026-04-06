@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface WizardData {
     age?: number;
     weight?: number;
+    height?: number;
     goals?: string[];
     allergies?: string[];
 }

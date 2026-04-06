@@ -26,6 +26,7 @@ interface UserSettings {
     email?: string;
     age?: number;
     weight?: number;
+    height?: number;
     is_premium?: boolean;
     subscription_tier?: SubscriptionTier;
     goals?: string[];
@@ -36,6 +37,7 @@ const DEMO_SETTINGS: UserSettings = {
     email: "utilisateur@example.com",
     age: 28,
     weight: 74.5,
+    height: 175,
     is_premium: false,
     subscription_tier: "free",
     goals: ["weight-loss", "wellness"],
@@ -217,6 +219,23 @@ export default function SettingsPage() {
                                     onChange={(e) =>
                                         setSettings((prev) =>
                                             prev ? { ...prev, weight: Number(e.target.value) } : prev
+                                        )
+                                    }
+                                    className="max-w-md"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="height">Taille (cm)</Label>
+                                <Input
+                                    id="height"
+                                    type="number"
+                                    min={100}
+                                    max={250}
+                                    value={settings?.height || ""}
+                                    onChange={(e) =>
+                                        setSettings((prev) =>
+                                            prev ? { ...prev, height: Number(e.target.value) } : prev
                                         )
                                     }
                                     className="max-w-md"

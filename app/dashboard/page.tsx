@@ -2,6 +2,7 @@
 
 import { WeightEvolutionChart } from "@/components/charts/weight-evolution-chart";
 import { CaloriesChart } from "@/components/charts/calories-chart";
+import { BmiCard } from "@/components/dashboard/bmi-card";
 import {
     Card,
     CardContent,
@@ -16,6 +17,7 @@ interface DashboardData {
     user?: {
         email?: string;
         weight?: number;
+        height?: number;
         is_premium?: boolean;
     };
     stats?: {
@@ -128,6 +130,11 @@ export default function DashboardPage() {
                         </Card>
                     ))}
                 </div>
+            </section>
+
+            <section aria-labelledby="bmi-heading">
+                <h2 id="bmi-heading" className="sr-only">Indice de Masse Corporelle</h2>
+                <BmiCard weight={data?.user?.weight} height={data?.user?.height} />
             </section>
 
             <section aria-labelledby="charts-heading">
