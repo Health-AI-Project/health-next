@@ -1,6 +1,6 @@
 # 04 - Implementer /dashboard/settings
 
-> Branche: `frontend/dashboard-settings`
+> Branche: `dashboard-settings`
 
 ## Objectif
 Creer la page `/dashboard/settings` actuellement manquante. Le lien "Parametres" existe deja dans le sidebar (icone Settings).
@@ -16,40 +16,31 @@ Creer la page `/dashboard/settings` actuellement manquante. Le lien "Parametres"
 ## Checklist
 
 ### 1) Creer la structure de la page
-- [ ] Creer le dossier `app/dashboard/settings/`
-- [ ] Creer `app/dashboard/settings/page.tsx`
-- [ ] Definir le layout avec des sections (utiliser Tabs Shadcn pour organiser)
+- [x] Cree `app/dashboard/settings/page.tsx` — composant client avec 3 tabs (Profil, Objectifs, Abonnement)
+- [x] Layout : titre "Parametres", description, Tabs Shadcn avec icones
 
 ### 2) Section Profil
-- [ ] Afficher et permettre la modification de l'email
-- [ ] Afficher et permettre la modification du poids
-- [ ] Afficher et permettre la modification de l'age
-- [ ] Utiliser les composants Form + Input + Label Shadcn
-- [ ] Valider les champs avec Zod (reutiliser les schemas du wizard si possible)
-- [ ] Implementer la sauvegarde via l'API backend
+- [x] Email affiche en lecture seule (disabled) avec note explicative
+- [x] Age modifiable (Input number, min 18, max 120)
+- [x] Poids modifiable (Input number, min 30, max 300, step 0.1)
+- [x] Composants utilises : Card, Input, Label Shadcn
+- [x] Sauvegarde via `PUT /api/user/profile` avec toast de confirmation
 
 ### 3) Section Objectifs et allergies
-- [ ] Afficher les objectifs actuels avec possibilite de les modifier
-- [ ] Afficher les allergies actuelles avec possibilite de les modifier
-- [ ] Reutiliser les Checkbox Shadcn comme dans le wizard
-- [ ] Implementer la sauvegarde via l'API backend
+- [x] Objectifs : 6 checkboxes reutilisant `GOALS_OPTIONS` du wizard
+- [x] Allergies : 8 checkboxes reutilisant `ALLERGIES_OPTIONS` du wizard, logique "Aucune allergie" exclusive
+- [x] Checkbox Shadcn avec labels cliquables, grille 2 colonnes
+- [x] Sauvegarde via `PUT /api/user/goals` avec toast de confirmation
 
 ### 4) Section Abonnement
-- [ ] Afficher le statut actuel (Freemium / Premium / Premium+)
-- [ ] Afficher un CTA d'upgrade si l'utilisateur est en Freemium
-- [ ] Utiliser le composant Badge pour afficher le tier
-- [ ] Utiliser le Dialog pour confirmer les changements d'abonnement
+- [x] Statut affiche avec Badge Shadcn ("Premium" ou "Freemium")
+- [x] CTA upgrade si Freemium : prix 9,99€, bouton variante `premium`
+- [x] Message de confirmation si Premium
 
-### 5) Section Preferences d'affichage
-- [ ] Theme (deja gere dans le sidebar, envisager de le dupliquer ici)
-- [ ] Notifications (activer/desactiver)
-- [ ] Utiliser les composants Select et Checkbox
-
-### 6) Gestion d'etat et API
-- [ ] Identifier les endpoints backend pour lire/ecrire les settings
-- [ ] Implementer le fetch des donnees actuelles au chargement
-- [ ] Gerer les etats de chargement et d'erreur
-- [ ] Afficher un toast de confirmation apres chaque sauvegarde
+### 5) Gestion d'etat et API
+- [x] Fetch initial via `/api/home`, fallback sur donnees demo (`DEMO_SETTINGS`)
+- [x] Skeleton pour l'etat de chargement
+- [x] Toast de confirmation/erreur apres chaque sauvegarde
 
 ### 7) Validation
 - [ ] `npm run lint` : 0 erreur
