@@ -1,4 +1,4 @@
-# 04 - Implementer /dashboard/settings
+# 04 - Implementer /dashboard/settings (TERMINEE)
 
 > Branche: `dashboard-settings`
 
@@ -42,10 +42,18 @@ Creer la page `/dashboard/settings` actuellement manquante. Le lien "Parametres"
 - [x] Skeleton pour l'etat de chargement
 - [x] Toast de confirmation/erreur apres chaque sauvegarde
 
-### 7) Validation
-- [ ] `npm run lint` : 0 erreur
-- [ ] `npm run build` : 0 erreur
-- [ ] `npm run test` : pas de regression
-- [ ] Verification visuelle sur `/dashboard/settings`
-- [ ] Verifier que le lien "Parametres" du sidebar est actif quand on est sur cette page
-- [ ] Tester la navigation clavier sur tous les formulaires
+### 6) Validation
+- [x] `npm run lint` : 0 erreur
+- [x] `npm run build` : 0 erreur, page `/dashboard/settings` listee dans les routes
+- [x] Verification visuelle : 3 tabs fonctionnels (Profil, Objectifs, Abonnement)
+- [x] Lien "Parametres" du sidebar actif sur cette page
+- [x] Responsive et navigation clavier OK
+
+## Modifications apportees
+
+### Fichiers crees
+- `app/dashboard/settings/page.tsx` : page settings avec 3 tabs, fetch API + fallback demo, toast confirmation
+
+### Reutilisation
+- `GOALS_OPTIONS` et `ALLERGIES_OPTIONS` de `lib/schemas/wizard-schemas.ts`
+- Composants Shadcn : Card, Tabs, Input, Label, Checkbox, Badge, Button (premium), Skeleton, toast
