@@ -6,14 +6,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
@@ -43,25 +35,6 @@ const DEMO_CLIENTS: Client[] = [
     { id: "7", name: "Lea Fournier", email: "lea.f@email.com", subscription_tier: "free", last_active: "2026-03-28", joined: "2026-03-10", calories_avg: 1900, workouts_count: 0 },
     { id: "8", name: "Nathan Girard", email: "nathan.g@email.com", subscription_tier: "premium_plus", last_active: "2026-04-06", joined: "2025-10-05", calories_avg: 1850, workouts_count: 22 },
 ];
-
-function TierBadge({ tier }: { tier: string }) {
-    switch (tier) {
-        case "premium_plus":
-            return <Badge className="gap-1">Premium+</Badge>;
-        case "premium":
-            return <Badge variant="secondary" className="gap-1">Premium</Badge>;
-        default:
-            return <Badge variant="outline">Free</Badge>;
-    }
-}
-
-function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-    });
-}
 
 function isActiveRecently(dateStr: string): boolean {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -191,39 +164,17 @@ export default function ClientsPage() {
                     <CardHeader>
                         <CardTitle>Liste des clients</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nom</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Abonnement</TableHead>
-                                    <TableHead>Inscription</TableHead>
-                                    <TableHead className="text-right">Cal. moy.</TableHead>
-                                    <TableHead className="text-right">Seances</TableHead>
-                                    <TableHead>Statut</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {clients.map((client) => (
-                                    <TableRow key={client.id}>
-                                        <TableCell className="font-medium">{client.name}</TableCell>
-                                        <TableCell className="text-muted-foreground">{client.email}</TableCell>
-                                        <TableCell><TierBadge tier={client.subscription_tier} /></TableCell>
-                                        <TableCell className="text-sm">{formatDate(client.joined)}</TableCell>
-                                        <TableCell className="text-right">{client.calories_avg}</TableCell>
-                                        <TableCell className="text-right">{client.workouts_count}</TableCell>
-                                        <TableCell>
-                                            {isActiveRecently(client.last_active) ? (
-                                                <Badge variant="outline" className="border-green-500 text-green-500">Actif</Badge>
-                                            ) : (
-                                                <Badge variant="outline" className="border-orange-500 text-orange-500">Inactif</Badge>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                    <CardContent>
+                        <div className="flex flex-col items-center justify-center py-12 space-y-4 text-center">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                                <ShieldCheck className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+                            </div>
+                            <p className="text-sm text-muted-foreground max-w-sm">
+                                Les donnees personnelles des clients (nom, email) sont protegees.
+                                Seuls les administrateurs autorises peuvent consulter cette liste.
+                            </p>
+                            <Badge variant="outline">Acces administrateur requis</Badge>
+                        </div>
                     </CardContent>
                 </Card>
             </section>
