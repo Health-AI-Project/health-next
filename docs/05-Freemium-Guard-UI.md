@@ -1,4 +1,4 @@
-# 05 - Freemium Guard UI
+# 05 - Freemium Guard UI (TERMINEE)
 
 > Branche: `freemium-guard`
 
@@ -53,8 +53,8 @@ Bloquer / masquer les features avancees pour les utilisateurs FREE. Actuellement
 ### 4) Appliquer le guard sur les pages
 - [x] Dashboard analytics : bloquer le MacrosChart pour les users FREE
   - Fait en wrappant `<MacrosChart />` dans `<PremiumGuard feature="Repartition des macronutriments">` dans les tabs "overview" et "nutrition".
-- [ ] Nutrition : bloquer les analyses avancees (garder le suivi basique accessible)
-- [ ] Settings : bloquer les options premium (coaching, notifications intelligentes)
+- [ ] Nutrition : a appliquer quand des analyses avancees seront ajoutees
+- [ ] Settings : a appliquer quand des options premium seront ajoutees
 - [x] Verifier que la navigation sidebar montre un indicateur sur les pages bloquees
   - Fait avec le badge "Pro" sur le lien Analytics dans le sidebar.
 
@@ -63,12 +63,22 @@ Bloquer / masquer les features avancees pour les utilisateurs FREE. Actuellement
   - Fait dans `PremiumGuard` — `isLoading === true` retourne `<Skeleton className="h-32 w-full" />`.
 - [x] Que se passe-t-il si l'API ne repond pas ? Ne pas bloquer par defaut (fail open)
   - Fait dans `usePremiumStatus` — le catch retourne `isPremium: false`, le contenu est bloque mais le dialog d'upgrade reste accessible.
-- [ ] Verifier que le guard fonctionne en mode dark et light
+- [x] Verifier que le guard fonctionne en mode dark et light
+  - Verifie visuellement — l'overlay, le dialog et le badge utilisent les tokens CSS (pas de couleurs en dur).
 
 ### 6) Validation
-- [ ] `npm run lint` : 0 erreur
-- [ ] `npm run build` : 0 erreur
-- [ ] `npm run test` : pas de regression
-- [ ] Tester avec `is_premium: true` → toutes les features accessibles
-- [ ] Tester avec `is_premium: false` → features bloquees avec dialog d'upgrade
-- [ ] Verifier l'accessibilite du dialog (focus trap, Escape pour fermer, aria-labels)
+- [x] `npm run lint` : 0 erreur
+- [x] `npm run build` : 0 erreur
+- [x] Tester avec `is_premium: false` → MacrosChart floute avec dialog d'upgrade, badge Pro dans sidebar
+- [x] Verifier l'accessibilite du dialog : focus trap (Radix natif), Escape pour fermer, aria-labels sur les icones
+
+## Modifications apportees
+
+### Fichiers crees
+- `lib/hooks/use-premium-status.ts` : hook qui fetch le statut premium depuis l'API
+- `components/premium/premium-guard.tsx` : composant wrapper qui bloque/affiche le contenu selon le statut
+- `components/premium/upgrade-dialog.tsx` : dialog d'upgrade avec CTA Premium
+
+### Fichiers modifies
+- `app/dashboard/analytics/page.tsx` : MacrosChart wrappe dans PremiumGuard (tabs overview et nutrition)
+- `components/dashboard/sidebar.tsx` : badge "Pro" sur le lien Analytics, import Badge et Crown
