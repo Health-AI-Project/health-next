@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test:e2e": "playwright test e2e/user-journey.spec.ts",
     "test:a11y": "playwright test e2e/accessibility.spec.ts",
+    "test:a11y:report": "playwright test e2e/accessibility.spec.ts && node scripts/generate-a11y-report.js",
     "test": "playwright test",
     "test:report": "playwright show-report"
   },

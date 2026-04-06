@@ -36,6 +36,10 @@ jobs:
         env:
           CI: true
 
+      - name: Generate Accessibility Report
+        if: always()
+        run: node scripts/generate-a11y-report.js
+
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -43,3 +47,11 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      - name: Upload Accessibility Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a11y-report
+          path: a11y-report/
+          retention-days: 30
