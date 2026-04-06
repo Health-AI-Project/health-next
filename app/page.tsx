@@ -14,6 +14,7 @@ import {
   X,
   Zap,
   Crown,
+  Gem,
   Heart,
   Activity,
   Apple,
@@ -23,7 +24,7 @@ import {
 export const metadata: Metadata = {
   title: "HealthNext | Votre parcours santé personnalisé",
   description:
-    "Découvrez nos offres Freemium et Premium pour atteindre vos objectifs de santé et bien-être.",
+    "Découvrez nos offres Freemium, Premium et Premium+ pour atteindre vos objectifs de santé et bien-être.",
 };
 
 const FREEMIUM_FEATURES = [
@@ -42,6 +43,18 @@ const PREMIUM_FEATURES = [
   { included: true, text: "Plans nutritionnels sur mesure" },
   { included: true, text: "Coaching personnalisé 24/7" },
   { included: true, text: "Analyses et rapports avancés" },
+];
+
+const PREMIUM_PLUS_FEATURES = [
+  { included: true, text: "Suivi complet de l'alimentation" },
+  { included: true, text: "Objectifs personnalisés illimités" },
+  { included: true, text: "Rappels et notifications intelligentes" },
+  { included: true, text: "Plans nutritionnels et sportifs IA" },
+  { included: true, text: "Coaching personnalisé 24/7" },
+  { included: true, text: "Analyses et rapports avancés" },
+  { included: true, text: "Intégration données biométriques" },
+  { included: true, text: "Connexion objets connectés" },
+  { included: true, text: "Consultations nutritionnistes en ligne" },
 ];
 
 export default function HomePage() {
@@ -100,12 +113,12 @@ export default function HomePage() {
           </div>
 
           <div
-            className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
             role="list"
             aria-label="Nos offres"
           >
             <Card
-              className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors"
+              className="relative overflow-hidden border-2 hover:border-primary/50 hover:shadow-xl hover:scale-[1.02] transition-all"
               role="listitem"
             >
               <CardHeader className="pb-4">
@@ -162,7 +175,7 @@ export default function HomePage() {
             </Card>
 
             <Card
-              className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl hover:border-primary transition-colors"
+              className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all"
               role="listitem"
             >
               <div className="absolute top-4 right-4">
@@ -204,6 +217,54 @@ export default function HomePage() {
                   <Button size="lg" className="w-full gap-2">
                     <Crown className="h-4 w-4" aria-hidden="true" />
                     Essayer Premium
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            <Card
+              className="relative overflow-hidden border-2 border-primary bg-gradient-to-br from-primary/10 to-primary/20 shadow-2xl hover:shadow-3xl hover:scale-[1.02] transition-all"
+              role="listitem"
+            >
+              <div className="absolute top-4 right-4">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-medium">
+                  <Gem className="h-4 w-4" aria-hidden="true" />
+                  Premium+
+                </span>
+              </div>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+                    <Gem className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                </div>
+                <CardTitle className="text-2xl mt-4">Premium+</CardTitle>
+                <CardDescription className="text-base">
+                  L&apos;accompagnement ultime avec objets connectés et consultations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">19,99€</span>
+                  <span className="text-muted-foreground">/mois</span>
+                </div>
+                <ul className="space-y-3" aria-label="Fonctionnalités incluses">
+                  {PREMIUM_PLUS_FEATURES.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <Check
+                        className="h-5 w-5 text-primary flex-shrink-0"
+                        aria-label="Inclus"
+                      />
+                      <span>{feature.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/inscription" className="w-full">
+                  <Button variant="premium" size="lg" className="w-full gap-2">
+                    <Gem className="h-4 w-4" aria-hidden="true" />
+                    Essayer Premium+
                   </Button>
                 </Link>
               </CardFooter>
