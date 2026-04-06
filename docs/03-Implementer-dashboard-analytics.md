@@ -15,9 +15,9 @@ Creer la page `/dashboard/analytics` actuellement manquante. Le lien "Analytics"
 ## Checklist
 
 ### 1) Creer la structure de la page
-- [ ] Creer le dossier `app/dashboard/analytics/`
-- [ ] Creer `app/dashboard/analytics/page.tsx`
-- [ ] Definir le layout de la page (titre, grille de charts)
+- [x] Cree le dossier `app/dashboard/analytics/`
+- [x] Cree `app/dashboard/analytics/page.tsx` — composant client avec fetch API, cards resume, tabs et charts
+- [x] Layout : titre "Analytics", 4 cards stats, section charts avec Tabs (Vue d'ensemble, Nutrition, Poids)
 
 ### 2) Definir les donnees et l'API
 - [ ] Identifier l'endpoint backend a appeler (ex: `/api/analytics` ou `/api/home`)
