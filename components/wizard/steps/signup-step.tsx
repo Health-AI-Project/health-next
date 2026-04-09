@@ -44,24 +44,31 @@ export function SignupStep() {
     const onSubmit = async (values: SignupFormValues) => {
         setIsLoading(true);
         try {
-            const result = await authClient.signUp.email({
-                email: values.email,
-                password: values.password,
-                name: values.email.split("@")[0],
+            // Call signup API directly to properly handle errors (authClient swallows 422)
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+            const signupResponse = await fetch(`${API_URL}/api/auth/sign-up/email`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: values.email,
+                    password: values.password,
+                    name: values.email.split("@")[0],
+                }),
             });
 
-            const error = result?.error;
-            const signupData = result?.data;
-
-            if (error || !signupData) {
-                const msg = (error?.message || error?.code || "").toLowerCase();
+            if (!signupResponse.ok) {
+                const errBody = await signupResponse.json().catch(() => ({}));
+                const msg = (errBody.message || errBody.code || "").toLowerCase();
                 if (msg.includes("already") || msg.includes("exist") || msg.includes("duplicate")) {
                     toast.error("Cette adresse email est deja utilisee. Connectez-vous ou utilisez une autre adresse.");
                 } else {
-                    toast.error(error?.message || "Une erreur est survenue lors de l'inscription");
+                    toast.error(errBody.message || "Une erreur est survenue lors de l'inscription");
                 }
                 return;
             }
+
+            const signupData = await signupResponse.json().catch(() => null);
 
             // Envoyer les données du wizard au profil santé (via cookies, session déjà active)
             try {
