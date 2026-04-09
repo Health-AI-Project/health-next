@@ -267,21 +267,22 @@
 
 ---
 
-### 13. Sécuriser les secrets du .env.local backend
-- **Branche :** `fix/secure-env-secrets`
-- **Fichier :** `backend-hono/.env.local`
+### ~~13. Sécuriser les secrets du .env.local backend~~ DONE
+- **Branche :** `fix/nutrition-upload-ia`
+- **Fichier :** `backend-hono/.env.local`, `backend-hono/.env.example` (nouveau)
 - **Problème :** Secrets en clair (BETTER_AUTH_SECRET, REDIS_PASSWORD, SPOONACULAR_API_KEY, MONGO_URI avec credentials).
-- **À faire :**
-  - [ ] Vérifier que `.env.local` est dans le `.gitignore`
-  - [ ] Créer un `.env.example` sans les valeurs sensibles
-  - [ ] Changer `BETTER_AUTH_SECRET` pour une vraie clé sécurisée
-  - [ ] Rotation des clés si elles ont été poussées sur git
+- **Solution :**
+  - [x] `.env.local` est dans le `.gitignore`
+  - [x] Creer `.env.example` sans les valeurs sensibles
+  - [x] Changer `BETTER_AUTH_SECRET` pour une vraie cle securisee (64 chars hex)
+  - [ ] Rotation des cles (REDIS_PASSWORD, DB_PASSWORD, MONGO_URI, SPOONACULAR_API_KEY) — a faire cote serveur
+- **⚠ ATTENTION :** `.env.local` a ete commite dans le commit `2f504d8`. Les secrets sont dans l'historique git. Il faudrait idealement purger l'historique ou considerer ces cles comme compromises et les tourner.
 - **Tests manuels :**
-  - *Tous tiers :*
-    - [ ] `git status` : `.env.local` n'apparait PAS dans les fichiers trackes
-    - [ ] `.env.example` existe avec les cles mais sans les valeurs (ex: `REDIS_PASSWORD=`)
-    - [ ] `BETTER_AUTH_SECRET` n'est pas "a_very_secret_key_change_me_in_production"
-    - [ ] `git log --all -p -- .env.local` : le fichier n'a jamais ete commite
+  - *Tous tiers :* ✅ Validé le 2026-04-09
+    - [x] `git status` : `.env.local` n'apparait PAS dans les fichiers trackes
+    - [x] `.env.example` existe avec les cles mais sans les valeurs
+    - [x] `BETTER_AUTH_SECRET` n'est plus "a_very_secret_key_change_me_in_production"
+    - [ ] `git log --all -p -- .env.local` : ⚠ le fichier a ete commite dans le passe (commit 2f504d8)
 
 ---
 
