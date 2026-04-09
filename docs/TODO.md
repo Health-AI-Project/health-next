@@ -186,13 +186,15 @@
   - [x] Verifier le cookie de session pour toutes les routes `/dashboard/*`
   - [x] Rediriger vers `/connexion` si non authentifie
 - **Tests manuels :**
-  - *Non connecte :*
-    - [ ] Aller sur /dashboard → redirige vers / ou /connexion
-    - [ ] Aller sur /dashboard/settings → idem
-    - [ ] Aller sur /dashboard/nutrition → idem
-  - *Freemium / Premium / Premium+ :*
-    - [ ] Aller sur /dashboard → affiche le dashboard normalement
-    - [ ] Se deconnecter puis naviguer vers /dashboard → redirection
+  - *Non connecte :* ✅ Validé le 2026-04-09
+    - [x] Aller sur /dashboard → redirige vers /connexion
+    - [x] Aller sur /dashboard/settings → idem
+    - [x] Aller sur /dashboard/nutrition → idem
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Aller sur /dashboard → affiche le dashboard normalement
+    - [x] Se deconnecter puis naviguer vers /dashboard → redirection vers /connexion
+  - *Premium / Premium+ :*
+    - [ ] Memes tests que Freemium
 
 ---
 
