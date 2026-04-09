@@ -88,7 +88,7 @@ export default function SettingsPage() {
                     weight: settings?.weight || 70,
                     height: settings?.height || 0,
                     goals: settings?.goals || [],
-                    allergies: settings?.allergies || [],
+                    allergies: (settings?.allergies?.length ? settings.allergies : ["none"]),
                 }),
             });
             toast.success("Profil mis a jour");
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                     weight: settings?.weight || 70,
                     height: settings?.height || 0,
                     goals: settings?.goals || [],
-                    allergies: settings?.allergies || [],
+                    allergies: (settings?.allergies?.length ? settings.allergies : ["none"]),
                 }),
             });
             toast.success("Objectifs mis a jour");
@@ -145,11 +145,12 @@ export default function SettingsPage() {
                 return { ...prev, allergies: ["none"] };
             }
             const filtered = allergies.filter((a) => a !== "none");
+            const updated = filtered.includes(allergyId)
+                ? filtered.filter((a) => a !== allergyId)
+                : [...filtered, allergyId];
             return {
                 ...prev,
-                allergies: filtered.includes(allergyId)
-                    ? filtered.filter((a) => a !== allergyId)
-                    : [...filtered, allergyId],
+                allergies: updated.length ? updated : ["none"],
             };
         });
     }
