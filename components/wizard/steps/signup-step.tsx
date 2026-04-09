@@ -86,9 +86,13 @@ export function SignupStep() {
             toast.success("Compte créé avec succès !");
             resetWizard();
             router.push("/dashboard");
-        } catch (err) {
-            console.error("Signup error:", err);
-            toast.error("Erreur de connexion au serveur");
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message?.toLowerCase() : "";
+            if (msg.includes("already") || msg.includes("exist") || msg.includes("duplicate") || msg.includes("422")) {
+                toast.error("Cette adresse email est deja utilisee. Connectez-vous ou utilisez une autre adresse.");
+            } else {
+                toast.error("Erreur de connexion au serveur");
+            }
         } finally {
             setIsLoading(false);
         }
