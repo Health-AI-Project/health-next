@@ -26,6 +26,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toaster";
 import { Heart, LogIn, Loader2 } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
 import { useState } from "react";
 
 const loginSchema = z.object({
@@ -154,6 +155,7 @@ export default function ConnexionPage() {
                     </CardFooter>
                 </Card>
             </main>
+            <Toaster position="bottom-right" />
         </div>
     );
 }
