@@ -20,7 +20,7 @@ export async function analyzeImage(file: File): Promise<NutritionData[]> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await apiFetch<any>('/api/nutrition/upload', {
+    const response = await apiFetch<{ id?: string; macros: { calories: number; protein: number; carbs: number; fat: number } }>('/api/nutrition/upload', {
         method: 'POST',
         body: formData,
     });

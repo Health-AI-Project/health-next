@@ -1,7 +1,6 @@
 "use client";
 
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Form,
@@ -16,8 +15,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2, UserPlus, ArrowLeft } from "lucide-react";
+import { toast } from "@/components/ui/toaster";
+import { WizardNavigation } from "@/components/wizard/wizard-navigation";
+import { Loader2, UserPlus } from "lucide-react";
 import { useState } from "react";
 
 const signupSchema = z.object({
@@ -31,7 +31,6 @@ export function SignupStep() {
     const { data: wizardData, prevStep } = useWizardStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const { data: session } = authClient.useSession();
 
     const form = useForm<SignupFormValues>({
         resolver: zodResolver(signupSchema),
@@ -142,31 +141,20 @@ export function SignupStep() {
                     />
                 </div>
 
-                <div className="flex justify-between pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="lg"
-                        onClick={prevStep}
-                        className="gap-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Retour
-                    </Button>
-                    <Button
-                        type="submit"
-                        size="lg"
-                        disabled={isLoading}
-                        className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                    >
-                        {isLoading ? (
+                <WizardNavigation
+                    onPrev={prevStep}
+                    prevLabel="Retour"
+                    nextLabel="Créer mon compte"
+                    nextIcon={
+                        isLoading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                             <UserPlus className="h-4 w-4" />
-                        )}
-                        Créer mon compte
-                    </Button>
-                </div>
+                        )
+                    }
+                    nextVariant="premium"
+                    isLoading={isLoading}
+                />
             </form>
         </Form>
     );

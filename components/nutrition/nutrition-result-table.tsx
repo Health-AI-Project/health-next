@@ -5,6 +5,7 @@ import { NutritionData, saveNutritionData } from "@/lib/actions/nutrition-action
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Edit2, Save, X, Loader2 } from "lucide-react";
@@ -145,92 +146,90 @@ export function NutritionResultTable({
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <table className="w-full" role="table">
-                        <thead>
-                            <tr className="border-b text-left text-sm text-muted-foreground">
-                                <th className="pb-3 font-medium">Aliment</th>
-                                <th className="pb-3 font-medium text-right">Calories</th>
-                                <th className="pb-3 font-medium text-right">Protéines</th>
-                                <th className="pb-3 font-medium text-right">Glucides</th>
-                                <th className="pb-3 font-medium text-right">Lipides</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {displayData.map((item) => (
-                                <tr key={item.id} className="text-sm">
-                                    <td className="py-3">
-                                        {isEditMode ? (
-                                            <Input
-                                                value={item.name}
-                                                onChange={(e) => updateItem(item.id, "name", e.target.value)}
-                                                className="h-8 max-w-[200px]"
-                                                aria-label={`Nom de l'aliment: ${item.name}`}
-                                            />
-                                        ) : (
-                                            <span className="font-medium">{item.name}</span>
-                                        )}
-                                    </td>
-                                    <td className="py-3 text-right">
-                                        {isEditMode ? (
-                                            <Input
-                                                type="number"
-                                                value={item.calories}
-                                                onChange={(e) => updateItem(item.id, "calories", e.target.value)}
-                                                className="h-8 w-20 ml-auto text-right"
-                                                aria-label={`Calories pour ${item.name}`}
-                                            />
-                                        ) : (
-                                            <span>{item.calories} kcal</span>
-                                        )}
-                                    </td>
-                                    <td className="py-3 text-right">
-                                        {isEditMode ? (
-                                            <Input
-                                                type="number"
-                                                step="0.1"
-                                                value={item.proteins}
-                                                onChange={(e) => updateItem(item.id, "proteins", e.target.value)}
-                                                className="h-8 w-20 ml-auto text-right"
-                                                aria-label={`Protéines pour ${item.name}`}
-                                            />
-                                        ) : (
-                                            <span>{item.proteins}g</span>
-                                        )}
-                                    </td>
-                                    <td className="py-3 text-right">
-                                        {isEditMode ? (
-                                            <Input
-                                                type="number"
-                                                step="0.1"
-                                                value={item.carbs}
-                                                onChange={(e) => updateItem(item.id, "carbs", e.target.value)}
-                                                className="h-8 w-20 ml-auto text-right"
-                                                aria-label={`Glucides pour ${item.name}`}
-                                            />
-                                        ) : (
-                                            <span>{item.carbs}g</span>
-                                        )}
-                                    </td>
-                                    <td className="py-3 text-right">
-                                        {isEditMode ? (
-                                            <Input
-                                                type="number"
-                                                step="0.1"
-                                                value={item.fats}
-                                                onChange={(e) => updateItem(item.id, "fats", e.target.value)}
-                                                className="h-8 w-20 ml-auto text-right"
-                                                aria-label={`Lipides pour ${item.name}`}
-                                            />
-                                        ) : (
-                                            <span>{item.fats}g</span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Aliment</TableHead>
+                            <TableHead className="text-right">Calories</TableHead>
+                            <TableHead className="text-right">Protéines</TableHead>
+                            <TableHead className="text-right">Glucides</TableHead>
+                            <TableHead className="text-right">Lipides</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {displayData.map((item) => (
+                            <TableRow key={item.id}>
+                                <TableCell>
+                                    {isEditMode ? (
+                                        <Input
+                                            value={item.name}
+                                            onChange={(e) => updateItem(item.id, "name", e.target.value)}
+                                            className="h-8 max-w-[200px]"
+                                            aria-label={`Nom de l'aliment: ${item.name}`}
+                                        />
+                                    ) : (
+                                        <span className="font-medium">{item.name}</span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {isEditMode ? (
+                                        <Input
+                                            type="number"
+                                            value={item.calories}
+                                            onChange={(e) => updateItem(item.id, "calories", e.target.value)}
+                                            className="h-8 w-20 ml-auto text-right"
+                                            aria-label={`Calories pour ${item.name}`}
+                                        />
+                                    ) : (
+                                        <span>{item.calories} kcal</span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {isEditMode ? (
+                                        <Input
+                                            type="number"
+                                            step="0.1"
+                                            value={item.proteins}
+                                            onChange={(e) => updateItem(item.id, "proteins", e.target.value)}
+                                            className="h-8 w-20 ml-auto text-right"
+                                            aria-label={`Protéines pour ${item.name}`}
+                                        />
+                                    ) : (
+                                        <span>{item.proteins}g</span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {isEditMode ? (
+                                        <Input
+                                            type="number"
+                                            step="0.1"
+                                            value={item.carbs}
+                                            onChange={(e) => updateItem(item.id, "carbs", e.target.value)}
+                                            className="h-8 w-20 ml-auto text-right"
+                                            aria-label={`Glucides pour ${item.name}`}
+                                        />
+                                    ) : (
+                                        <span>{item.carbs}g</span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {isEditMode ? (
+                                        <Input
+                                            type="number"
+                                            step="0.1"
+                                            value={item.fats}
+                                            onChange={(e) => updateItem(item.id, "fats", e.target.value)}
+                                            className="h-8 w-20 ml-auto text-right"
+                                            aria-label={`Lipides pour ${item.name}`}
+                                        />
+                                    ) : (
+                                        <span>{item.fats}g</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </CardContent>
             <CardFooter className="border-t pt-4">
                 <div className="flex w-full items-center justify-between">

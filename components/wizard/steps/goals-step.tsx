@@ -8,7 +8,6 @@ import {
     GOALS_OPTIONS,
 } from "@/lib/schemas/wizard-schemas";
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     Form,
@@ -19,7 +18,7 @@ import {
     FormMessage,
     FormDescription,
 } from "@/components/ui/form";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { WizardNavigation } from "@/components/wizard/wizard-navigation";
 
 export function GoalsStep() {
     const { data, updateData, nextStep, prevStep } = useWizardStore();
@@ -98,22 +97,7 @@ export function GoalsStep() {
                     )}
                 />
 
-                <div className="flex justify-between pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="lg"
-                        onClick={prevStep}
-                        className="gap-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Précédent
-                    </Button>
-                    <Button type="submit" size="lg" className="gap-2">
-                        Suivant
-                        <ArrowRight className="h-4 w-4" />
-                    </Button>
-                </div>
+                <WizardNavigation onPrev={prevStep} />
             </form>
         </Form>
     );

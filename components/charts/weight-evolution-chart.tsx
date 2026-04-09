@@ -11,9 +11,17 @@ import {
     Legend,
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
-import { ChartCard } from "@/components/charts/chart-card";
+import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
-const weightData: any[] = [];
+const weightData: Record<string, number | string>[] = [
+    { date: "01/03", poids: 76.2, objectif: 74 },
+    { date: "05/03", poids: 75.8, objectif: 74 },
+    { date: "10/03", poids: 75.5, objectif: 74 },
+    { date: "15/03", poids: 75.1, objectif: 74 },
+    { date: "20/03", poids: 74.9, objectif: 74 },
+    { date: "25/03", poids: 74.7, objectif: 74 },
+    { date: "30/03", poids: 74.5, objectif: 74 },
+];
 
 export function WeightEvolutionChart() {
     const colors = useChartColors();
@@ -50,14 +58,8 @@ export function WeightEvolutionChart() {
                             tickFormatter={(value) => `${value} kg`}
                         />
                         <Tooltip
-                            contentStyle={{
-                                backgroundColor: colors.background,
-                                border: `1px solid ${colors.grid}`,
-                                borderRadius: "8px",
-                                color: colors.text,
-                            }}
+                            {...getChartTooltipStyle(colors)}
                             formatter={(value) => [`${value} kg`, "Poids"]}
-                            labelStyle={{ color: colors.text }}
                         />
                         <Legend
                             wrapperStyle={{ color: colors.text }}

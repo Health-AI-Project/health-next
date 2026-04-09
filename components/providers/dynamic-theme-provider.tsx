@@ -57,24 +57,23 @@ export function DynamicThemeProvider({
     const [colorMode, setColorMode] = useState<ColorMode>(defaultColorMode);
     const [resolvedColorMode, setResolvedColorMode] = useState<"light" | "dark">("light");
 
-    const updateResolvedColorMode = useCallback(() => {
-        if (colorMode === "system") {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            setResolvedColorMode(prefersDark ? "dark" : "light");
-        } else {
-            setResolvedColorMode(colorMode);
+    const resolveColorMode = useCallback((mode: ColorMode): "light" | "dark" => {
+        if (mode === "system") {
+            return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
-    }, [colorMode]);
+        return mode;
+    }, []);
 
     useEffect(() => {
-        updateResolvedColorMode();
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing with browser media query requires setState in effect
+        setResolvedColorMode(resolveColorMode(colorMode));
 
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        const handler = () => updateResolvedColorMode();
+        const handler = () => setResolvedColorMode(resolveColorMode(colorMode));
         mediaQuery.addEventListener("change", handler);
 
         return () => mediaQuery.removeEventListener("change", handler);
-    }, [updateResolvedColorMode]);
+    }, [colorMode, resolveColorMode]);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -102,7 +101,9 @@ export function DynamicThemeProvider({
         const savedColorMode = localStorage.getItem("color-mode") as ColorMode | null;
 
         if (savedTheme) {
-            setCurrentTheme(getThemeById(savedTheme));
+            const theme = getThemeById(savedTheme);
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- Restoring persisted theme on mount
+            setCurrentTheme(theme);
         }
         if (savedColorMode) {
             setColorMode(savedColorMode);

@@ -12,9 +12,17 @@ import {
     Cell,
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
-import { ChartCard } from "@/components/charts/chart-card";
+import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
 
-const caloriesData: any[] = [];
+const caloriesData: Record<string, number | string>[] = [
+    { jour: "Lun", calories: 1850, objectif: 2000 },
+    { jour: "Mar", calories: 2100, objectif: 2000 },
+    { jour: "Mer", calories: 1750, objectif: 2000 },
+    { jour: "Jeu", calories: 1950, objectif: 2000 },
+    { jour: "Ven", calories: 2200, objectif: 2000 },
+    { jour: "Sam", calories: 1600, objectif: 2000 },
+    { jour: "Dim", calories: 1900, objectif: 2000 },
+];
 
 export function CaloriesChart() {
     const colors = useChartColors();
@@ -49,14 +57,8 @@ export function CaloriesChart() {
                             tickFormatter={(value) => `${value}`}
                         />
                         <Tooltip
-                            contentStyle={{
-                                backgroundColor: colors.background,
-                                border: `1px solid ${colors.grid}`,
-                                borderRadius: "8px",
-                                color: colors.text,
-                            }}
+                            {...getChartTooltipStyle(colors)}
                             formatter={(value) => [`${value} kcal`, "Calories"]}
-                            labelStyle={{ color: colors.text }}
                         />
                         <ReferenceLine
                             y={2000}

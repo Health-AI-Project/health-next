@@ -1,6 +1,5 @@
 "use client";
 
-import { useTheme } from "@/components/providers/dynamic-theme-provider";
 import { WeightEvolutionChart } from "@/components/charts/weight-evolution-chart";
 import { CaloriesChart } from "@/components/charts/calories-chart";
 import {
@@ -13,20 +12,33 @@ import { TrendingDown, Flame, Target, Activity, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 
+interface DashboardData {
+    user?: {
+        email?: string;
+        weight?: number;
+        is_premium?: boolean;
+    };
+    stats?: {
+        calories?: number;
+        protein?: number;
+        workouts_count?: number;
+    };
+}
+
 export default function DashboardPage() {
-    const { currentTheme } = useTheme();
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await apiFetch<any>('/api/home');
+                const response = await apiFetch<{ data: DashboardData }>('/api/home');
                 setData(response.data);
-            } catch (err: any) {
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : "Erreur inconnue";
                 console.error("Dashboard fetch error:", err);
-                setError(err.message);
+                setError(message);
             } finally {
                 setLoading(false);
             }
