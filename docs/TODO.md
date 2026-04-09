@@ -152,17 +152,18 @@
 
 ---
 
-### 8. Corriger les noms de champs nutrition history
-- **Branche :** `fix/nutrition-history-fields`
+### ~~8. Corriger les noms de champs nutrition history~~ DONE
+- **Branche :** `fix/user-profile-method`
 - **Fichier :** `health-next/app/dashboard/nutrition/history/page.tsx`
 - **Problème :** Mismatches entre frontend et backend :
   - `proteins` (frontend) vs `protein` (backend)
   - `fats` (frontend) vs `fat` (backend)
   - `items` n'existe pas côté backend (il y a `imageUrl`)
   - Macros imbriquées dans `macros` côté backend, à plat côté frontend
-- **À faire :**
-  - [ ] Adapter le frontend pour parser la structure `macros` du backend
-  - [ ] Ou adapter le backend pour aplatir les macros dans la réponse
+- **Solution :** Adapter le frontend avec un mapper `backendToMealHistory()`
+  - [x] Mapper `macros.protein` → `proteins`, `macros.fat` → `fats`, etc.
+  - [x] Gerer les deux formats de reponse (tableau direct ou `{ data: [] }`)
+  - [x] Afficher "—" au lieu d'URLs dans la colonne Aliments
 - **Tests manuels :**
   - *Freemium :*
     - [ ] Uploader 2-3 repas via /dashboard/nutrition

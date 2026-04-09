@@ -34,6 +34,32 @@ interface MealHistoryItem {
     fats: number;
 }
 
+interface BackendMealHistory {
+    id: string;
+    date: string;
+    imageUrl?: string;
+    name?: string;
+    macros: {
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+    };
+}
+
+function backendToMealHistory(meals: BackendMealHistory[]): MealHistoryItem[] {
+    return meals.map((m, i) => ({
+        id: m.id || String(i),
+        date: m.date,
+        name: m.name || "Repas analyse",
+        items: m.imageUrl ? [m.imageUrl] : [],
+        calories: m.macros?.calories || 0,
+        proteins: m.macros?.protein || 0,
+        carbs: m.macros?.carbs || 0,
+        fats: m.macros?.fat || 0,
+    }));
+}
+
 const DEMO_HISTORY: MealHistoryItem[] = [
     {
         id: "1",
@@ -135,8 +161,16 @@ export default function MealHistoryPage() {
     useEffect(() => {
         async function fetchHistory() {
             try {
-                const response = await apiFetch<{ data: MealHistoryItem[] }>("/api/nutrition/history");
-                setMeals(response.data);
+                const response = await apiFetch<BackendMealHistory[] | { data: MealHistoryItem[] }>("/api/nutrition/history");
+                if (Array.isArray(response)) {
+                    // Backend returns flat array with macros object
+                    setMeals(backendToMealHistory(response));
+                } else if (response.data) {
+                    // Already in expected format
+                    setMeals(response.data);
+                } else {
+                    setMeals(DEMO_HISTORY);
+                }
             } catch {
                 setMeals(DEMO_HISTORY);
             } finally {
@@ -298,7 +332,9 @@ function MealTable({ meals }: { meals: MealHistoryItem[] }) {
                             <Badge variant="outline">{meal.name}</Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                            {meal.items.join(", ")}
+                            {meal.items.length > 0 && !meal.items[0].startsWith("http")
+                                ? meal.items.join(", ")
+                                : "—"}
                         </TableCell>
                         <TableCell className="text-right font-medium">
                             {meal.calories}
