@@ -165,12 +165,12 @@
   - [x] Gerer les deux formats de reponse (tableau direct ou `{ data: [] }`)
   - [x] Afficher "—" au lieu d'URLs dans la colonne Aliments
 - **Tests manuels :**
-  - *Freemium :*
-    - [ ] Uploader 2-3 repas via /dashboard/nutrition
-    - [ ] Aller sur /dashboard/nutrition/history
-    - [ ] Les repas s'affichent avec calories, proteines, glucides, lipides corrects (pas 0 ou undefined)
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Aller sur /dashboard/nutrition/history
+    - [x] Les repas s'affichent avec calories, proteines, glucides, lipides corrects (pas 0 ou undefined)
+    - [x] Les totaux (1100 kcal, 550 kcal/repas) sont coherents
+    - [ ] Uploader 2-3 repas via /dashboard/nutrition (necessite ia-python)
     - [ ] L'image du plat s'affiche si disponible
-    - [ ] Les totaux journaliers sont coherents
   - *Premium / Premium+ :*
     - [ ] Memes tests que Freemium (l'historique est accessible a tous)
 
