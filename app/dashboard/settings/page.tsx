@@ -66,11 +66,17 @@ export default function SettingsPage() {
     async function handleSaveProfile() {
         setSaving(true);
         try {
+            // Convert age to date_of_birth (approximate: today minus age years)
+            const birthYear = new Date().getFullYear() - (settings?.age || 25);
+            const date_of_birth = `${birthYear}-01-01`;
+
             await apiFetch("/api/user/profile", {
-                method: "PUT",
+                method: "POST",
                 body: JSON.stringify({
-                    age: settings?.age,
-                    weight: settings?.weight,
+                    date_of_birth,
+                    weight: settings?.weight || 70,
+                    goals: settings?.goals || [],
+                    allergies: settings?.allergies || [],
                 }),
             });
             toast.success("Profil mis a jour");
@@ -84,11 +90,17 @@ export default function SettingsPage() {
     async function handleSaveGoals() {
         setSaving(true);
         try {
-            await apiFetch("/api/user/goals", {
-                method: "PUT",
+            // Save goals + allergies via the profile endpoint (backend expects all fields)
+            const birthYear = new Date().getFullYear() - (settings?.age || 25);
+            const date_of_birth = `${birthYear}-01-01`;
+
+            await apiFetch("/api/user/profile", {
+                method: "POST",
                 body: JSON.stringify({
-                    goals: settings?.goals,
-                    allergies: settings?.allergies,
+                    date_of_birth,
+                    weight: settings?.weight || 70,
+                    goals: settings?.goals || [],
+                    allergies: settings?.allergies || [],
                 }),
             });
             toast.success("Objectifs mis a jour");
