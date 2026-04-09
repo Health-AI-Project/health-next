@@ -29,7 +29,7 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupStep() {
-    const { data: wizardData, prevStep } = useWizardStore();
+    const { data: wizardData, prevStep, reset: resetWizard } = useWizardStore();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -79,6 +79,7 @@ export function SignupStep() {
             }
 
             toast.success("Compte créé avec succès !");
+            resetWizard();
             router.push("/dashboard");
         } catch (err) {
             console.error("Signup error:", err);

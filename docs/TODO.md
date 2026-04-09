@@ -288,14 +288,14 @@
 
 ## MOYENNE
 
-### 14. Persister l'état du wizard dans localStorage
-- **Branche :** `feat/wizard-persistence`
-- **Fichier :** `health-next/lib/stores/wizard-store.ts`
+### ~~14. Persister l'état du wizard dans localStorage~~ DONE
+- **Branche :** `fix/user-profile-method`
+- **Fichiers :** `health-next/lib/stores/wizard-store.ts`, `health-next/components/wizard/steps/signup-step.tsx`
 - **Problème :** L'état Zustand est en mémoire uniquement. Un refresh perd toute la progression.
-- **À faire :**
-  - [ ] Ajouter le middleware `persist` de Zustand avec localStorage
-  - [ ] Configurer les champs à persister
-  - [ ] Ajouter un mécanisme de nettoyage après inscription réussie
+- **Solution :**
+  - [x] Ajouter le middleware `persist` de Zustand avec localStorage (cle: `wizard-store`)
+  - [x] Persister `currentStep` et `data` (age, poids, taille, objectifs, allergies)
+  - [x] Appeler `resetWizard()` apres inscription reussie pour nettoyer le localStorage
 - **Tests manuels :**
   - *Non connecte (inscription) :*
     - [ ] Aller sur /inscription, remplir age et poids
