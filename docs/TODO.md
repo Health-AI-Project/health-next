@@ -16,10 +16,12 @@
   - [x] Logger la prédiction via gRPC `CoreService.LogNutrition()`
 - **Note :** En attente du modèle IA finalisé par le collègue pour test complet
 - **Tests manuels :**
-  - [ ] Lancer ia-python (`uvicorn api:app --port 8000`) + backend-hono
-  - [ ] Depuis le dashboard Nutrition, uploader une photo de plat
-  - [ ] Vérifier dans Network : `POST /api/nutrition/upload` retourne 200 avec `class_name`, `calories`, `macros`
-  - [ ] Vérifier dans les logs backend : "LogNutrition" apparait sans erreur
+  - *Freemium :*
+    - [ ] Depuis le dashboard Nutrition, uploader une photo de plat
+    - [ ] Network : `POST /api/nutrition/upload` retourne 200 avec `class_name`, `calories`, `macros`
+    - [ ] Logs backend : "LogNutrition" apparait sans erreur
+  - *Premium / Premium+ :*
+    - [ ] Memes tests que Freemium (la feature upload est accessible a tous)
 
 ---
 
@@ -31,14 +33,17 @@
   - [x] Convertir `age` en `date_of_birth` (approximation année de naissance)
   - [x] Ajouter les champs manquants `goals` et `allergies` dans le body
 - **Tests manuels :** ✅ Validés le 2026-04-09
-  - [x] S'inscrire via /inscription avec age, poids, taille, objectifs, allergies
-  - [x] Aller dans /dashboard/settings → les champs sont pre-remplis
-  - [x] Modifier age/poids/taille, cliquer Sauvegarder → toast "Profil mis a jour"
-  - [x] Network : requete POST vers `/api/user/profile`, body contient `date_of_birth`, `weight`, `height`, `goals`, `allergies`
-  - [x] Rafraichir la page → les valeurs persistent
-  - [x] Onglet Objectifs : cocher/decocher objectifs et allergies, Sauvegarder → persist apres refresh
-  - [x] Allergies "Aucune" : coche decoche les autres, et inversement
-  - [ ] Backend down : toast "Impossible de sauvegarder (backend non disponible)"
+  - *Freemium :*
+    - [x] S'inscrire via /inscription avec age, poids, taille, objectifs, allergies
+    - [x] Aller dans /dashboard/settings → les champs sont pre-remplis
+    - [x] Modifier age/poids/taille, cliquer Sauvegarder → toast "Profil mis a jour"
+    - [x] Network : requete POST vers `/api/user/profile`, body contient `date_of_birth`, `weight`, `height`, `goals`, `allergies`
+    - [x] Rafraichir la page → les valeurs persistent
+    - [x] Onglet Objectifs : cocher/decocher objectifs et allergies, Sauvegarder → persist apres refresh
+    - [x] Allergies "Aucune" : coche decoche les autres, et inversement
+    - [ ] Backend down : toast "Impossible de sauvegarder (backend non disponible)"
+  - *Premium / Premium+ :*
+    - [ ] Memes tests que Freemium (settings accessible a tous les tiers)
 
 ---
 
@@ -48,7 +53,10 @@
 - **Solution :** Redirigé vers `POST /api/user/profile` qui accepte goals + allergies
   - [x] handleSaveGoals utilise maintenant POST /api/user/profile avec tous les champs requis
 - **Tests manuels :** ✅ Validés le 2026-04-09
-  - [x] Memes tests que tache #2, onglet Objectifs
+  - *Freemium :*
+    - [x] Memes tests que tache #2, onglet Objectifs
+  - *Premium / Premium+ :*
+    - [ ] Memes tests que Freemium
 
 ---
 
@@ -62,11 +70,17 @@
   - [x] Mapper les recettes backend (`BackendRecipe[]`) vers `DayPlan[]`
   - [x] Bandeau "Donnees de demonstration" quand aucun plan n'existe
 - **Tests manuels :**
-  - [ ] Aller sur /dashboard/nutrition/meal-plan
-  - [ ] Network : `GET /api/my-meals` ne retourne pas 404
-  - [ ] Bandeau demo visible si aucun plan genere
-  - [ ] Cliquer "Generer un plan" → loader, puis plan affiche par jour avec macros
-  - [ ] Rafraichir → le plan persiste (charge depuis /api/my-meals)
+  - *Freemium :*
+    - [ ] Aller sur /dashboard/nutrition/meal-plan → PremiumGuard bloque le contenu (blur + "Debloquer")
+    - [ ] Le contenu premium n'est PAS accessible via DevTools (tache #10)
+  - *Premium :*
+    - [ ] Aller sur /dashboard/nutrition/meal-plan → contenu visible sans blur
+    - [ ] Network : `GET /api/my-meals` ne retourne pas 404
+    - [ ] Bandeau demo visible si aucun plan genere
+    - [ ] Cliquer "Generer un plan" → loader, puis plan affiche par jour avec macros
+    - [ ] Rafraichir → le plan persiste (charge depuis /api/my-meals)
+  - *Premium+ :*
+    - [ ] Memes tests que Premium (acces complet)
 
 ---
 
@@ -79,10 +93,15 @@
   - [ ] Ou modifier le frontend pour appeler `POST /api/workout/generate`
   - [ ] Adapter le format de réponse pour matcher `DayWorkout[]`
 - **Tests manuels :**
-  - [ ] Aller sur /dashboard/workouts (necessite Premium)
-  - [ ] Network : la requete ne retourne pas 404
-  - [ ] Un plan d'entrainement s'affiche ou un formulaire pour en generer
-  - [ ] Verifier que les exercices, durees et calories sont affiches
+  - *Freemium :*
+    - [ ] Aller sur /dashboard/workouts → PremiumGuard bloque (blur + "Debloquer")
+  - *Premium :*
+    - [ ] Aller sur /dashboard/workouts → contenu visible
+    - [ ] Network : la requete ne retourne pas 404
+    - [ ] Un plan d'entrainement s'affiche ou un formulaire pour en generer
+    - [ ] Verifier que les exercices, durees et calories sont affiches
+  - *Premium+ :*
+    - [ ] Memes tests que Premium
 
 ---
 
@@ -96,10 +115,15 @@
   - [ ] Protéger avec vérification Premium Plus
   - [ ] Retourner le format `Client[]` attendu par le frontend
 - **Tests manuels :**
-  - [ ] Avec un compte Premium Plus : /dashboard/clients affiche la liste des clients
-  - [ ] Network : `GET /api/clients` retourne 200 avec un tableau `Client[]`
-  - [ ] Avec un compte Free : la page affiche le guard premium (pas d'acces)
-  - [ ] Sans auth : retourne 401
+  - *Freemium :*
+    - [ ] Aller sur /dashboard/clients → PremiumGuard bloque (blur + "Debloquer")
+    - [ ] Sans auth : `GET /api/clients` retourne 401
+  - *Premium :*
+    - [ ] Aller sur /dashboard/clients → PremiumGuard bloque (requiert Premium+)
+  - *Premium+ :*
+    - [ ] Aller sur /dashboard/clients → liste des clients visible
+    - [ ] Network : `GET /api/clients` retourne 200 avec un tableau `Client[]`
+    - [ ] Les donnees clients s'affichent correctement
 
 ---
 
@@ -111,11 +135,18 @@
   - [ ] Ajouter `is_premium` et `subscription_tier` dans la réponse user de `/api/home`
   - [ ] Récupérer ces infos depuis gRPC `GetUserProfile` (retourne `is_premium`) ou table users
 - **Tests manuels :**
-  - [ ] Network : `GET /api/home` → la reponse `data.user` contient `is_premium` et `subscription_tier`
-  - [ ] Avec un compte Free : `is_premium: false`, `subscription_tier: "free"`
-  - [ ] Avec un compte Premium : `is_premium: true`, `subscription_tier: "premium"`
-  - [ ] Dans /dashboard/settings onglet Abonnement : le badge affiche le bon tier
-  - [ ] Les sections "Pro" du menu lateral sont verrouillees/deverrouillees selon le tier
+  - *Freemium :*
+    - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: false`, `subscription_tier: "free"`
+    - [ ] /dashboard/settings onglet Abonnement : badge "Freemium" affiche
+    - [ ] Sections "Pro" du menu lateral sont verrouillees
+  - *Premium :*
+    - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: true`, `subscription_tier: "premium"`
+    - [ ] /dashboard/settings onglet Abonnement : badge "Premium" affiche
+    - [ ] Sections "Pro" du menu lateral sont deverrouillees (sauf clients)
+  - *Premium+ :*
+    - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: true`, `subscription_tier: "premium_plus"`
+    - [ ] /dashboard/settings onglet Abonnement : badge "Premium+" affiche
+    - [ ] Toutes les sections du menu lateral sont deverrouillees
 
 ---
 
@@ -131,11 +162,14 @@
   - [ ] Adapter le frontend pour parser la structure `macros` du backend
   - [ ] Ou adapter le backend pour aplatir les macros dans la réponse
 - **Tests manuels :**
-  - [ ] Uploader 2-3 repas via /dashboard/nutrition
-  - [ ] Aller sur /dashboard/nutrition/history
-  - [ ] Les repas s'affichent avec calories, proteines, glucides, lipides corrects (pas 0 ou undefined)
-  - [ ] L'image du plat s'affiche si disponible
-  - [ ] Les totaux journaliers sont coherents
+  - *Freemium :*
+    - [ ] Uploader 2-3 repas via /dashboard/nutrition
+    - [ ] Aller sur /dashboard/nutrition/history
+    - [ ] Les repas s'affichent avec calories, proteines, glucides, lipides corrects (pas 0 ou undefined)
+    - [ ] L'image du plat s'affiche si disponible
+    - [ ] Les totaux journaliers sont coherents
+  - *Premium / Premium+ :*
+    - [ ] Memes tests que Freemium (l'historique est accessible a tous)
 
 ---
 
@@ -150,10 +184,13 @@
   - [ ] Rediriger vers `/` ou `/inscription` si non authentifié
   - [ ] Utiliser `better-auth` pour la vérification de session côté serveur
 - **Tests manuels :**
-  - [ ] Sans etre connecte, aller sur /dashboard → redirige vers / ou /inscription
-  - [ ] Sans etre connecte, aller sur /dashboard/settings → idem
-  - [ ] Connecte, aller sur /dashboard → affiche le dashboard normalement
-  - [ ] Se deconnecter puis naviguer vers /dashboard → redirection
+  - *Non connecte :*
+    - [ ] Aller sur /dashboard → redirige vers / ou /connexion
+    - [ ] Aller sur /dashboard/settings → idem
+    - [ ] Aller sur /dashboard/nutrition → idem
+  - *Freemium / Premium / Premium+ :*
+    - [ ] Aller sur /dashboard → affiche le dashboard normalement
+    - [ ] Se deconnecter puis naviguer vers /dashboard → redirection
 
 ---
 
@@ -167,10 +204,15 @@
   - [ ] Le frontend doit gérer le 403 et afficher l'upgrade dialog
   - [ ] Ne pas envoyer les données premium dans la réponse si non autorisé
 - **Tests manuels :**
-  - [ ] Avec compte Free : appeler un endpoint premium (ex: /api/workouts/plan) → 403
-  - [ ] Le frontend affiche le dialog d'upgrade, pas de donnees visibles dans DevTools
-  - [ ] Avec compte Premium : meme endpoint → 200 avec donnees
-  - [ ] Inspecter le HTML avec DevTools (compte Free) : aucune donnee premium dans le DOM
+  - *Freemium :*
+    - [ ] Appeler un endpoint premium (ex: /api/workouts/plan) → 403
+    - [ ] Le frontend affiche le dialog d'upgrade
+    - [ ] Inspecter le HTML avec DevTools : aucune donnee premium dans le DOM
+  - *Premium :*
+    - [ ] Meme endpoint → 200 avec donnees visibles
+    - [ ] Endpoints Premium+ (ex: /api/clients) → 403
+  - *Premium+ :*
+    - [ ] Tous les endpoints retournent 200
 
 ---
 
@@ -183,9 +225,13 @@
   - [ ] Ou ajouter un fallback quand `user` est undefined
   - [ ] Tester la route avec et sans authentification
 - **Tests manuels :**
-  - [ ] Sans auth : `POST /api/generate-menu` → 401 (pas 500 ou crash)
-  - [ ] Avec auth : `POST /api/generate-menu` → 200 ou reponse metier normale
-  - [ ] Verifier les logs backend : pas d'exception "Cannot read property of undefined"
+  - *Non connecte :*
+    - [ ] `POST /api/generate-menu` → 401 (pas 500 ou crash)
+    - [ ] Logs backend : pas d'exception "Cannot read property of undefined"
+  - *Freemium :*
+    - [ ] `POST /api/generate-menu` → 200 ou reponse metier normale (si autorise)
+  - *Premium / Premium+ :*
+    - [ ] `POST /api/generate-menu` → 200 avec plan genere
 
 ---
 
@@ -203,11 +249,15 @@
   - [ ] Ajouter un indicateur visuel "Mode démo" quand les données de démo sont affichées
   - [ ] Ajouter try/catch dans nutrition-actions.ts
 - **Tests manuels :**
-  - [ ] Session expiree → redirection automatique vers /connexion (pas ecran blanc)
-  - [ ] Endpoint premium sans etre premium → dialog upgrade (pas erreur silencieuse)
-  - [ ] Rate limit (429) → toast "Trop de requetes, reessayez" avec retry
-  - [ ] Backend completement down → bandeau "Mode demo" visible, pas d'ecran blanc
-  - [ ] Erreur dans nutrition upload → toast explicite avec le message d'erreur
+  - *Non connecte :*
+    - [ ] Acces a une page protegee → redirection vers /connexion (pas ecran blanc)
+  - *Freemium :*
+    - [ ] Endpoint premium → dialog upgrade (pas erreur silencieuse)
+    - [ ] Rate limit (429) → toast "Trop de requetes, reessayez"
+    - [ ] Backend down → bandeau "Mode demo" visible, pas d'ecran blanc
+    - [ ] Erreur nutrition upload → toast explicite avec le message d'erreur
+  - *Premium / Premium+ :*
+    - [ ] Memes tests de resilience (429, backend down)
 
 ---
 
@@ -221,10 +271,11 @@
   - [ ] Changer `BETTER_AUTH_SECRET` pour une vraie clé sécurisée
   - [ ] Rotation des clés si elles ont été poussées sur git
 - **Tests manuels :**
-  - [ ] `git status` : `.env.local` n'apparait PAS dans les fichiers trackes
-  - [ ] `.env.example` existe avec les cles mais sans les valeurs (ex: `REDIS_PASSWORD=`)
-  - [ ] `BETTER_AUTH_SECRET` n'est pas "a_very_secret_key_change_me_in_production"
-  - [ ] `git log --all -p -- .env.local` : le fichier n'a jamais ete commite
+  - *Tous tiers :*
+    - [ ] `git status` : `.env.local` n'apparait PAS dans les fichiers trackes
+    - [ ] `.env.example` existe avec les cles mais sans les valeurs (ex: `REDIS_PASSWORD=`)
+    - [ ] `BETTER_AUTH_SECRET` n'est pas "a_very_secret_key_change_me_in_production"
+    - [ ] `git log --all -p -- .env.local` : le fichier n'a jamais ete commite
 
 ---
 
@@ -239,10 +290,11 @@
   - [ ] Configurer les champs à persister
   - [ ] Ajouter un mécanisme de nettoyage après inscription réussie
 - **Tests manuels :**
-  - [ ] Aller sur /inscription, remplir age et poids
-  - [ ] Rafraichir la page (F5) → l'etape et les donnees sont conservees
-  - [ ] Terminer l'inscription → localStorage est nettoye
-  - [ ] DevTools > Application > localStorage : pas de donnees wizard residuelles apres inscription
+  - *Non connecte (inscription) :*
+    - [ ] Aller sur /inscription, remplir age et poids
+    - [ ] Rafraichir la page (F5) → l'etape et les donnees sont conservees
+    - [ ] Terminer l'inscription → localStorage est nettoye
+    - [ ] DevTools > Application > localStorage : pas de donnees wizard residuelles apres inscription
 
 ---
 
@@ -255,6 +307,7 @@
   - [ ] Supprimer l'interface `MealAnalysis` inutilisée (`nutrition-actions.ts:12-17`)
   - [ ] Centraliser les données de démo dupliquées dans chaque page dashboard
 - **Tests manuels :**
-  - [ ] `grep -r "console.log" components/wizard/` : aucun console.log commente restant
-  - [ ] `grep -r "MealAnalysis" lib/` : l'interface n'existe plus
-  - [ ] Les donnees de demo sont dans un seul fichier partage (ex: `lib/demo-data.ts`)
+  - *Tous tiers :*
+    - [ ] `grep -r "console.log" components/wizard/` : aucun console.log commente restant
+    - [ ] `grep -r "MealAnalysis" lib/` : l'interface n'existe plus
+    - [ ] Les donnees de demo sont dans un seul fichier partage (ex: `lib/demo-data.ts`)
