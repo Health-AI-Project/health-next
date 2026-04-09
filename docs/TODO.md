@@ -118,8 +118,8 @@
   - [ ] Proteger avec verification Premium Plus (tache #10)
 - **Tests manuels :**
   - *Freemium :*
-    - [ ] Aller sur /dashboard/clients → page "Acces reserve" (guard frontend isPremiumPlus)
-    - [ ] Sans auth : `GET /api/clients` retourne 401
+    - [x] Aller sur /dashboard/clients → page "Acces reserve" (guard frontend isPremiumPlus)
+    - [x] Sans auth : `GET /api/clients` retourne 401
   - *Premium :*
     - [ ] Aller sur /dashboard/clients → page "Acces reserve" (requiert Premium+)
   - *Premium+ :*
@@ -129,13 +129,13 @@
 
 ---
 
-### 7. Ajouter is_premium et subscription_tier dans /api/home
-- **Branche :** `fix/premium-status-response`
-- **Fichiers :** `health-next/lib/hooks/use-premium-status.ts:31-35` / `backend-hono/src/routes/home.ts`
+### ~~7. Ajouter is_premium et subscription_tier dans /api/home~~ DONE
+- **Branche :** `fix/nutrition-upload-ia`
+- **Fichiers :** `backend-hono/src/routes/home.ts`
 - **Problème :** Le frontend cherche `user.subscription_tier` et `user.is_premium`, mais le backend ne retourne pas ces champs. Tous les utilisateurs sont considérés "free".
-- **À faire :**
-  - [ ] Ajouter `is_premium` et `subscription_tier` dans la réponse user de `/api/home`
-  - [ ] Récupérer ces infos depuis gRPC `GetUserProfile` (retourne `is_premium`) ou table users
+- **Solution :** Ajouter les champs depuis le gRPC `GetUserProfile` (qui retourne `is_premium` et `subscription_status`)
+  - [x] Ajouter `is_premium` et `subscription_tier` dans la reponse user de `/api/home`
+  - [x] Mapper `subscription_status` (PREMIUM/FREE) vers `subscription_tier` (premium/free/premium_plus)
 - **Tests manuels :**
   - *Freemium :*
     - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: false`, `subscription_tier: "free"`
