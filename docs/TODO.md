@@ -237,29 +237,30 @@
 
 ---
 
-### 12. Améliorer la gestion d'erreurs API dans le frontend
-- **Branche :** `feat/error-handling`
-- **Fichiers :** `lib/api.ts`, `use-premium-status.ts`, `nutrition-actions.ts`, pages dashboard
+### ~~12. Améliorer la gestion d'erreurs API dans le frontend~~ DONE
+- **Branche :** `fix/user-profile-method`
+- **Fichiers :** `lib/api.ts`, `nutrition-actions.ts`, `app/dashboard/page.tsx`, `app/dashboard/analytics/page.tsx`
 - **Problèmes :**
   - Pas de distinction 401/403/429/500 dans `api.ts`
-  - Erreur silencieuse → tier "free" dans `use-premium-status.ts`
   - Aucun try/catch dans `nutrition-actions.ts`
   - Données de démo affichées sans prévenir l'utilisateur
-- **À faire :**
-  - [ ] Gérer 401 (rediriger vers login), 403 (upgrade dialog), 429 (retry avec backoff)
-  - [ ] Ajouter des toasts d'erreur explicites
-  - [ ] Ajouter un indicateur visuel "Mode démo" quand les données de démo sont affichées
-  - [ ] Ajouter try/catch dans nutrition-actions.ts
+- **Solution :**
+  - [x] Creer classe `ApiError` avec `status` et `required_tier` dans `api.ts`
+  - [x] Redirection auto vers `/connexion` sur 401
+  - [x] Try/catch dans `nutrition-actions.ts` avec messages explicites
+  - [x] Bandeau "Mode demonstration" sur dashboard, analytics, meal-plan, workouts
+  - [x] Supprimer l'interface `MealAnalysis` inutilisee dans `nutrition-actions.ts`
+- **Note :** Les graphiques Analytics utilisent des donnees hardcodees (pas d'API historique disponible)
 - **Tests manuels :**
   - *Non connecte :*
     - [ ] Acces a une page protegee → redirection vers /connexion (pas ecran blanc)
   - *Freemium :*
-    - [ ] Endpoint premium → dialog upgrade (pas erreur silencieuse)
-    - [ ] Rate limit (429) → toast "Trop de requetes, reessayez"
+    - [ ] Endpoint premium → toast d'erreur (pas erreur silencieuse)
     - [ ] Backend down → bandeau "Mode demo" visible, pas d'ecran blanc
     - [ ] Erreur nutrition upload → toast explicite avec le message d'erreur
+    - [ ] Page Analytics : bandeau indiquant que les graphiques sont des donnees de demo
   - *Premium / Premium+ :*
-    - [ ] Memes tests de resilience (429, backend down)
+    - [ ] Memes tests de resilience (backend down)
 
 ---
 

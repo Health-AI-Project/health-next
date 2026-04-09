@@ -36,14 +36,12 @@ export default function AnalyticsPage() {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
         async function fetchData() {
             try {
                 const response = await apiFetch<{ data: AnalyticsData }>("/api/home");
                 setData(response.data);
-            } catch (err: unknown) {
-                console.error("Analytics fetch error:", err);
+            } catch {
                 setData(DEMO_DATA);
             } finally {
                 setLoading(false);
@@ -107,6 +105,10 @@ export default function AnalyticsPage() {
                     Suivez vos tendances et analysez vos progres
                 </p>
             </header>
+
+            <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
+                Les graphiques affichent des donnees de demonstration. Les KPI (calories, poids) sont reels si connecte.
+            </div>
 
             <section aria-labelledby="summary-heading">
                 <h2 id="summary-heading" className="sr-only">

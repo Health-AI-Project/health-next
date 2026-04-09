@@ -35,16 +35,17 @@ const DEMO_DASHBOARD: DashboardData = {
 export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const [isDemo, setIsDemo] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const response = await apiFetch<{ data: DashboardData }>('/api/home');
                 setData(response.data);
-            } catch (err: unknown) {
-                console.error("Dashboard fetch error:", err);
+                setIsDemo(false);
+            } catch {
                 setData(DEMO_DASHBOARD);
+                setIsDemo(true);
             } finally {
                 setLoading(false);
             }
@@ -102,6 +103,12 @@ export default function DashboardPage() {
                     Voici un aperçu de vos statistiques de santé
                 </p>
             </header>
+
+            {isDemo && (
+                <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
+                    Mode demonstration — les donnees affichees sont des exemples. Connectez-vous pour voir vos vraies statistiques.
+                </div>
+            )}
 
             <section aria-labelledby="stats-heading">
                 <h2 id="stats-heading" className="sr-only">

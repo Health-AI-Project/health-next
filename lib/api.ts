@@ -1,5 +1,17 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
+export class ApiError extends Error {
+    status: number;
+    required_tier?: string;
+
+    constructor(message: string, status: number, required_tier?: string) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.required_tier = required_tier;
+    }
+}
+
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_URL}${endpoint}`;
 
@@ -33,10 +45,18 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const error = new Error(errorData.message || `API error: ${response.status}`);
-        (error as any).status = response.status;
-        (error as any).required_tier = errorData.required_tier;
-        throw error;
+
+        // 401: redirect to login
+        if (response.status === 401 && typeof window !== 'undefined') {
+            window.location.href = '/connexion';
+            throw new ApiError('Session expiree', 401);
+        }
+
+        throw new ApiError(
+            errorData.message || `API error: ${response.status}`,
+            response.status,
+            errorData.required_tier,
+        );
     }
 
     return response.json();
