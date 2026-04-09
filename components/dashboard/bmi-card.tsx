@@ -82,6 +82,9 @@ export function BmiCard({ weight, height }: BmiCardProps) {
                     <span>Surpoids</span>
                     <span>Obesite</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground/70 italic">
+                    L&apos;IMC ne distingue pas masse musculaire et masse grasse. Un sportif muscule peut avoir un IMC eleve sans exces de graisse.
+                </p>
             </CardContent>
         </Card>
     );
