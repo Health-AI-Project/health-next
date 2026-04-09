@@ -252,13 +252,16 @@
   - [x] Supprimer l'interface `MealAnalysis` inutilisee dans `nutrition-actions.ts`
 - **Note :** Les graphiques Analytics utilisent des donnees hardcodees (pas d'API historique disponible)
 - **Tests manuels :**
-  - *Non connecte :*
-    - [ ] Acces a une page protegee → redirection vers /connexion (pas ecran blanc)
-  - *Freemium :*
-    - [ ] Endpoint premium → toast d'erreur (pas erreur silencieuse)
+  - *Non connecte :* ✅ Validé le 2026-04-09
+    - [x] Acces a une page protegee → redirection vers /connexion (pas ecran blanc)
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Endpoint premium → toast d'erreur (pas erreur silencieuse)
+    - [x] Dashboard : pas de bandeau demo (donnees reelles chargees)
+    - [x] Page Analytics : bandeau indiquant que les graphiques sont des donnees de demo
+    - [x] Page Workouts : bandeau demo + toast erreur sur "Generer un programme"
+    - [x] Page Meal Plan : bandeau demo + toast erreur sur "Generer un plan"
     - [ ] Backend down → bandeau "Mode demo" visible, pas d'ecran blanc
     - [ ] Erreur nutrition upload → toast explicite avec le message d'erreur
-    - [ ] Page Analytics : bandeau indiquant que les graphiques sont des donnees de demo
   - *Premium / Premium+ :*
     - [ ] Memes tests de resilience (backend down)
 
