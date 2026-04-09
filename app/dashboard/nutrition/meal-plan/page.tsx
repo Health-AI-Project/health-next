@@ -13,7 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { PremiumGuard } from "@/components/premium/premium-guard";
 import { apiFetch } from "@/lib/api";
-import { Utensils, Coffee, Sun, Moon } from "lucide-react";
+import { toast } from "@/components/ui/toaster";
+import { Utensils, Coffee, Sun, Moon, RefreshCw, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -34,6 +35,26 @@ interface DayPlan {
     snack?: Meal;
 }
 
+interface BackendRecipe {
+    id: number;
+    name: string;
+    ingredients: string[];
+    calories: number;
+    protein: number;
+    fat: number;
+    carbs: number;
+    sugar?: number;
+    sodium?: number;
+    pricePerServing?: number;
+    preparationTime?: number;
+    imageUrl?: string;
+    diets?: string[];
+    dishTypes?: string[];
+    score?: number;
+}
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+
 const DEMO_MEAL_PLAN: DayPlan[] = [
     {
         day: "Lundi",
@@ -44,7 +65,7 @@ const DEMO_MEAL_PLAN: DayPlan[] = [
     },
     {
         day: "Mardi",
-        breakfast: { name: "Tartines completes", calories: 380, proteins: 15, carbs: 55, fats: 10, ingredients: ["Pain complet", "Avocat", "Oeuf poché", "Tomate"] },
+        breakfast: { name: "Tartines completes", calories: 380, proteins: 15, carbs: 55, fats: 10, ingredients: ["Pain complet", "Avocat", "Oeuf poche", "Tomate"] },
         lunch: { name: "Salade composee", calories: 520, proteins: 30, carbs: 45, fats: 20, ingredients: ["Thon", "Haricots verts", "Pommes de terre", "Vinaigrette"] },
         dinner: { name: "Risotto legumes", calories: 480, proteins: 12, carbs: 70, fats: 14, ingredients: ["Riz arborio", "Champignons", "Parmesan", "Bouillon"] },
     },
@@ -69,6 +90,32 @@ const DEMO_MEAL_PLAN: DayPlan[] = [
         snack: { name: "Collation", calories: 160, proteins: 6, carbs: 22, fats: 5, ingredients: ["Carres de chocolat noir", "Noix"] },
     },
 ];
+
+function recipeToMeal(recipe: BackendRecipe): Meal {
+    return {
+        name: recipe.name,
+        calories: Math.round(recipe.calories),
+        proteins: Math.round(recipe.protein),
+        carbs: Math.round(recipe.carbs),
+        fats: Math.round(recipe.fat),
+        ingredients: recipe.ingredients || [],
+    };
+}
+
+function recipesToDayPlans(recipes: BackendRecipe[]): DayPlan[] {
+    const plans: DayPlan[] = [];
+    for (let i = 0; i < recipes.length; i += 2) {
+        const dayIndex = Math.floor(i / 2);
+        if (dayIndex >= DAYS.length) break;
+        plans.push({
+            day: DAYS[dayIndex],
+            breakfast: { name: "Petit-dejeuner libre", calories: 400, proteins: 15, carbs: 50, fats: 12, ingredients: [] },
+            lunch: recipeToMeal(recipes[i]),
+            dinner: recipes[i + 1] ? recipeToMeal(recipes[i + 1]) : recipeToMeal(recipes[i]),
+        });
+    }
+    return plans;
+}
 
 const MEAL_ICONS = {
     breakfast: Coffee,
@@ -99,13 +146,15 @@ function MealCard({ meal, type }: { meal: Meal; type: keyof typeof MEAL_ICONS })
                     <span>G: {meal.carbs}g</span>
                     <span>L: {meal.fats}g</span>
                 </div>
-                <div className="flex flex-wrap gap-1">
-                    {meal.ingredients.map((ing) => (
-                        <Badge key={ing} variant="secondary" className="text-xs">
-                            {ing}
-                        </Badge>
-                    ))}
-                </div>
+                {meal.ingredients.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        {meal.ingredients.map((ing) => (
+                            <Badge key={ing} variant="secondary" className="text-xs">
+                                {ing}
+                            </Badge>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
@@ -114,18 +163,50 @@ function MealCard({ meal, type }: { meal: Meal; type: keyof typeof MEAL_ICONS })
 export default function MealPlanPage() {
     const [plan, setPlan] = useState<DayPlan[]>([]);
     const [loading, setLoading] = useState(true);
+    const [generating, setGenerating] = useState(false);
+    const [isDemo, setIsDemo] = useState(false);
+
+    async function fetchPlan() {
+        try {
+            const recipes = await apiFetch<BackendRecipe[]>("/api/my-meals");
+            if (Array.isArray(recipes) && recipes.length > 0) {
+                setPlan(recipesToDayPlans(recipes));
+                setIsDemo(false);
+            } else {
+                setPlan(DEMO_MEAL_PLAN);
+                setIsDemo(true);
+            }
+        } catch {
+            setPlan(DEMO_MEAL_PLAN);
+            setIsDemo(true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleGenerate() {
+        setGenerating(true);
+        try {
+            await apiFetch("/api/generate-menu", {
+                method: "POST",
+                body: JSON.stringify({
+                    user: {
+                        dailyCaloriesTarget: 2000,
+                        allergies: [],
+                        goal: "maintenance",
+                    },
+                }),
+            });
+            toast.success("Plan de repas genere !");
+            await fetchPlan();
+        } catch {
+            toast.error("Impossible de generer le plan (verifiez la cle Spoonacular)");
+        } finally {
+            setGenerating(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchPlan() {
-            try {
-                const response = await apiFetch<{ data: DayPlan[] }>("/api/nutrition/meal-plan");
-                setPlan(response.data);
-            } catch {
-                setPlan(DEMO_MEAL_PLAN);
-            } finally {
-                setLoading(false);
-            }
-        }
         fetchPlan();
     }, []);
 
@@ -155,13 +236,34 @@ export default function MealPlanPage() {
                         Votre plan nutritionnel personnalise par l&apos;IA
                     </p>
                 </div>
-                <Link href="/dashboard/nutrition">
-                    <Button variant="outline" className="gap-2">
-                        <Utensils className="h-4 w-4" aria-hidden="true" />
-                        Analyser un repas
+                <div className="flex gap-2">
+                    <Button
+                        variant="default"
+                        className="gap-2"
+                        onClick={handleGenerate}
+                        disabled={generating}
+                    >
+                        {generating ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        {generating ? "Generation..." : "Generer un plan"}
                     </Button>
-                </Link>
+                    <Link href="/dashboard/nutrition">
+                        <Button variant="outline" className="gap-2">
+                            <Utensils className="h-4 w-4" aria-hidden="true" />
+                            Analyser un repas
+                        </Button>
+                    </Link>
+                </div>
             </header>
+
+            {isDemo && (
+                <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
+                    Donnees de demonstration. Cliquez &quot;Generer un plan&quot; pour obtenir un plan personnalise.
+                </div>
+            )}
 
             <PremiumGuard feature="Plans de repas personnalises">
                 <Tabs defaultValue={plan[0]?.day || "Lundi"} className="space-y-6">
