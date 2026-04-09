@@ -51,7 +51,6 @@ export function SummaryStep() {
     };
 
     const handleSubmit = () => {
-        // console.log("Données de simulation:", data);
         nextStep();
     };
 

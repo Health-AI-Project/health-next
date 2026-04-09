@@ -307,17 +307,17 @@
 
 ## FAIBLE
 
-### 15. Nettoyer le code
-- **Branche :** `chore/cleanup`
-- **À faire :**
-  - [ ] Supprimer console.log commentés (`signup-step.tsx:50,73`, `summary-step.tsx:54`)
-  - [x] Supprimer l'interface `MealAnalysis` inutilisée (`nutrition-actions.ts:12-17`) — fait dans tache #12
-  - [ ] Centraliser les données de démo dupliquées dans chaque page dashboard
+### ~~15. Nettoyer le code~~ DONE (partiel)
+- **Branche :** `fix/user-profile-method`
+- **Solution :**
+  - [x] Supprimer console.log commente (`summary-step.tsx:54`)
+  - [x] Supprimer l'interface `MealAnalysis` inutilisee (`nutrition-actions.ts:12-17`) — fait dans tache #12
+  - [ ] Centraliser les donnees de demo dans un fichier partage — reporte (6 fichiers avec des interfaces differentes, refactoring risque)
 - **Tests manuels :**
-  - *Tous tiers :*
-    - [ ] `grep -r "console.log" components/wizard/` : aucun console.log commente restant
-    - [ ] `grep -r "MealAnalysis" lib/` : l'interface n'existe plus
-    - [ ] Les donnees de demo sont dans un seul fichier partage (ex: `lib/demo-data.ts`)
+  - *Tous tiers :* ✅ Partiellement validé le 2026-04-09
+    - [x] `grep -r "console.log" components/wizard/` : aucun console.log commente restant
+    - [x] `grep -r "MealAnalysis" lib/` : l'interface n'existe plus
+    - [ ] Les donnees de demo sont encore dans chaque page (centralisation reportee)
 
 ---
 
