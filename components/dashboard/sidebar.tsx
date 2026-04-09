@@ -31,7 +31,10 @@ import {
     Monitor,
     Utensils,
     Crown,
+    LogOut,
 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -44,6 +47,7 @@ const navItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
     const {
         currentTheme,
         setTheme,
@@ -51,6 +55,11 @@ export function Sidebar() {
         colorMode,
         setColorMode,
     } = useTheme();
+
+    async function handleSignOut() {
+        await authClient.signOut();
+        router.push("/connexion");
+    }
 
     return (
         <aside
@@ -141,6 +150,15 @@ export function Sidebar() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
+                    onClick={handleSignOut}
+                >
+                    <LogOut className="h-4 w-4" aria-hidden="true" />
+                    Se deconnecter
+                </Button>
             </div>
         </aside>
     );
