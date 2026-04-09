@@ -26,8 +26,9 @@ export function NutritionTracker() {
         try {
             const result = await analyzeImage(file);
             setNutritionData(result);
+            const foodName = result[0]?.name || 'Aliment';
             toast.success("Analyse terminée", {
-                description: `${result.length} aliments détectés dans votre repas.`,
+                description: `${foodName} detecté (${result[0]?.calories || 0} kcal).`,
             });
         } catch {
             toast.error("Erreur d'analyse", {

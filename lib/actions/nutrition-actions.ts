@@ -20,15 +20,31 @@ export async function analyzeImage(file: File): Promise<NutritionData[]> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await apiFetch<{ id?: string; macros: { calories: number; protein: number; carbs: number; fat: number } }>('/api/nutrition/upload', {
+    const response = await apiFetch<{
+        success: boolean;
+        message: string;
+        id?: string;
+        food_name?: string;
+        confidence?: number;
+        macros: { calories: number; protein: number; carbs: number; fat: number };
+    }>('/api/nutrition/upload', {
         method: 'POST',
         body: formData,
     });
 
+    if (!response.success) {
+        throw new Error(response.message || 'AI analysis failed');
+    }
+
+    // Format the food name for display (replace underscores, capitalize)
+    const displayName = response.food_name
+        ? response.food_name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+        : 'Analyse IA';
+
     return [
         {
             id: response.id || 'new_meal',
-            name: "Analyse IA",
+            name: displayName,
             calories: response.macros.calories,
             proteins: response.macros.protein,
             carbs: response.macros.carbs,
