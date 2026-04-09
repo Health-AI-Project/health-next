@@ -71,8 +71,8 @@
   - [x] Bandeau "Donnees de demonstration" quand aucun plan n'existe
 - **Tests manuels :**
   - *Freemium :*
-    - [ ] Aller sur /dashboard/nutrition/meal-plan → PremiumGuard bloque le contenu (blur + "Debloquer")
-    - [ ] Le contenu premium n'est PAS accessible via DevTools (tache #10)
+    - [x] Aller sur /dashboard/nutrition/meal-plan → PremiumGuard bloque le contenu (blur + "Debloquer")
+    - [x] Le contenu premium n'est PAS accessible via DevTools (tache #10)
   - *Premium :*
     - [ ] Aller sur /dashboard/nutrition/meal-plan → contenu visible sans blur
     - [ ] Network : `GET /api/my-meals` ne retourne pas 404
@@ -84,21 +84,23 @@
 
 ---
 
-### 5. Créer ou mapper l'endpoint /api/workouts/plan
-- **Branche :** `fix/workouts-endpoint`
-- **Fichier :** `health-next/app/dashboard/workouts/page.tsx:121`
+### ~~5. Créer ou mapper l'endpoint /api/workouts/plan~~ DONE
+- **Branche :** `fix/user-profile-method`
+- **Fichier :** `health-next/app/dashboard/workouts/page.tsx`
 - **Problème :** Le frontend appelle `GET /api/workouts/plan`, mais le backend a `POST /api/workout/generate` (avec params duration, equipment, injuries).
-- **À faire :**
-  - [ ] Créer `GET /api/workouts/plan` qui retourne le dernier plan généré
-  - [ ] Ou modifier le frontend pour appeler `POST /api/workout/generate`
-  - [ ] Adapter le format de réponse pour matcher `DayWorkout[]`
+- **Solution :** Modifier le frontend pour utiliser `POST /api/workout/generate` directement
+  - [x] Remplacer `GET /api/workouts/plan` par `POST /api/workout/generate`
+  - [x] Mapper la reponse backend (`BackendWorkoutPlan`) vers `DayWorkout[]`
+  - [x] Ajouter bouton "Generer un programme" + bandeau demo
 - **Tests manuels :**
   - *Freemium :*
-    - [ ] Aller sur /dashboard/workouts → PremiumGuard bloque (blur + "Debloquer")
+    - [ ] Aller sur /dashboard/workouts → PremiumGuard bloque le programme (blur + "Debloquer")
+    - [ ] Les stats (seances, calories, exercices) sont visibles au-dessus du guard
   - *Premium :*
-    - [ ] Aller sur /dashboard/workouts → contenu visible
-    - [ ] Network : la requete ne retourne pas 404
-    - [ ] Un plan d'entrainement s'affiche ou un formulaire pour en generer
+    - [ ] Aller sur /dashboard/workouts → contenu visible sans blur
+    - [ ] Network : `POST /api/workout/generate` ne retourne pas 404
+    - [ ] Bandeau demo visible si gRPC down, sinon plan reel
+    - [ ] Cliquer "Generer un programme" → loader, puis exercices affiches par jour
     - [ ] Verifier que les exercices, durees et calories sont affiches
   - *Premium+ :*
     - [ ] Memes tests que Premium

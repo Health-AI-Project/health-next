@@ -9,9 +9,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { PremiumGuard } from "@/components/premium/premium-guard";
 import { apiFetch } from "@/lib/api";
-import { Dumbbell, Clock, Flame, Target, Trophy } from "lucide-react";
+import { toast } from "@/components/ui/toaster";
+import { Dumbbell, Clock, Flame, Target, Trophy, RefreshCw, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Exercise {
@@ -30,6 +32,19 @@ interface DayWorkout {
     difficulty: "Debutant" | "Intermediaire" | "Avance";
     exercises: Exercise[];
 }
+
+interface BackendExercise {
+    name: string;
+    duration: number;
+    type: string;
+}
+
+interface BackendWorkoutPlan {
+    exercises: BackendExercise[];
+    total_duration: number;
+}
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 
 const DEMO_WORKOUT_PLAN: DayWorkout[] = [
     {
@@ -101,6 +116,33 @@ const DEMO_WORKOUT_PLAN: DayWorkout[] = [
     },
 ];
 
+function backendToDayWorkouts(plan: BackendWorkoutPlan): DayWorkout[] {
+    const exercises = plan.exercises || [];
+    const perDay = Math.max(1, Math.ceil(exercises.length / DAYS.length));
+    const days: DayWorkout[] = [];
+
+    for (let i = 0; i < DAYS.length && i * perDay < exercises.length; i++) {
+        const dayExercises = exercises.slice(i * perDay, (i + 1) * perDay);
+        const dayDuration = dayExercises.reduce((sum, e) => sum + e.duration, 0);
+        days.push({
+            day: DAYS[i],
+            focus: dayExercises[0]?.type || "Entrainement",
+            duration: `${dayDuration} min`,
+            calories: Math.round(dayDuration * 7),
+            difficulty: "Intermediaire",
+            exercises: dayExercises.map((e) => ({
+                name: e.name,
+                sets: 3,
+                reps: `${e.duration} min`,
+                rest: "60s",
+                muscle: e.type,
+            })),
+        });
+    }
+
+    return days;
+}
+
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
     const config: Record<string, { variant: "default" | "secondary" | "destructive"; className: string }> = {
         Debutant: { variant: "secondary", className: "" },
@@ -114,20 +156,65 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 export default function WorkoutsPage() {
     const [plan, setPlan] = useState<DayWorkout[]>([]);
     const [loading, setLoading] = useState(true);
+    const [generating, setGenerating] = useState(false);
+    const [isDemo, setIsDemo] = useState(false);
+
+    async function fetchPlan() {
+        try {
+            const response = await apiFetch<BackendWorkoutPlan>("/api/workout/generate", {
+                method: "POST",
+                body: JSON.stringify({
+                    duration: 45,
+                    equipment: "GYM",
+                    injuries: [],
+                }),
+            });
+            if (response?.exercises?.length > 0) {
+                setPlan(backendToDayWorkouts(response));
+                setIsDemo(false);
+            } else {
+                setPlan(DEMO_WORKOUT_PLAN);
+                setIsDemo(true);
+            }
+        } catch {
+            setPlan(DEMO_WORKOUT_PLAN);
+            setIsDemo(true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleGenerate() {
+        setGenerating(true);
+        try {
+            const response = await apiFetch<BackendWorkoutPlan>("/api/workout/generate", {
+                method: "POST",
+                body: JSON.stringify({
+                    duration: 45,
+                    equipment: "GYM",
+                    injuries: [],
+                }),
+            });
+            if (response?.exercises?.length > 0) {
+                setPlan(backendToDayWorkouts(response));
+                setIsDemo(false);
+                toast.success("Programme genere !");
+            } else {
+                toast.error("Aucun exercice retourne par le serveur");
+            }
+        } catch {
+            toast.error("Impossible de generer le programme");
+        } finally {
+            setGenerating(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchPlan() {
-            try {
-                const response = await apiFetch<{ data: DayWorkout[] }>("/api/workouts/plan");
-                setPlan(response.data);
-            } catch {
-                setPlan(DEMO_WORKOUT_PLAN);
-            } finally {
-                setLoading(false);
-            }
-        }
         fetchPlan();
     }, []);
+
+    const weeklyCalories = plan.reduce((sum, d) => sum + d.calories, 0);
+    const totalExercises = plan.reduce((sum, d) => sum + d.exercises.length, 0);
 
     if (loading) {
         return (
@@ -146,17 +233,35 @@ export default function WorkoutsPage() {
         );
     }
 
-    const weeklyCalories = plan.reduce((sum, d) => sum + d.calories, 0);
-    const totalExercises = plan.reduce((sum, d) => sum + d.exercises.length, 0);
-
     return (
         <div className="space-y-8">
-            <header>
-                <h1 className="text-3xl font-bold tracking-tight">Entrainement</h1>
-                <p className="text-muted-foreground mt-1">
-                    Votre programme d&apos;entrainement personnalise par l&apos;IA
-                </p>
+            <header className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Entrainement</h1>
+                    <p className="text-muted-foreground mt-1">
+                        Votre programme d&apos;entrainement personnalise par l&apos;IA
+                    </p>
+                </div>
+                <Button
+                    variant="default"
+                    className="gap-2"
+                    onClick={handleGenerate}
+                    disabled={generating}
+                >
+                    {generating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                    )}
+                    {generating ? "Generation..." : "Generer un programme"}
+                </Button>
             </header>
+
+            {isDemo && (
+                <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
+                    Donnees de demonstration. Cliquez &quot;Generer un programme&quot; pour obtenir un plan personnalise.
+                </div>
+            )}
 
             <section aria-labelledby="workout-stats-heading">
                 <h2 id="workout-stats-heading" className="sr-only">Statistiques du programme</h2>
