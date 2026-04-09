@@ -52,7 +52,12 @@ export function SignupStep() {
             });
 
             if (error) {
-                toast.error(error.message || "Une erreur est survenue lors de l'inscription");
+                const msg = error.message?.toLowerCase() || "";
+                if (msg.includes("already") || msg.includes("exist") || msg.includes("duplicate")) {
+                    toast.error("Cette adresse email est deja utilisee. Connectez-vous ou utilisez une autre adresse.");
+                } else {
+                    toast.error(error.message || "Une erreur est survenue lors de l'inscription");
+                }
                 return;
             }
 
