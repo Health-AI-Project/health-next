@@ -137,10 +137,10 @@
   - [x] Ajouter `is_premium` et `subscription_tier` dans la reponse user de `/api/home`
   - [x] Mapper `subscription_status` (PREMIUM/FREE) vers `subscription_tier` (premium/free/premium_plus)
 - **Tests manuels :**
-  - *Freemium :*
-    - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: false`, `subscription_tier: "free"`
-    - [ ] /dashboard/settings onglet Abonnement : badge "Freemium" affiche
-    - [ ] Sections "Pro" du menu lateral sont verrouillees
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Network : `GET /api/home` → `data.user` contient `is_premium: false`, `subscription_tier: "free"`
+    - [x] /dashboard/settings onglet Abonnement : badge "Freemium" affiche
+    - [x] Sections "Pro" du menu lateral sont verrouillees (Entrainement Pro, Analytics Pro)
   - *Premium :*
     - [ ] Network : `GET /api/home` → `data.user` contient `is_premium: true`, `subscription_tier: "premium"`
     - [ ] /dashboard/settings onglet Abonnement : badge "Premium" affiche
