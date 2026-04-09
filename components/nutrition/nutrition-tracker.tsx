@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { MealUploader } from "@/components/nutrition/meal-uploader";
 import { NutritionResultTable } from "@/components/nutrition/nutrition-result-table";
+import { MealSuggestions } from "@/components/nutrition/meal-suggestions";
 import { analyzeImage, NutritionData } from "@/lib/actions/nutrition-actions";
 import { toast } from "sonner";
-import { Utensils } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Utensils, History, CalendarDays } from "lucide-react";
+import Link from "next/link";
 
 export function NutritionTracker() {
     const [nutritionData, setNutritionData] = useState<NutritionData[]>([]);
@@ -42,26 +45,47 @@ export function NutritionTracker() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Utensils className="h-5 w-5 text-primary" aria-hidden="true" />
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <Utensils className="h-5 w-5 text-primary" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-semibold">Nutrition Tracker</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Uploadez une photo de votre repas pour analyse nutritionnelle
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-xl font-semibold">Nutrition Tracker</h2>
-                    <p className="text-sm text-muted-foreground">
-                        Uploadez une photo de votre repas pour analyse nutritionnelle
-                    </p>
+                <div className="flex gap-2">
+                    <Link href="/dashboard/nutrition/meal-plan">
+                        <Button variant="outline" className="gap-2">
+                            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                            Plan repas
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard/nutrition/history">
+                        <Button variant="outline" className="gap-2">
+                            <History className="h-4 w-4" aria-hidden="true" />
+                            Historique
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
             <MealUploader onUpload={handleUpload} isLoading={isAnalyzing} />
 
             {hasAnalyzed && (
-                <NutritionResultTable
-                    data={nutritionData}
-                    onDataUpdate={handleDataUpdate}
-                    isLoading={isAnalyzing}
-                />
+                <>
+                    <NutritionResultTable
+                        data={nutritionData}
+                        onDataUpdate={handleDataUpdate}
+                        isLoading={isAnalyzing}
+                    />
+                    {!isAnalyzing && nutritionData.length > 0 && (
+                        <MealSuggestions data={nutritionData} />
+                    )}
+                </>
             )}
         </div>
     );

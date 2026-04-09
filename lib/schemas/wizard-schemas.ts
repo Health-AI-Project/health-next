@@ -12,6 +12,10 @@ export const weightSchema = z.object({
         .number({ message: "Le poids est requis et doit être un nombre valide" })
         .min(30, { message: "Le poids minimum est de 30 kg" })
         .max(300, { message: "Le poids maximum est de 300 kg" }),
+    height: z
+        .number({ message: "La taille est requise et doit être un nombre valide" })
+        .min(100, { message: "La taille minimum est de 100 cm" })
+        .max(250, { message: "La taille maximum est de 250 cm" }),
 });
 
 export const goalsSchema = z.object({

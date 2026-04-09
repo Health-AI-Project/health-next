@@ -7,7 +7,7 @@ import {
     ALLERGIES_OPTIONS,
 } from "@/lib/schemas/wizard-schemas";
 import { WizardNavigation } from "@/components/wizard/wizard-navigation";
-import { Check, User, Scale, Target, AlertTriangle, type LucideIcon } from "lucide-react";
+import { Check, User, Scale, Ruler, Target, AlertTriangle, type LucideIcon } from "lucide-react";
 
 function SummaryCard({
     icon: Icon,
@@ -67,6 +67,10 @@ export function SummaryStep() {
 
                     <SummaryCard icon={Scale} label="Poids">
                         <p className="text-muted-foreground">{data.weight} kg</p>
+                    </SummaryCard>
+
+                    <SummaryCard icon={Ruler} label="Taille">
+                        <p className="text-muted-foreground">{data.height} cm</p>
                     </SummaryCard>
 
                     <SummaryCard icon={Target} label="Objectifs">
