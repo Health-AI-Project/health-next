@@ -33,7 +33,10 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `API error: ${response.status}`);
+        const error = new Error(errorData.message || `API error: ${response.status}`);
+        (error as any).status = response.status;
+        (error as any).required_tier = errorData.required_tier;
+        throw error;
     }
 
     return response.json();

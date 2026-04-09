@@ -198,15 +198,15 @@
 
 ---
 
-### 10. Implémenter un vrai guard premium côté backend
-- **Branche :** `feat/backend-premium-guard`
-- **Fichier :** `health-next/components/premium/premium-guard.tsx`
+### ~~10. Implémenter un vrai guard premium côté backend~~ DONE
+- **Branche :** `fix/nutrition-upload-ia` + `fix/user-profile-method`
+- **Fichiers :** `backend-hono/src/middlewares/premium.ts` (nouveau), `backend-hono/src/index.ts`, `health-next/lib/api.ts`
 - **Problème :** Le PremiumGuard actuel est purement CSS (blur + overlay). Le contenu est visible via DevTools.
-- **À faire :**
-  - [ ] Ajouter un middleware backend qui vérifie le tier de l'utilisateur
-  - [ ] Les endpoints premium doivent retourner 403 si non premium
-  - [ ] Le frontend doit gérer le 403 et afficher l'upgrade dialog
-  - [ ] Ne pas envoyer les données premium dans la réponse si non autorisé
+- **Solution :** Middleware `premiumGuard()` cote backend + error.status dans apiFetch
+  - [x] Creer middleware `premiumGuard('premium' | 'premium_plus')` qui verifie via gRPC
+  - [x] Appliquer aux endpoints : `/api/workout/*`, `/api/generate-menu`, `/api/nutrition/analyze` (Premium), `/api/clients` (Premium+)
+  - [x] Retourner 403 avec `required_tier` si non autorise
+  - [x] Frontend `apiFetch` expose `error.status` et `error.required_tier`
 - **Tests manuels :**
   - *Freemium :*
     - [ ] Appeler un endpoint premium (ex: /api/workouts/plan) → 403
