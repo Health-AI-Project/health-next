@@ -30,14 +30,14 @@
   - [x] Changer la méthode de PUT à POST dans settings/page.tsx
   - [x] Convertir `age` en `date_of_birth` (approximation année de naissance)
   - [x] Ajouter les champs manquants `goals` et `allergies` dans le body
-- **Tests manuels :**
-  - [ ] S'inscrire via /inscription avec age, poids, taille, objectifs, allergies
-  - [ ] Aller dans /dashboard/settings → les champs sont pre-remplis
-  - [ ] Modifier age/poids/taille, cliquer Sauvegarder → toast "Profil mis a jour"
-  - [ ] Network : requete POST vers `/api/user/profile`, body contient `date_of_birth`, `weight`, `height`, `goals`, `allergies`
-  - [ ] Rafraichir la page → les valeurs persistent
-  - [ ] Onglet Objectifs : cocher/decocher objectifs et allergies, Sauvegarder → persist apres refresh
-  - [ ] Allergies "Aucune" : coche decoche les autres, et inversement
+- **Tests manuels :** ✅ Validés le 2026-04-09
+  - [x] S'inscrire via /inscription avec age, poids, taille, objectifs, allergies
+  - [x] Aller dans /dashboard/settings → les champs sont pre-remplis
+  - [x] Modifier age/poids/taille, cliquer Sauvegarder → toast "Profil mis a jour"
+  - [x] Network : requete POST vers `/api/user/profile`, body contient `date_of_birth`, `weight`, `height`, `goals`, `allergies`
+  - [x] Rafraichir la page → les valeurs persistent
+  - [x] Onglet Objectifs : cocher/decocher objectifs et allergies, Sauvegarder → persist apres refresh
+  - [x] Allergies "Aucune" : coche decoche les autres, et inversement
   - [ ] Backend down : toast "Impossible de sauvegarder (backend non disponible)"
 
 ---
@@ -47,8 +47,8 @@
 - **Fichier :** `health-next/app/dashboard/settings/page.tsx:87`
 - **Solution :** Redirigé vers `POST /api/user/profile` qui accepte goals + allergies
   - [x] handleSaveGoals utilise maintenant POST /api/user/profile avec tous les champs requis
-- **Tests manuels :**
-  - [ ] Memes tests que tache #2, onglet Objectifs
+- **Tests manuels :** ✅ Validés le 2026-04-09
+  - [x] Memes tests que tache #2, onglet Objectifs
 
 ---
 
