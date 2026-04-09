@@ -208,10 +208,10 @@
   - [x] Retourner 403 avec `required_tier` si non autorise
   - [x] Frontend `apiFetch` expose `error.status` et `error.required_tier`
 - **Tests manuels :**
-  - *Freemium :*
-    - [ ] Appeler un endpoint premium (ex: /api/workouts/plan) → 403
-    - [ ] Le frontend affiche le dialog d'upgrade
-    - [ ] Inspecter le HTML avec DevTools : aucune donnee premium dans le DOM
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Appeler un endpoint premium (POST /api/workout/generate) → 403
+    - [x] Le frontend affiche le toast d'erreur "Impossible de generer le programme"
+    - [x] Le PremiumGuard CSS bloque le contenu (blur + "Debloquer")
   - *Premium :*
     - [ ] Meme endpoint → 200 avec donnees visibles
     - [ ] Endpoints Premium+ (ex: /api/clients) → 403
