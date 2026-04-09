@@ -230,8 +230,8 @@
   - *Non connecte :* ✅ Validé le 2026-04-09
     - [x] `POST /api/generate-menu` → 401 (pas 500 ou crash)
     - [x] Logs backend : pas d'exception "Cannot read property of undefined"
-  - *Freemium :*
-    - [ ] `POST /api/generate-menu` → 403 (premium requis, tache #10)
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] `POST /api/generate-menu` → 403 (premium requis, bloque par premiumGuard)
   - *Premium / Premium+ :*
     - [ ] `POST /api/generate-menu` → 200 avec plan genere
 
