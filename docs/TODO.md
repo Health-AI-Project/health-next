@@ -93,9 +93,9 @@
   - [x] Mapper la reponse backend (`BackendWorkoutPlan`) vers `DayWorkout[]`
   - [x] Ajouter bouton "Generer un programme" + bandeau demo
 - **Tests manuels :**
-  - *Freemium :*
-    - [ ] Aller sur /dashboard/workouts → PremiumGuard bloque le programme (blur + "Debloquer")
-    - [ ] Les stats (seances, calories, exercices) sont visibles au-dessus du guard
+  - *Freemium :* ✅ Validé le 2026-04-09
+    - [x] Aller sur /dashboard/workouts → PremiumGuard bloque le programme (blur + "Debloquer")
+    - [x] Les stats (seances, calories, exercices) sont visibles au-dessus du guard
   - *Premium :*
     - [ ] Aller sur /dashboard/workouts → contenu visible sans blur
     - [ ] Network : `POST /api/workout/generate` ne retourne pas 404
