@@ -227,9 +227,9 @@
 - **Solution :** Retirer l'exemption (la route est aussi protegee par premiumGuard depuis tache #10)
   - [x] Retirer `/api/generate-menu` de la liste des exemptions auth
 - **Tests manuels :**
-  - *Non connecte :*
-    - [ ] `POST /api/generate-menu` → 401 (pas 500 ou crash)
-    - [ ] Logs backend : pas d'exception "Cannot read property of undefined"
+  - *Non connecte :* ✅ Validé le 2026-04-09
+    - [x] `POST /api/generate-menu` → 401 (pas 500 ou crash)
+    - [x] Logs backend : pas d'exception "Cannot read property of undefined"
   - *Freemium :*
     - [ ] `POST /api/generate-menu` → 403 (premium requis, tache #10)
   - *Premium / Premium+ :*
