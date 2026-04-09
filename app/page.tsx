@@ -66,9 +66,14 @@ export default function HomePage() {
             <Heart className="h-8 w-8 text-primary" aria-hidden="true" />
             <span className="text-xl font-bold">HealthNext</span>
           </div>
-          <Link href="/inscription">
-            <Button variant="outline">Commencer gratuitement</Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/connexion">
+              <Button variant="ghost">Se connecter</Button>
+            </Link>
+            <Link href="/inscription">
+              <Button variant="outline">Commencer gratuitement</Button>
+            </Link>
+          </div>
         </nav>
       </header>
 

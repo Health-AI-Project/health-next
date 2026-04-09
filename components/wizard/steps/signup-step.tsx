@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toaster";
 import { WizardNavigation } from "@/components/wizard/wizard-navigation";
@@ -55,9 +56,7 @@ export function SignupStep() {
                 return;
             }
 
-            const activeToken = signupData?.token;
-
-            // Envoyer les données du wizard au profil santé
+            // Envoyer les données du wizard au profil santé (via cookies, session déjà active)
             try {
                 const dob = wizardData.age
                     ? `${new Date().getFullYear() - wizardData.age}-01-01`
@@ -68,22 +67,13 @@ export function SignupStep() {
                     goals: Array.isArray(wizardData.goals) ? wizardData.goals : [],
                     allergies: Array.isArray(wizardData.allergies) ? wizardData.allergies : [],
                     weight: Number(wizardData.weight) || 0,
+                    height: Number(wizardData.height) || 0,
                 };
 
-                // console.log("[SignupStep] Sending profile payload:", payload);
-
-                const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
+                await apiFetch("/api/user/profile", {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${activeToken || ''}`
-                    },
                     body: JSON.stringify(payload),
                 });
-
-                if (!profileResponse.ok) {
-                    console.warn("Échec de la mise à jour du profil santé, mais le compte est créé.");
-                }
             } catch (profileErr) {
                 console.error("Error updating health profile:", profileErr);
             }

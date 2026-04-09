@@ -19,6 +19,7 @@ import { GOALS_OPTIONS, ALLERGIES_OPTIONS } from "@/lib/schemas/wizard-schemas";
 import { apiFetch } from "@/lib/api";
 import { Save, User, Target, CreditCard, Crown, Gem } from "lucide-react";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 type SubscriptionTier = "free" | "premium" | "premium_plus";
 
@@ -55,7 +56,17 @@ export default function SettingsPage() {
                 const response = await apiFetch<{ data: { user: UserSettings } }>("/api/home");
                 setSettings(response.data.user);
             } catch {
-                setSettings(DEMO_SETTINGS);
+                // /api/home failed (gRPC down), try to get at least session info
+                try {
+                    const { data: session } = await authClient.getSession();
+                    if (session?.user?.email) {
+                        setSettings({ ...DEMO_SETTINGS, email: session.user.email });
+                    } else {
+                        setSettings(DEMO_SETTINGS);
+                    }
+                } catch {
+                    setSettings(DEMO_SETTINGS);
+                }
             } finally {
                 setLoading(false);
             }
@@ -75,6 +86,7 @@ export default function SettingsPage() {
                 body: JSON.stringify({
                     date_of_birth,
                     weight: settings?.weight || 70,
+                    height: settings?.height || 0,
                     goals: settings?.goals || [],
                     allergies: settings?.allergies || [],
                 }),
@@ -99,6 +111,7 @@ export default function SettingsPage() {
                 body: JSON.stringify({
                     date_of_birth,
                     weight: settings?.weight || 70,
+                    height: settings?.height || 0,
                     goals: settings?.goals || [],
                     allergies: settings?.allergies || [],
                 }),
