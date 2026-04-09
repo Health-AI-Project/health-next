@@ -52,20 +52,21 @@
 
 ---
 
-### 4. Créer ou mapper l'endpoint /api/nutrition/meal-plan
-- **Branche :** `fix/meal-plan-endpoint`
-- **Fichier :** `health-next/app/dashboard/nutrition/meal-plan/page.tsx:121`
+### ~~4. Créer ou mapper l'endpoint /api/nutrition/meal-plan~~ DONE
+- **Branche :** `fix/user-profile-method`
+- **Fichier :** `health-next/app/dashboard/nutrition/meal-plan/page.tsx`
 - **Problème :** Le frontend appelle `GET /api/nutrition/meal-plan`, mais le backend a `POST /api/generate-menu` et `GET /api/my-meals`.
-- **À faire :**
-  - [ ] Créer `GET /api/nutrition/meal-plan` côté backend qui appelle `GET /api/my-meals`
-  - [ ] Ou modifier le frontend pour utiliser `GET /api/my-meals` + bouton `POST /api/generate-menu`
-  - [ ] Adapter le format de réponse pour matcher le type `DayPlan[]`
+- **Solution :** Modifier le frontend pour utiliser les endpoints existants
+  - [x] Remplacer `GET /api/nutrition/meal-plan` par `GET /api/my-meals`
+  - [x] Ajouter bouton "Generer un plan" qui appelle `POST /api/generate-menu`
+  - [x] Mapper les recettes backend (`BackendRecipe[]`) vers `DayPlan[]`
+  - [x] Bandeau "Donnees de demonstration" quand aucun plan n'existe
 - **Tests manuels :**
   - [ ] Aller sur /dashboard/nutrition/meal-plan
-  - [ ] Network : la requete ne retourne pas 404
-  - [ ] Un plan de repas s'affiche (ou un bouton pour en generer un)
-  - [ ] Apres generation, les repas s'affichent par jour avec les macros
-  - [ ] Rafraichir → le plan persiste
+  - [ ] Network : `GET /api/my-meals` ne retourne pas 404
+  - [ ] Bandeau demo visible si aucun plan genere
+  - [ ] Cliquer "Generer un plan" → loader, puis plan affiche par jour avec macros
+  - [ ] Rafraichir → le plan persiste (charge depuis /api/my-meals)
 
 ---
 
