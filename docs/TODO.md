@@ -178,14 +178,13 @@
 
 ## HAUTE
 
-### 9. Ajouter middleware auth Next.js pour protéger /dashboard
-- **Branche :** `feat/auth-middleware`
+### ~~9. Ajouter middleware auth Next.js pour protéger /dashboard~~ DONE
+- **Branche :** `fix/user-profile-method`
 - **Problème :** Aucune protection côté serveur sur `/dashboard/*`. Un utilisateur non connecté peut accéder à toutes les pages.
-- **À faire :**
-  - [ ] Créer `middleware.ts` à la racine de health-next
-  - [ ] Vérifier la session/cookie pour toutes les routes `/dashboard/*`
-  - [ ] Rediriger vers `/` ou `/inscription` si non authentifié
-  - [ ] Utiliser `better-auth` pour la vérification de session côté serveur
+- **Solution :** Middleware Next.js qui verifie le cookie `better-auth.session_token`
+  - [x] Creer `middleware.ts` a la racine de health-next
+  - [x] Verifier le cookie de session pour toutes les routes `/dashboard/*`
+  - [x] Rediriger vers `/connexion` si non authentifie
 - **Tests manuels :**
   - *Non connecte :*
     - [ ] Aller sur /dashboard → redirige vers / ou /connexion
