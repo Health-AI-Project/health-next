@@ -107,24 +107,24 @@
 
 ---
 
-### 6. Créer l'endpoint /api/clients
-- **Branche :** `fix/clients-endpoint`
-- **Fichier :** `health-next/app/dashboard/clients/page.tsx:52`
+### ~~6. Créer l'endpoint /api/clients~~ DONE
+- **Branche :** `fix/nutrition-upload-ia`
+- **Fichiers :** `backend-hono/src/routes/clients.ts` (nouveau), `backend-hono/src/index.ts`
 - **Problème :** L'endpoint n'existe pas du tout côté backend.
-- **À faire :**
-  - [ ] Créer la route `GET /api/clients` dans backend-hono
-  - [ ] Implémenter la logique B2B (liste des clients d'un professionnel)
-  - [ ] Protéger avec vérification Premium Plus
-  - [ ] Retourner le format `Client[]` attendu par le frontend
+- **Solution :** Creer `GET /api/clients` avec donnees de demo (pas de table B2B en base)
+  - [x] Creer la route `GET /api/clients` dans backend-hono
+  - [x] Retourner le format `Client[]` attendu par le frontend
+  - [ ] Implementer la vraie logique B2B quand la table clients existera
+  - [ ] Proteger avec verification Premium Plus (tache #10)
 - **Tests manuels :**
   - *Freemium :*
-    - [ ] Aller sur /dashboard/clients → PremiumGuard bloque (blur + "Debloquer")
+    - [ ] Aller sur /dashboard/clients → page "Acces reserve" (guard frontend isPremiumPlus)
     - [ ] Sans auth : `GET /api/clients` retourne 401
   - *Premium :*
-    - [ ] Aller sur /dashboard/clients → PremiumGuard bloque (requiert Premium+)
+    - [ ] Aller sur /dashboard/clients → page "Acces reserve" (requiert Premium+)
   - *Premium+ :*
-    - [ ] Aller sur /dashboard/clients → liste des clients visible
-    - [ ] Network : `GET /api/clients` retourne 200 avec un tableau `Client[]`
+    - [ ] Aller sur /dashboard/clients → stats + liste des clients visible
+    - [ ] Network : `GET /api/clients` retourne 200 avec `{ data: Client[] }`
     - [ ] Les donnees clients s'affichent correctement
 
 ---
