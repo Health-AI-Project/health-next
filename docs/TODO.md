@@ -310,10 +310,38 @@
 - **Branche :** `chore/cleanup`
 - **À faire :**
   - [ ] Supprimer console.log commentés (`signup-step.tsx:50,73`, `summary-step.tsx:54`)
-  - [ ] Supprimer l'interface `MealAnalysis` inutilisée (`nutrition-actions.ts:12-17`)
+  - [x] Supprimer l'interface `MealAnalysis` inutilisée (`nutrition-actions.ts:12-17`) — fait dans tache #12
   - [ ] Centraliser les données de démo dupliquées dans chaque page dashboard
 - **Tests manuels :**
   - *Tous tiers :*
     - [ ] `grep -r "console.log" components/wizard/` : aucun console.log commente restant
     - [ ] `grep -r "MealAnalysis" lib/` : l'interface n'existe plus
     - [ ] Les donnees de demo sont dans un seul fichier partage (ex: `lib/demo-data.ts`)
+
+---
+
+### 16. Connecter les graphiques Analytics/Dashboard a de vraies donnees
+- **Fichiers :** `health-next/components/charts/weight-evolution-chart.tsx`, `calories-chart.tsx`, `macros-chart.tsx`
+- **Problème :** Les graphiques "Evolution du poids" et "Calories journalieres" affichent des donnees hardcodees. Les KPI du haut sont reels, mais pas les graphiques.
+- **À faire :**
+  - **engine-go :**
+    - [ ] Creer un endpoint gRPC `GetWeightHistory(user_id, days)` — retourne les pesees passees
+    - [ ] Creer un endpoint gRPC `GetCaloriesHistory(user_id, days)` — agrege les `daily_log` par jour
+    - [ ] Logger chaque changement de poids (pas juste le dernier)
+  - **backend-hono :**
+    - [ ] Creer `GET /api/stats/weight-history` qui appelle le gRPC et retourne `[{ date, poids, objectif }]`
+    - [ ] Creer `GET /api/stats/calories-history` qui appelle le gRPC et retourne `[{ jour, calories, objectif }]`
+  - **health-next :**
+    - [ ] `weight-evolution-chart.tsx` : remplacer les donnees hardcodees par un fetch vers `/api/stats/weight-history`
+    - [ ] `calories-chart.tsx` : remplacer les donnees hardcodees par un fetch vers `/api/stats/calories-history`
+- **Tables existantes dans engine-go :**
+  - `daily_log` — champs `total_calories`, `total_protein`, `total_carbs`, `total_fat`
+  - `health_profile` — goals de l'utilisateur
+- **Tests manuels :**
+  - *Freemium :*
+    - [ ] /dashboard : le graphique "Evolution du poids" affiche le vrai poids de l'utilisateur
+    - [ ] /dashboard : le graphique "Calories journalieres" affiche les vraies calories logguees
+    - [ ] Si aucune donnee historique : afficher un message "Pas encore de donnees"
+  - *Premium / Premium+ :*
+    - [ ] /dashboard/analytics : memes graphiques avec donnees reelles
+    - [ ] Le graphique Macros (PremiumGuard) affiche les vraies repartitions
