@@ -100,8 +100,8 @@
     - [x] Aller sur /dashboard/workouts → contenu visible sans blur
     - [x] Network : `POST /api/workout/generate` ne retourne pas 404
     - [x] Bandeau demo visible si gRPC down, sinon plan reel
-    - [ ] Cliquer "Generer un programme" → loader, puis exercices affiches par jour — ⚠ gRPC GenerateWorkout non implemente cote engine-go
-    - [ ] Verifier que les exercices, durees et calories sont affiches — ⚠ Depend de gRPC
+    - [x] Cliquer "Generer un programme" → loader, puis exercices affiches par jour — ✅ gRPC GetWorkoutRecommendation implemente + exercices seedes
+    - [x] Verifier que les exercices, durees et calories sont affiches — ✅ Connecte au WorkoutService
   - *Premium+ :*
     - [x] Memes tests que Premium
 
@@ -115,7 +115,7 @@
   - [x] Creer la route `GET /api/clients` dans backend-hono
   - [x] Retourner le format `Client[]` attendu par le frontend
   - [ ] Implementer la vraie logique B2B quand la table clients existera
-  - [ ] Proteger avec verification Premium Plus (tache #10)
+  - [x] Proteger avec verification Premium Plus (tache #10) — fait via `premiumGuard('premium_plus')` dans index.ts
 - **Tests manuels :**
   - *Freemium :*
     - [x] Aller sur /dashboard/clients → page "Acces reserve" (guard frontend isPremiumPlus)
