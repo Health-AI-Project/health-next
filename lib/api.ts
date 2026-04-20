@@ -1,5 +1,45 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
+// --- Cache intelligent ---
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry<unknown>>();
+const DEFAULT_CACHE_TTL = 30_000; // 30 secondes
+
+export function cachedFetch<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    ttl: number = DEFAULT_CACHE_TTL,
+): Promise<T> {
+    const method = (options.method || 'GET').toUpperCase();
+    if (method !== 'GET') {
+        return apiFetch<T>(endpoint, options);
+    }
+
+    const cacheKey = endpoint;
+    const cached = cache.get(cacheKey) as CacheEntry<T> | undefined;
+
+    if (cached && Date.now() - cached.timestamp < ttl) {
+        return Promise.resolve(cached.data);
+    }
+
+    return apiFetch<T>(endpoint, options).then((data) => {
+        cache.set(cacheKey, { data, timestamp: Date.now() });
+        return data;
+    });
+}
+
+export function invalidateCache(endpoint?: string) {
+    if (endpoint) {
+        cache.delete(endpoint);
+    } else {
+        cache.clear();
+    }
+}
+
 export class ApiError extends Error {
     status: number;
     required_tier?: string;

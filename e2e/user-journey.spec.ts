@@ -23,9 +23,10 @@ test.describe("Critical User Journey: Landing → Wizard", () => {
         await page.getByLabel(/âge/i).fill("30");
         await page.getByRole("button", { name: "Suivant" }).click();
 
-        // Step 1: Weight
+        // Step 1: Weight + Height
         await expect(page.getByRole("heading", { name: /poids/i })).toBeVisible();
         await page.getByLabel(/poids/i).fill("75");
+        await page.getByLabel(/taille/i).fill("175");
         await page.getByRole("button", { name: "Suivant" }).click();
 
         // Step 2: Goals
@@ -44,20 +45,20 @@ test.describe("Critical User Journey: Landing → Wizard", () => {
 });
 
 test.describe("Dashboard & Nutrition", () => {
-    test("should verify dashboard content and navigation", async ({ page }) => {
+    test("should redirect to login when not authenticated", async ({ page }) => {
         await page.goto("/dashboard");
 
-        // Stats cards
-        await expect(page.getByRole("heading", { name: "Poids actuel" })).toBeVisible();
+        // Middleware should redirect to /connexion
+        await expect(page).toHaveURL(/\/connexion/);
+        await expect(page.getByRole("heading", { name: /connexion/i })).toBeVisible();
+    });
 
-        // Charts
-        await expect(page.getByText(/évolution du poids/i)).toBeVisible();
-        // Use specific heading role for charts to avoid ambiguity with KPI cards
-        await expect(page.getByRole("heading", { name: "Calories journalières" })).toBeVisible();
+    test("should show login page with email and password fields", async ({ page }) => {
+        await page.goto("/connexion");
 
-        // Sidebar navigation to Nutrition
-        await page.getByRole("link", { name: /nutrition/i }).click();
-        await expect(page).toHaveURL(/\/dashboard\/nutrition/);
-        await expect(page.getByRole("heading", { name: /nutrition tracker/i })).toBeVisible();
+        await expect(page.getByLabel(/email/i)).toBeVisible();
+        await expect(page.getByLabel(/mot de passe/i)).toBeVisible();
+        await expect(page.getByRole("button", { name: /se connecter/i })).toBeVisible();
+        await expect(page.getByText(/creer un compte/i)).toBeVisible();
     });
 });

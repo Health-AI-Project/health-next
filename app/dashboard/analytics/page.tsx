@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PremiumGuard } from "@/components/premium/premium-guard";
 import { Utensils, Dumbbell, Flame, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { cachedFetch } from "@/lib/api";
 
 interface AnalyticsData {
     stats?: {
@@ -39,7 +39,7 @@ export default function AnalyticsPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await apiFetch<{ data: AnalyticsData }>("/api/home");
+                const response = await cachedFetch<{ data: AnalyticsData }>("/api/home");
                 setData(response.data);
             } catch {
                 setData(DEMO_DATA);

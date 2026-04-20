@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { TrendingDown, Flame, Target, Activity, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { cachedFetch } from "@/lib/api";
 
 interface DashboardData {
     user?: {
@@ -40,7 +40,7 @@ export default function DashboardPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await apiFetch<{ data: DashboardData }>('/api/home');
+                const response = await cachedFetch<{ data: DashboardData }>('/api/home');
                 setData(response.data);
                 setIsDemo(false);
             } catch {

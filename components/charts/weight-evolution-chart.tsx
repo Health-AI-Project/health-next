@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
-import { apiFetch } from "@/lib/api";
+import { cachedFetch } from "@/lib/api";
 
 const DEMO_DATA: Record<string, number | string>[] = [
     { date: "01/03", poids: 76.2, objectif: 74 },
@@ -33,7 +33,7 @@ export function WeightEvolutionChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await apiFetch<{ data: Record<string, number | string>[] }>('/api/stats/weight-history?days=30');
+                const res = await cachedFetch<{ data: Record<string, number | string>[] }>('/api/stats/weight-history?days=30');
                 if (res.data && res.data.length > 0) {
                     setWeightData(res.data);
                     setIsDemo(false);

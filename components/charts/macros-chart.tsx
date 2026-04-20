@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
-import { apiFetch } from "@/lib/api";
+import { cachedFetch } from "@/lib/api";
 
 const DEMO_DATA = [
     { name: "Proteines", value: 30 },
@@ -27,7 +27,7 @@ export function MacrosChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await apiFetch<{ data: { name: string; value: number }[] | null }>('/api/stats/macros');
+                const res = await cachedFetch<{ data: { name: string; value: number }[] | null }>('/api/stats/macros');
                 if (res.data && res.data.length > 0) {
                     setMacrosData(res.data);
                     setIsDemo(false);

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
-import { apiFetch } from "@/lib/api";
+import { cachedFetch } from "@/lib/api";
 
 const DEMO_DATA: Record<string, number | string>[] = [
     { jour: "Lun", calories: 1850, objectif: 2000 },
@@ -35,7 +35,7 @@ export function CaloriesChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await apiFetch<{ data: Record<string, number | string>[] }>('/api/stats/calories-history?days=7');
+                const res = await cachedFetch<{ data: Record<string, number | string>[] }>('/api/stats/calories-history?days=7');
                 if (res.data && res.data.length > 0) {
                     setCaloriesData(res.data);
                     setIsDemo(false);
