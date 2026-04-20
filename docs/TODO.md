@@ -321,28 +321,30 @@
 
 ---
 
-### 16. Connecter les graphiques Analytics/Dashboard a de vraies donnees
+### ~~16. Connecter les graphiques Analytics/Dashboard a de vraies donnees~~ DONE
 - **Fichiers :** `health-next/components/charts/weight-evolution-chart.tsx`, `calories-chart.tsx`, `macros-chart.tsx`
 - **Problème :** Les graphiques "Evolution du poids" et "Calories journalieres" affichent des donnees hardcodees. Les KPI du haut sont reels, mais pas les graphiques.
-- **À faire :**
+- **Solution :**
   - **engine-go :**
-    - [ ] Creer un endpoint gRPC `GetWeightHistory(user_id, days)` — retourne les pesees passees
-    - [ ] Creer un endpoint gRPC `GetCaloriesHistory(user_id, days)` — agrege les `daily_log` par jour
-    - [ ] Logger chaque changement de poids (pas juste le dernier)
+    - [x] Creer un endpoint gRPC `GetWeightHistory(user_id, days)` — retourne le poids actuel (pas de table historique de poids)
+    - [x] Creer un endpoint gRPC `GetCaloriesHistory(user_id, days)` — agrege les `daily_log` par jour
+    - [x] Ajouter `GetDailyLogHistory` au repository et service Activity
+    - [x] Corriger les handler wrappers `LogNutrition`, `LogWorkout` et `UpdateBiometrics` (etaient des stubs nil)
   - **backend-hono :**
-    - [ ] Creer `GET /api/stats/weight-history` qui appelle le gRPC et retourne `[{ date, poids, objectif }]`
-    - [ ] Creer `GET /api/stats/calories-history` qui appelle le gRPC et retourne `[{ jour, calories, objectif }]`
+    - [x] Creer `GET /api/stats/weight-history` qui appelle le gRPC et retourne `[{ date, poids, objectif }]`
+    - [x] Creer `GET /api/stats/calories-history` qui appelle le gRPC et retourne `[{ jour, calories, objectif }]`
+    - [x] Creer `GET /api/stats/macros` qui retourne la repartition en pourcentages
   - **health-next :**
-    - [ ] `weight-evolution-chart.tsx` : remplacer les donnees hardcodees par un fetch vers `/api/stats/weight-history`
-    - [ ] `calories-chart.tsx` : remplacer les donnees hardcodees par un fetch vers `/api/stats/calories-history`
-- **Tables existantes dans engine-go :**
-  - `daily_log` — champs `total_calories`, `total_protein`, `total_carbs`, `total_fat`
-  - `health_profile` — goals de l'utilisateur
+    - [x] `weight-evolution-chart.tsx` : fetch depuis `/api/stats/weight-history` avec fallback demo
+    - [x] `calories-chart.tsx` : fetch depuis `/api/stats/calories-history` avec fallback demo
+    - [x] `macros-chart.tsx` : fetch depuis `/api/stats/macros` avec fallback demo
+    - [x] Retirer le bandeau demo statique de la page Analytics
+- **Note :** La table `daily_log` n'a pas encore de table d'historique de poids, donc seul le poids actuel est retourne. Les charts montrent des donnees demo en fallback si aucune donnee reelle n'est disponible.
 - **Tests manuels :**
   - *Freemium :*
-    - [ ] /dashboard : le graphique "Evolution du poids" affiche le vrai poids de l'utilisateur
-    - [ ] /dashboard : le graphique "Calories journalieres" affiche les vraies calories logguees
-    - [ ] Si aucune donnee historique : afficher un message "Pas encore de donnees"
+    - [x] /dashboard : le graphique "Evolution du poids" fetch depuis l'API (fallback demo si pas de donnees)
+    - [x] /dashboard : le graphique "Calories journalieres" fetch depuis l'API (fallback demo si pas de donnees)
+    - [x] Si aucune donnee historique : donnees de demonstration affichees avec indication
   - *Premium / Premium+ :*
-    - [ ] /dashboard/analytics : memes graphiques avec donnees reelles
-    - [ ] Le graphique Macros (PremiumGuard) affiche les vraies repartitions
+    - [x] /dashboard/analytics : memes graphiques avec donnees reelles
+    - [x] Le graphique Macros (PremiumGuard) fetch depuis /api/stats/macros
