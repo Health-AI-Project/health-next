@@ -106,10 +106,6 @@ export default function AnalyticsPage() {
                 </p>
             </header>
 
-            <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-700 dark:text-yellow-400">
-                Les graphiques affichent des donnees de demonstration. Les KPI (calories, poids) sont reels si connecte.
-            </div>
-
             <section aria-labelledby="summary-heading">
                 <h2 id="summary-heading" className="sr-only">
                     Resume des statistiques

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
     LineChart,
     Line,
@@ -12,8 +13,9 @@ import {
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
+import { apiFetch } from "@/lib/api";
 
-const weightData: Record<string, number | string>[] = [
+const DEMO_DATA: Record<string, number | string>[] = [
     { date: "01/03", poids: 76.2, objectif: 74 },
     { date: "05/03", poids: 75.8, objectif: 74 },
     { date: "10/03", poids: 75.5, objectif: 74 },
@@ -25,11 +27,28 @@ const weightData: Record<string, number | string>[] = [
 
 export function WeightEvolutionChart() {
     const colors = useChartColors();
+    const [weightData, setWeightData] = useState<Record<string, number | string>[]>(DEMO_DATA);
+    const [isDemo, setIsDemo] = useState(true);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const res = await apiFetch<{ data: Record<string, number | string>[] }>('/api/stats/weight-history?days=30');
+                if (res.data && res.data.length > 0) {
+                    setWeightData(res.data);
+                    setIsDemo(false);
+                }
+            } catch {
+                // keep demo data
+            }
+        }
+        fetchData();
+    }, []);
 
     return (
         <ChartCard
             title="Évolution du poids"
-            description="Suivi sur les 30 derniers jours"
+            description={isDemo ? "Donnees de demonstration" : "Suivi sur les 30 derniers jours"}
             className="h-full"
         >
             <div className="h-[300px] min-h-[300px] w-full">

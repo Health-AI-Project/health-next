@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
     BarChart,
     Bar,
@@ -13,8 +14,9 @@ import {
 } from "recharts";
 import { useChartColors } from "@/components/providers/dynamic-theme-provider";
 import { ChartCard, getChartTooltipStyle } from "@/components/charts/chart-card";
+import { apiFetch } from "@/lib/api";
 
-const caloriesData: Record<string, number | string>[] = [
+const DEMO_DATA: Record<string, number | string>[] = [
     { jour: "Lun", calories: 1850, objectif: 2000 },
     { jour: "Mar", calories: 2100, objectif: 2000 },
     { jour: "Mer", calories: 1750, objectif: 2000 },
@@ -26,11 +28,33 @@ const caloriesData: Record<string, number | string>[] = [
 
 export function CaloriesChart() {
     const colors = useChartColors();
+    const [caloriesData, setCaloriesData] = useState<Record<string, number | string>[]>(DEMO_DATA);
+    const [isDemo, setIsDemo] = useState(true);
+    const [objectif, setObjectif] = useState(2000);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const res = await apiFetch<{ data: Record<string, number | string>[] }>('/api/stats/calories-history?days=7');
+                if (res.data && res.data.length > 0) {
+                    setCaloriesData(res.data);
+                    setIsDemo(false);
+                    const firstObjectif = res.data[0]?.objectif;
+                    if (typeof firstObjectif === 'number') {
+                        setObjectif(firstObjectif);
+                    }
+                }
+            } catch {
+                // keep demo data
+            }
+        }
+        fetchData();
+    }, []);
 
     return (
         <ChartCard
             title="Calories journalières"
-            description="Consommation vs objectif cette semaine"
+            description={isDemo ? "Donnees de demonstration" : "Consommation vs objectif cette semaine"}
             className="h-full"
         >
             <div className="h-[300px] min-h-[300px] w-full">
@@ -61,11 +85,11 @@ export function CaloriesChart() {
                             formatter={(value) => [`${value} kcal`, "Calories"]}
                         />
                         <ReferenceLine
-                            y={2000}
+                            y={objectif}
                             stroke={colors.secondary}
                             strokeDasharray="5 5"
                             label={{
-                                value: "Objectif: 2000 kcal",
+                                value: `Objectif: ${objectif} kcal`,
                                 position: "insideTopRight",
                                 fill: colors.text,
                                 fontSize: 11,
@@ -76,7 +100,7 @@ export function CaloriesChart() {
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={
-                                        entry.calories > entry.objectif
+                                        Number(entry.calories) > Number(entry.objectif)
                                             ? colors.tertiary
                                             : colors.primary
                                     }
