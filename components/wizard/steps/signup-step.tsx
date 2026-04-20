@@ -13,7 +13,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toaster";
@@ -68,7 +67,7 @@ export function SignupStep() {
                 return;
             }
 
-            const signupData = await signupResponse.json().catch(() => null);
+            await signupResponse.json().catch(() => null);
 
             // Envoyer les données du wizard au profil santé (via cookies, session déjà active)
             try {
