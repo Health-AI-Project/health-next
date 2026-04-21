@@ -17,6 +17,7 @@ DOCS_ORDER = [
     "03-Maquettes-Design-System.md",
     "04-Accessibilite-WCAG-RGAA.md",
     "05-Conduite-Changement.md",
+    "06-Rapport-Tests-Couverture.md",
 ]
 
 CSS = """
@@ -156,13 +157,14 @@ def main():
     <li><a href="#maquettes">Maquettes & Design System</a></li>
     <li><a href="#accessibilite">Accessibilite WCAG 2.1 AA / RGAA 4</a></li>
     <li><a href="#conduite">Conduite du changement</a></li>
+    <li><a href="#tests">Rapport de tests et couverture</a></li>
     <li><a href="#annexe">Annexe : Captures d'ecran</a></li>
   </ol>
 </div>
 """)
 
     # Main docs
-    anchors = ["benchmark", "documentation", "maquettes", "accessibilite", "conduite"]
+    anchors = ["benchmark", "documentation", "maquettes", "accessibilite", "conduite", "tests"]
     for doc_file, anchor in zip(DOCS_ORDER, anchors):
         src = ROOT / doc_file
         if not src.exists():
