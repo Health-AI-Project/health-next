@@ -1,173 +1,108 @@
-# Benchmark Frontend — HealthNext
+# Benchmark Frontend
 
-## 1. Contexte
+## Contexte du choix
 
-Dans le cadre du développement de la plateforme **HealthAI Coach**, un choix technologique devait être fait pour l'interface utilisateur. L'application cible les Millennials/Gen Z, doit être responsive (mobile, tablette, desktop), accessible (WCAG/RGAA AA), et capable de consommer plusieurs APIs (IA, gRPC, backend métier).
+Pour la partie front de HealthAI Coach, on devait trancher entre plusieurs frameworks avant d'écrire la moindre ligne. Le but c'était pas de prendre "le plus hype" mais celui qui collait vraiment à nos contraintes : une app web pensée mobile d'abord, accessible (on a l'exigence WCAG AA dans le cahier des charges), qui doit causer à plusieurs APIs (IA de vision, gRPC côté backend Go, microservices nutrition et activité), et qu'une équipe de 4 personnes puisse maintenir sans galérer.
 
-Ce document présente le benchmark réalisé pour justifier le choix de **Next.js 16 (React 19)** comme framework frontend.
+Au final on a pris **Next.js 16 avec React 19**. Ce doc explique pourquoi, avec les alternatives qu'on a regardées sérieusement.
 
----
+## Ce qu'on a regardé
 
-## 2. Critères d'évaluation
+Avant de comparer les frameworks, on a listé nos vrais besoins, pondérés selon leur importance :
 
-| Critère | Pondération | Justification |
+| Critère | Importance | Pourquoi c'est important pour nous |
 |---|---|---|
-| Performance (SSR/hydration) | ★★★★★ | Temps de chargement critique sur mobile |
-| Écosystème & communauté | ★★★★★ | Recrutement futur, maintenance long terme |
-| TypeScript natif | ★★★★☆ | Sécurité du code, DX |
-| SEO / Rendu côté serveur | ★★★★☆ | Landing page indexable |
-| Accessibilité (a11y) | ★★★★★ | WCAG AA exigé par le cahier des charges |
-| Courbe d'apprentissage | ★★★☆☆ | Équipe de 4 personnes, formation rapide |
-| Compatibilité design system | ★★★★☆ | Shadcn UI, Tailwind |
-| Bundle size | ★★★★☆ | Perf mobile |
+| Rendu serveur / hydratation | Très haut | La landing doit charger vite sur mobile, et être indexée |
+| Écosystème | Très haut | On ne veut pas réécrire des composants triviaux |
+| Support TypeScript | Haut | Typage partout, zéro `any` en principe |
+| Accessibilité native | Très haut | WCAG AA exigé, on peut pas bricoler à la main |
+| Design system dispo | Haut | Shadcn/Radix nous plaisait déjà |
+| Courbe d'apprentissage | Moyen | 4 personnes, formation limitée |
+| Bundle size | Haut | Cible mobile = compte chaque ko |
+| Recrutement long terme | Moyen | Si quelqu'un part, faut pouvoir remplacer |
 
----
+## Les candidats
 
-## 3. Comparatif des frameworks
+### Next.js (React) — retenu
 
-### 3.1 React (Next.js) — **CHOIX RETENU**
+C'est clairement le choix le plus "safe" vu le contexte. L'argument principal pour nous c'était pas React en soi, mais tout ce qui gravite autour : Shadcn UI a son port principal sur React, Radix UI idem, et la plupart des tutos modernes partent du principe qu'on est sur React. On voulait pas perdre du temps à chercher un équivalent Vue ou Svelte pour chaque lib.
 
-**Points forts :**
-- **Rendu hybride** (SSR, SSG, ISR, Client) : parfait pour une landing page indexable + un dashboard interactif
-- **Écosystème le plus mature** : Shadcn UI, Radix UI, React Hook Form, Zustand, Recharts, TanStack Query — tout ce qu'on utilise a des intégrations natives
-- **Tooling Next.js 16** : Turbopack, App Router, Server Components, middleware natif pour l'auth
-- **TypeScript natif** : typage complet, autocomplétion
-- **React 19** : nouveau compiler, meilleures perfs de base
-- **Communauté** : +227k ⭐ sur GitHub (React), support LTS garanti par Vercel
-- **Accessibilité** : Radix UI fournit des composants accessibles par défaut (ARIA, keyboard)
+L'App Router de Next.js 16 nous intéressait pour plusieurs raisons. D'abord le rendu mixte (Server Components par défaut, Client Components quand on en a besoin), ce qui permet de garder un bundle JS minimal. Ensuite le middleware natif, qu'on utilise pour protéger `/dashboard/*` côté serveur, avant même que la page soit servie. Et puis Turbopack en dev, qui est effectivement beaucoup plus rapide que Webpack (c'est pas du marketing, la différence est flagrante).
 
-**Points faibles :**
-- Build plus lent que Vite (mais Turbopack comble l'écart)
-- Hydration parfois lourde si mal optimisée
-- Courbe d'apprentissage plus raide (App Router, Server Components)
+Points qui nous ont fait hésiter : la courbe d'apprentissage de l'App Router est réelle. Entre Server Components, Client Components, les Server Actions, le caching Next, il faut du temps pour tout maitriser. Mais une fois la phase d'appropriation passée, le gain est net.
 
-### 3.2 Vue.js (Nuxt 3)
+### Vue.js avec Nuxt 3
 
-**Points forts :**
-- Syntaxe Single-File Components très lisible
-- Nuxt 3 offre du SSR comparable à Next.js
-- Moins verbose que React pour les petits projets
-- Bundle initial plus léger
+Techniquement Nuxt 3 couvre les mêmes besoins que Next.js (SSR, SSG, middleware, etc). La syntaxe Single-File Component est objectivement plus lisible que le JSX, surtout pour des débutants. Le bundle initial est parfois un peu plus léger aussi.
 
-**Points faibles :**
-- Écosystème **moins riche** pour notre stack (Shadcn UI principal port est React ; Vue a son équivalent mais moins mature)
-- Moins de composants accessibles prêts à l'emploi (Radix UI n'a pas d'équivalent aussi complet côté Vue)
-- Recrutement plus difficile (marché du travail dominé par React)
-- Composition API moins intuitive pour les débutants React
+Ce qui nous a fait dire non :
+- Shadcn-Vue existe mais c'est un port, toujours un peu en retard sur la version React
+- Pareil pour les composants Radix : l'équivalent côté Vue (Radix-Vue) est bien mais moins étoffé
+- Sur le marché du travail en France, les devs React sont plus nombreux que les devs Vue. Si quelqu'un de l'équipe part ou passe à autre chose, on a plus de chances de retrouver quelqu'un facilement
 
-### 3.3 Angular
+### Angular
 
-**Points forts :**
-- Framework "batteries included" (routing, HTTP, forms, i18n intégrés)
-- TypeScript first-class depuis le début
-- Bon pour les grosses applications d'entreprise
-- Excellents outils CLI (ng generate, ng build)
+On l'a regardé par devoir (c'est le framework "officiel" des grosses boites françaises) mais on a rapidement abandonné. Angular est pensé pour les grosses applications d'entreprise, pas pour un MVP que 4 personnes doivent livrer en quelques semaines. Tout y est verbose : les modules, les décorateurs, l'injection de dépendances, les services. Pour itérer sur des composants UI, c'est lent.
 
-**Points faibles :**
-- **Beaucoup trop lourd** pour notre scope (MVP 4 personnes, 6 pages)
-- Syntaxe verbose (decorators, modules, injection)
-- Bundle initial plus important
-- Courbe d'apprentissage très raide
-- Moins agile pour itérer sur des composants UI
-- Écosystème design system moins vibrant (pas d'équivalent Shadcn UI)
+L'écosystème design system est aussi beaucoup moins vibrant. Angular Material fait le job mais n'a pas la souplesse de Shadcn. Et le bundle initial d'une app Angular est historiquement plus lourd.
 
-### 3.4 SvelteKit
+### SvelteKit
 
-**Points forts :**
-- Performance exceptionnelle (compilation AOT)
-- Bundle extrêmement léger
-- Syntaxe simple et claire
+Celui-là on aurait aimé le prendre pour la perf (c'est vraiment impressionnant) mais deux problèmes :
+1. Pas de design system équivalent à Shadcn. On aurait passé un temps fou à styler nous-mêmes
+2. Recrutement : Svelte reste une niche, retrouver un dev Svelte en France c'est galère
 
-**Points faibles :**
-- Écosystème encore immature
-- Moins de composants accessibles prêts à l'emploi
-- Recrutement plus difficile
-- Communauté plus petite (risque sur la pérennité)
+Dommage, parce que côté DX c'est probablement le plus agréable des 4.
 
----
+## Décision finale
 
-## 4. Matrice de décision
+Matrice simplifiée après élimination :
 
-| Critère | Next.js (React) | Nuxt (Vue) | Angular | SvelteKit |
+| Critère | Next.js | Nuxt | Angular | SvelteKit |
 |---|:-:|:-:|:-:|:-:|
-| Performance SSR | ✅ Excellent | ✅ Excellent | ⚠️ Bon | ✅ Excellent |
-| Écosystème | ✅ 5/5 | ⚠️ 4/5 | ⚠️ 4/5 | ❌ 2/5 |
-| TypeScript | ✅ Natif | ⚠️ Bon | ✅ Natif | ⚠️ Bon |
-| Accessibilité | ✅ Radix UI | ⚠️ Partiel | ⚠️ Partiel | ❌ Manuel |
-| Design system | ✅ Shadcn UI | ⚠️ Shadcn-Vue | ❌ Angular Material | ❌ Manuel |
-| SEO | ✅ Excellent | ✅ Excellent | ⚠️ Bon | ✅ Excellent |
-| Apprentissage | ⚠️ Moyen | ✅ Facile | ❌ Difficile | ✅ Facile |
-| Communauté | ✅ 227k ⭐ | ✅ 208k ⭐ | ⚠️ 96k ⭐ | ⚠️ 78k ⭐ |
-| Recrutement | ✅ Facile | ⚠️ Moyen | ⚠️ Moyen | ❌ Difficile |
-| **TOTAL** | **9/9** | **5/9** | **3/9** | **2/9** |
+| SSR de qualité | Oui | Oui | Partiel | Oui |
+| Écosystème React/Shadcn | Oui | Non (port) | Non | Non |
+| TS natif | Oui | OK | Oui | OK |
+| A11y out-of-the-box | Radix | Radix-Vue | Angular Material | Rien |
+| Vitesse de dev | Bonne | Bonne | Lente | Bonne |
+| Bundle | Moyen | Léger | Lourd | Léger |
+| Recrutement FR | Facile | Moyen | Moyen | Dur |
 
----
+Next.js gagne surtout sur l'écosystème et le recrutement. La perf n'est pas parfaite sur cette colonne mais compense par tout le reste.
 
-## 5. Choix des librairies associées
+## Les librairies qu'on a choisies autour
 
-### 5.1 Design System : Shadcn UI + Radix UI + Tailwind CSS
+### Design system : Shadcn UI + Radix + Tailwind
 
-**Pourquoi ?**
-- Composants headless (pas de style imposé) → personnalisation totale
-- Accessibilité WCAG AA **by default** via Radix UI (ARIA, keyboard, focus trap)
-- Tailwind CSS = utility-first, design cohérent, contrôle total du design system
-- Code installable et modifiable (pas de dépendance npm opaque)
+Shadcn c'est pas vraiment une librairie, c'est plutôt un générateur de composants qu'on installe dans le projet. Le code source des boutons, modals, forms, etc est copié dans `components/ui/`. On peut le modifier librement. Ça évite la dépendance à une lib externe qu'on ne maîtrise pas (comme MUI par exemple).
 
-**Alternatives évaluées :**
-- Material UI (MUI) → trop opinionné, difficile à customiser, bundle lourd
-- Chakra UI → bon mais plus limité, pas de composants dialog/combobox headless
-- Ant Design → look trop "enterprise", pas adapté à notre cible (jeune, moderne)
+Radix UI fournit les "primitives" headless derrière, c'est à dire la logique des widgets complexes (Dialog, Tabs, Select, Combobox, Checkbox) avec toute l'accessibilité ARIA gérée pour nous. Ça répond directement à l'exigence WCAG du cahier des charges.
 
-### 5.2 Graphiques : Recharts
+Tailwind v4 pour le style. On a hésité avec CSS modules ou Vanilla Extract, mais Tailwind c'est ce avec quoi l'équipe est la plus à l'aise et c'est ce que préconise Shadcn.
 
-**Pourquoi ?**
-- API déclarative React-friendly
-- Responsive par défaut
-- Suffisant pour nos 3 graphiques (poids, calories, macros)
-- Bundle plus léger que D3.js (~90ko vs 250ko+)
+Alternatives éliminées : MUI (trop rigide), Chakra (pas assez de composants avancés), Ant Design (look trop "corporate", pas adapté à notre cible Gen Z).
 
-**Alternatives évaluées :**
-- D3.js → trop bas niveau, overkill pour nos besoins
-- Chart.js → impératif (Canvas), moins React-friendly
-- Plotly.js → trop lourd (~900ko), overkill
+### Graphiques : Recharts
 
-### 5.3 State management : Zustand
+On avait 3 graphiques à faire (poids, calories, macros). Pour ça, pas besoin de D3.js. Recharts a une API déclarative qui s'intègre bien avec React, le bundle fait ~90ko (contre 250+ pour D3), et la gestion responsive est automatique.
 
-**Pourquoi ?**
-- API minimaliste (hook unique)
-- Middleware `persist` natif (stockage localStorage pour le wizard)
-- Pas de boilerplate contrairement à Redux
-- TypeScript natif
+### State : Zustand
 
-**Alternatives évaluées :**
-- Redux Toolkit → overkill pour un MVP
-- React Context → pas de persistance, re-renders inutiles
-- Jotai → excellent mais moins connu, moins d'exemples
+Pour le wizard d'inscription qui a 6 étapes, on avait besoin d'un state partagé qui survive aux refresh. Zustand avec son middleware `persist` fait ça en 10 lignes. On a évité Redux (overkill pour un MVP) et Context (pas de persistance et re-renders indésirables).
 
-### 5.4 Formulaires : React Hook Form + Zod
+### Formulaires : React Hook Form + Zod
 
-**Pourquoi ?**
-- Validation schema-based avec Zod (réutilisable côté API)
-- Performance (pas de re-render inutile)
-- Intégration Shadcn UI native
+Zod pour les schémas de validation (réutilisables côté backend en théorie), React Hook Form pour éviter les re-renders à chaque keystroke. Intégration native avec Shadcn. Pas mieux dans l'écosystème React actuellement.
 
-### 5.5 Auth : Better Auth
+### Auth : Better Auth
 
-**Pourquoi ?**
-- Moderne, TypeScript, gère sessions via cookies HttpOnly
-- Support email/password out-of-the-box
-- Middleware Next.js simple à intégrer
+Plus moderne que NextAuth/Auth.js, full TypeScript, gestion des sessions via cookies HttpOnly par défaut. L'équipe backend l'avait déjà choisi, donc logique de suivre.
 
----
+## Ce qu'on a perdu en choisissant ça
 
-## 6. Conclusion
+Faut être honnête, aucun choix n'est parfait :
+- On dépend de l'écosystème Vercel (sponsors principaux de Next.js). Si demain ils changent de modèle économique, ça peut poser question
+- React 19 est très récent, on a eu 2 ou 3 bugs liés à l'hydratation qu'il a fallu contourner
+- La taille du bundle Next.js est perfectible, surtout avec Turbopack en dev qui charge pas mal de code
 
-**Next.js 16 (React 19) + Shadcn UI + Tailwind CSS + Recharts + Zustand + Better Auth** a été retenu car cette stack :
-
-1. **Couvre tous les besoins** exprimés dans le cahier des charges (responsive, accessible, APIs IA, visualisations)
-2. **Maximise la vélocité** de développement (4 devs, 50h de formation)
-3. **Garantit la pérennité** (écosystème le plus riche, Vercel comme sponsor principal)
-4. **Respecte WCAG AA** par défaut via Radix UI
-5. **Permet le déploiement B2B en marque blanche** (tokens CSS customisables, theming dynamique)
-
-Cette stack est également celle privilégiée par les acteurs référents du marché (Vercel, Linear, Cal.com, Shadcn ecosystem).
+Globalement on est satisfaits du choix mais on aurait pu prendre Nuxt et avoir quelque chose de comparable.

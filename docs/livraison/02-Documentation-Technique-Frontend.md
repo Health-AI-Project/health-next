@@ -1,455 +1,205 @@
-# Documentation technique — Frontend HealthNext
+# Documentation technique du frontend
 
-## 1. Vue d'ensemble
+## De quoi on parle
 
-**HealthNext** est l'interface web de la plateforme **HealthAI Coach**. C'est une application Next.js 16 (React 19) qui expose aux utilisateurs finaux et aux clients B2B les fonctionnalités IA de nutrition et d'activité physique.
+HealthNext c'est l'interface web de HealthAI Coach. Une app Next.js 16 qui tourne chez nous en local sur le port 3000, en préprod/prod derrière `next.medev-tech.fr`. Elle expose toutes les fonctionnalités côté utilisateur : inscription, dashboard avec ses stats, upload de photos de repas analysées par l'IA, plans de repas, programmes sport, panel B2B pour les clients marque blanche, etc.
 
-### 1.1 Stack technique
+Le front communique avec un seul backend (Hono sur le port 3002) qui sert de gateway. C'est ce backend qui orchestre ensuite les appels gRPC vers le moteur Go, les appels HTTP vers l'API Python de classification d'images, et les différents microservices (nutrition, meal plan, activity). Côté front on s'en fiche complètement, on voit qu'une seule URL.
 
-| Couche | Technologie | Version |
+## Stack complète
+
+| Couche | Techno | Version |
 |---|---|---|
-| Framework | Next.js (App Router, Turbopack) | 16.1.6 |
-| UI Library | React | 19.2.3 |
+| Framework | Next.js App Router | 16.1.6 |
+| UI | React | 19.2.3 |
 | Langage | TypeScript | 5.x |
-| Design System | Shadcn UI + Radix UI | dernière |
 | Styling | Tailwind CSS | 4.x |
+| Composants | Shadcn UI + Radix UI | latest |
 | Graphiques | Recharts | 3.7 |
-| Formulaires | React Hook Form + Zod | 7.71 / 4.3 |
-| State | Zustand + persist middleware | 5.0 |
+| Formulaires | React Hook Form | 7.71 |
+| Validation | Zod | 4.3 |
+| State global | Zustand (+ persist) | 5.0 |
 | Auth | Better Auth | 1.4 |
 | Animations | Framer Motion | 12.31 |
-| Tests e2e | Playwright | 1.58 |
-| Accessibilité | @axe-core/playwright | 4.11 |
-| Upload | react-dropzone | 14.4 |
 | Icônes | Lucide React | 0.563 |
+| Upload | react-dropzone | 14.4 |
+| Tests e2e | Playwright | 1.58 |
+| Tests a11y | @axe-core/playwright | 4.11 |
 
-### 1.2 Architecture en couches
+Toutes les dépendances sont dans `package.json`. Rien d'exotique, tout est sur npm.
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  Pages (app/)                                            │
-│  - Server Components (SEO, initial data)                 │
-│  - Client Components (interactivité)                     │
-├──────────────────────────────────────────────────────────┤
-│  Components (components/)                                │
-│  - UI (Shadcn)                                           │
-│  - Charts (Recharts)                                     │
-│  - Dashboard (layout, sidebar)                           │
-│  - Nutrition, Wizard, Premium                            │
-├──────────────────────────────────────────────────────────┤
-│  Lib (lib/)                                              │
-│  - api.ts (fetch + cache + gestion erreurs)              │
-│  - actions/ (Server Actions)                             │
-│  - stores/ (Zustand)                                     │
-│  - hooks/ (use-premium-status)                           │
-│  - auth-client.ts                                        │
-├──────────────────────────────────────────────────────────┤
-│  Middleware (middleware.ts)                              │
-│  - Protection auth sur /dashboard/*                      │
-└──────────────────────────────────────────────────────────┘
-                         ↓
-              ┌──────────────────────┐
-              │  Backend Hono :3002  │
-              │  API Gateway         │
-              └──────────────────────┘
-                         ↓
-      ┌────────────────────────────────────┐
-      │   gRPC (engine-go :50051)          │
-      │   IA-Python FastAPI (:8000)        │
-      │   Microservices (nutrition, meal)  │
-      └────────────────────────────────────┘
-```
+## Architecture
 
----
-
-## 2. Structure du projet
+L'archi suit les conventions de Next.js App Router. Rapidement :
 
 ```
-health-next/
-├── app/                          # App Router Next.js
-│   ├── page.tsx                  # Landing page (3 offres)
-│   ├── connexion/page.tsx        # Login
-│   ├── inscription/page.tsx      # Wizard multi-étapes
-│   ├── dashboard/
-│   │   ├── layout.tsx            # Layout commun (sidebar)
-│   │   ├── page.tsx              # Dashboard (KPIs + graphiques)
-│   │   ├── analytics/page.tsx    # Analytics avancées (tabs)
-│   │   ├── nutrition/
-│   │   │   ├── page.tsx          # Upload + résultats IA
-│   │   │   ├── history/page.tsx  # Historique repas
-│   │   │   └── meal-plan/page.tsx # Plans de repas (Premium)
-│   │   ├── workouts/page.tsx     # Programmes sport (Premium)
-│   │   ├── clients/page.tsx      # B2B (Premium+)
-│   │   └── settings/page.tsx     # Profil, objectifs, abonnement
-│   └── layout.tsx                # Root layout (Toaster, thème)
-├── components/
-│   ├── ui/                       # Shadcn UI (Button, Card, Dialog, ...)
-│   ├── charts/                   # Recharts (Weight, Calories, Macros)
-│   ├── dashboard/                # Layout, Sidebar, BmiCard
-│   ├── nutrition/                # Tracker, Uploader, ResultTable, Suggestions
-│   ├── wizard/                   # Multi-step inscription
-│   ├── premium/                  # PremiumGuard, UpgradeDialog
-│   └── providers/                # DynamicThemeProvider
-├── lib/
-│   ├── api.ts                    # Client API + cache + ApiError
-│   ├── actions/                  # Server Actions (nutrition)
-│   ├── stores/                   # Zustand (wizard, theme)
-│   ├── hooks/                    # use-premium-status
-│   └── auth-client.ts            # Better Auth
-├── e2e/
-│   ├── user-journey.spec.ts      # 5 tests parcours critique
-│   ├── pages.spec.ts             # 22 tests de couverture
-│   └── accessibility.spec.ts     # 6 tests WCAG AA
-├── docs/                         # Documentation
-├── middleware.ts                 # Auth middleware
-├── next.config.ts
-├── tailwind.config.ts
-└── playwright.config.ts
+┌───────────────────────────────────────────────┐
+│  app/   (les routes, une par dossier)         │
+│   ├── page.tsx           → landing publique   │
+│   ├── connexion/         → login              │
+│   ├── inscription/       → wizard 6 étapes    │
+│   └── dashboard/                              │
+│       ├── layout.tsx     → sidebar + shell    │
+│       ├── page.tsx       → dashboard accueil  │
+│       ├── nutrition/                          │
+│       ├── workouts/                           │
+│       ├── analytics/                          │
+│       ├── clients/                            │
+│       └── settings/                           │
+├───────────────────────────────────────────────┤
+│  components/                                  │
+│   ├── ui/       → Shadcn (button, card, ...)  │
+│   ├── charts/   → Recharts                    │
+│   ├── nutrition/                              │
+│   ├── wizard/                                 │
+│   ├── premium/  → PremiumGuard, UpgradeDialog │
+│   └── providers/                              │
+├───────────────────────────────────────────────┤
+│  lib/                                         │
+│   ├── api.ts              → fetch + cache     │
+│   ├── actions/            → Server Actions    │
+│   ├── stores/             → Zustand           │
+│   ├── hooks/              → use-premium, ...  │
+│   └── auth-client.ts                          │
+├───────────────────────────────────────────────┤
+│  middleware.ts  → auth guard sur /dashboard   │
+└───────────────────────────────────────────────┘
+                       │
+                       ▼
+              Backend Hono (:3002)
 ```
 
----
+Le middleware est vraiment minimal (une vingtaine de lignes). Il check juste la présence du cookie `better-auth.session_token`. Il valide pas la session auprès du backend, c'est volontaire : tout endpoint appelé derrière revalide de toute façon, donc inutile de rajouter une requête réseau au middleware et de ralentir le premier render.
 
-## 3. Fonctionnalités principales
+## Les pages
 
-### 3.1 Landing Page (`/`)
+Je vais pas détailler chaque composant mais voici en gros ce que fait chaque page.
 
-- Page publique présentant les 3 offres (Freemium 0€, Premium 9,99€, Premium+ 19,99€)
-- Grille responsive 3 colonnes → 1 colonne sur mobile
-- CTAs vers `/inscription` et `/connexion`
-- SEO optimisé (metadata, sémantique HTML)
+### Landing `/`
 
-### 3.2 Inscription (`/inscription`)
+Page publique, sans session. Trois cards pour les trois offres (Freemium 0€, Premium 9,99€, Premium+ 19,99€), un hero avec CTA, un footer. Indexable (Server Component, rendu côté serveur). On a fait attention aux metadata pour le SEO, tout en sémantique HTML correcte (`<header>`, `<main>`, `<section aria-labelledby>`, etc).
 
-**Wizard multi-étapes (6 étapes)** :
-1. Âge (validation : 18-100 ans)
-2. Poids + Taille (30-300 kg / 100-250 cm)
-3. Objectifs (checkboxes multi-sélection)
-4. Allergies (checkboxes + option "Aucune")
-5. Récapitulatif
-6. Création de compte (email + mot de passe)
+### Inscription `/inscription`
 
-**Caractéristiques :**
-- État persistant dans `localStorage` via Zustand `persist` middleware
-- Un refresh (F5) ne perd pas la progression
-- Nettoyage automatique après inscription réussie
-- Validation Zod à chaque étape
-- Navigation Précédent/Suivant avec sauvegarde
+Wizard en 6 étapes : âge → poids/taille → objectifs → allergies → récap → création compte. L'état est stocké dans Zustand avec le middleware `persist`, donc si l'utilisateur ferme l'onglet et revient plus tard, il retrouve sa progression. Une fois l'inscription réussie, on appelle `resetWizard()` pour nettoyer le localStorage.
 
-### 3.3 Dashboard (`/dashboard`)
+Chaque étape a sa propre validation Zod. Les messages d'erreur sont annoncés aux lecteurs d'écran via `aria-live="polite"`.
 
-**4 KPI cards** (données réelles via `/api/home`) :
-- Poids actuel
-- Calories du jour
-- Protéines
-- Nombre de séances
+### Connexion `/connexion`
 
-**Graphiques** (données réelles via `/api/stats/*`) :
-- Évolution du poids (LineChart, 30 jours)
-- Calories journalières (BarChart, 7 jours)
-- Carte BMI (calcul client-side : `poids / (taille/100)²`)
+Formulaire simple email + password. Utilise `authClient.signIn.email()` de Better Auth. Gestion des 401 et 422 avec des toasts explicites. Un lien vers `/inscription` en bas.
 
-**Fallback** : Si l'API est indisponible, bandeau "Mode démonstration" + données fictives (expérience dégradée, pas d'écran blanc).
+### Dashboard `/dashboard`
 
-### 3.4 Analytics (`/dashboard/analytics`)
+Le coeur de l'app. 4 KPI cards en haut (poids, calories du jour, protéines, séances), une carte IMC calculée côté client à partir de poids+taille, puis deux graphiques (évolution du poids et calories de la semaine).
 
-**3 onglets** :
-- Vue d'ensemble (poids + calories + macros)
-- Nutrition (calories + macros)
-- Poids (évolution)
+Les données des KPI viennent de `/api/home` (une agrégation BFF). Les graphiques font leurs propres requêtes vers `/api/stats/weight-history` et `/api/stats/calories-history` pour pouvoir être réutilisés à plusieurs endroits (dashboard + analytics) sans refetcher à chaque fois.
 
-**Macros Chart** (PieChart) protégé par `PremiumGuard` pour les utilisateurs Freemium.
+Si l'API retourne une erreur, on a un fallback avec des données de démo et un bandeau jaune qui prévient "Mode démonstration". L'utilisateur voit pas un écran blanc, il voit quelque chose d'exploitable mais il est prévenu que c'est pas ses vraies stats.
 
-### 3.5 Nutrition
+### Nutrition `/dashboard/nutrition`
 
-**Upload (`/dashboard/nutrition`)** :
-- Drag & drop via `react-dropzone` (image/*, max 10MB)
-- Envoi au backend qui forwarde à **ia-python** (`POST /predict/upload`)
-- Réponse : classe détectée + calories + macros estimées
-- Affichage tabulaire éditable (correction utilisateur possible)
-- Suggestions contextualisées (déficit / équilibre / excès)
+C'est là qu'est le flow principal d'interaction avec l'IA. L'utilisateur drag-and-drop une photo de plat (via react-dropzone), elle est envoyée au backend qui la forwarde à l'API Python. La réponse arrive avec la classe détectée (parmi 101 classes de plats), la confiance, et une estimation calorique. On affiche ça dans une table éditable (l'utilisateur peut corriger manuellement les macros s'il juge l'estimation fausse), plus un composant `MealSuggestions` qui donne des conseils selon les objectifs de l'utilisateur.
 
-**Historique (`/dashboard/nutrition/history`)** :
-- Liste des repas loggés
-- Filtre par période (aujourd'hui, semaine, mois)
-- Tri ascendant/descendant par date
-- 3 cards : total repas, calories cumulées, moyenne/repas
+Le sous-menu contient aussi :
+- `/dashboard/nutrition/history` : liste des repas passés avec filtres (aujourd'hui, 7 jours, 30 jours, tout), tri par date
+- `/dashboard/nutrition/meal-plan` : génération de plan hebdo par l'IA (Premium)
 
-**Meal Plan (`/dashboard/nutrition/meal-plan`)** — **Premium** :
-- Bouton "Générer un plan" → `POST /api/generate-menu`
-- Plan sur 5 jours (petit-déj, déjeuner, dîner, collation)
-- Contraintes prises en compte : allergies, régime, budget
-- Cards détaillées par repas (macros, ingrédients)
+### Analytics `/dashboard/analytics`
 
-### 3.6 Workouts (`/dashboard/workouts`) — Premium
+Trois onglets (Tabs de Radix) : Vue d'ensemble, Nutrition, Poids. Les graphiques Macros sont derrière un `PremiumGuard` pour les utilisateurs Freemium.
 
-- Bouton "Générer un programme" → `POST /api/workout/generate`
-- Distribution sur 5 jours (Lun → Ven)
-- Chaque jour : liste d'exercices avec séries, répétitions, repos
-- Paramètres : durée, équipement, blessures
+### Workouts `/dashboard/workouts`
 
-### 3.7 Clients B2B (`/dashboard/clients`) — Premium+
+Génération de programmes sportifs via l'endpoint `/api/workout/generate`. Les exercices réels viennent de la base Postgres côté backend Go. On a seedé 15 exercices de base (pompes, squats, burpees, dips, etc). Le moteur Go choisit selon l'équipement dispo, les blessures, et le niveau.
 
-- Tableau de bord B2B (marque blanche)
-- Liste des clients abonnés
-- Stats : total, actifs 7j, taux Premium, calories moyennes
-- Données anonymisées (confidentialité)
+Côté front, on distribue les exercices sur 5 jours (Lun → Ven) avec des onglets par jour.
 
-### 3.8 Settings (`/dashboard/settings`)
+### Clients `/dashboard/clients`
 
-**3 onglets** :
-- Profil (email, âge, poids, taille)
-- Objectifs & Allergies
-- Abonnement (badge tier, CTA upgrade)
+Réservé aux comptes Premium+. Affiche un tableau de bord anonymisé des clients d'un partenaire B2B (salle de sport, mutuelle). Pour l'instant c'est des données de démo parce qu'on n'a pas encore de table clients en base. Le `premiumGuard('premium_plus')` côté backend retourne un 403 aux non-Premium+, et côté front le message "Accès réservé" s'affiche.
 
-Sauvegarde via `POST /api/user/profile` avec toast de confirmation.
+### Settings `/dashboard/settings`
 
----
+Trois onglets : Profil (email, âge, poids, taille), Objectifs & allergies, Abonnement (badge tier, CTA upgrade). Les modifs sont envoyées via `POST /api/user/profile` (qui appelle le gRPC `UpdateHealthProfile` côté Go).
 
-## 4. Principes d'ergonomie appliqués
+## Comment on cause au backend
 
-### 4.1 Navigation
+### Le client API
 
-- **Sidebar fixe desktop** avec icônes Lucide + labels
-- **Sidebar collapsible tablette/mobile** (menu hamburger)
-- **Breadcrumb implicite** via le titre de page (`h1`)
-- **Retour arrière natif** du navigateur préservé (pas de SPA cassée)
-- **Liens actifs** mis en évidence (couleur primaire + fond)
-
-### 4.2 Feedback utilisateur
-
-- **Toasts** (Sonner) pour confirmations et erreurs
-- **Skeletons** pendant les chargements (pas de spinner bloquant)
-- **Bandeaux "Mode démonstration"** transparents quand données mockées
-- **Messages d'erreur** explicites (pas de code HTTP brut)
-- **Validation en temps réel** dans les formulaires
-
-### 4.3 Hiérarchie visuelle
-
-- **Titre h1** unique par page (SEO + a11y)
-- **Cards** pour regrouper l'information (Card/CardHeader/CardContent/CardFooter)
-- **Couleurs sémantiques** (primary = vert, destructive = rouge, muted = gris)
-- **Tailles typographiques** cohérentes (via `text-sm`, `text-xl`, `text-4xl`)
-
-### 4.4 Cognitive load
-
-- **6 liens maximum** dans la sidebar
-- **Wizard découpé** en 6 étapes courtes plutôt qu'un formulaire long
-- **Messages d'aide** sous chaque champ (`description`)
-- **Premium Guard** avec blur + CTA clair (pas de murs opaques)
-
-### 4.5 Responsive
-
-| Breakpoint | Comportement |
-|---|---|
-| `< 640px` (mobile) | Sidebar cachée, grille 1 colonne, navigation bottom/top |
-| `640-1024px` (tablet) | Grille 2 colonnes, sidebar collapsible |
-| `> 1024px` (desktop) | Sidebar fixe 264px, grille 3-4 colonnes |
-
-Testé sur viewports 375×812 (iPhone SE), 768×1024 (iPad), 1920×1080 (desktop).
-
----
-
-## 5. Gestion des APIs
-
-### 5.1 Client API centralisé (`lib/api.ts`)
+Tout passe par `lib/api.ts`. Deux fonctions principales :
 
 ```typescript
-// Requêtes classiques
-apiFetch<T>(endpoint, options)
-
-// Requêtes avec cache TTL (30s par défaut)
-cachedFetch<T>(endpoint, options, ttl)
-
-// Invalidation
-invalidateCache(endpoint)
+apiFetch<T>(endpoint, options)      // requête standard
+cachedFetch<T>(endpoint, options)   // avec cache mémoire (TTL 30s)
 ```
 
-### 5.2 Cache intelligent
+Il y a aussi une classe `ApiError` avec les champs `status` et `required_tier` pour distinguer les cas d'erreur. On a des comportements automatiques :
+- 401 : redirect vers `/connexion` (window.location)
+- 403 avec `required_tier` : toast + ouverture de `UpgradeDialog`
+- 429 : toast "trop de requêtes"
+- 5xx : fallback sur données demo, bandeau jaune
 
-- Cache en mémoire (Map)
-- TTL 30 secondes par défaut
-- Appliqué aux endpoints stables : `/api/home`, `/api/stats/*`
-- Les mutations (POST/PUT/PATCH) bypassent le cache automatiquement
-- Clé = URL complète (inclut les query params)
+### Le cache
 
-### 5.3 Gestion d'erreurs
+Ajouté relativement tard dans le projet. Avant, chaque page qui montait son composant déclenchait un refetch de `/api/home`. Maintenant, le premier appel met en cache pendant 30 secondes (Map en mémoire). Les GET avec la même URL tapent dans le cache. Les mutations POST/PUT/PATCH bypassent évidemment.
 
-**Classe `ApiError`** :
-- `status` (HTTP code)
-- `required_tier` (pour 403 premium)
-- `message` (humain)
+C'est volontairement basique. Si on avait voulu faire les choses bien on aurait pris TanStack Query (ex-React Query). On n'en avait pas besoin pour un MVP.
 
-**Comportements** :
-- **401** → redirect automatique vers `/connexion`
-- **403** → toast "Premium requis" + overlay UpgradeDialog
-- **429** → toast "Trop de requêtes, réessayez"
-- **5xx** → fallback demo + bandeau + logged en console
+### Fallback demo
 
-### 5.4 Fallbacks (continuité de service)
+Le principe c'est de jamais laisser l'utilisateur sur un écran blanc. Chaque page principale a sa constante `DEMO_DATA` en haut du fichier. Le pattern est toujours le même :
 
-Chaque page principale a des **DEMO_DATA** utilisées en cas d'erreur API :
-- Pas d'écran blanc
-- Bandeau jaune "Mode démonstration" transparent
-- L'utilisateur comprend que les données ne sont pas réelles
-
----
-
-## 6. Accessibilité (WCAG 2.1 AA / RGAA)
-
-### 6.1 Mesures appliquées
-
-| Critère | Implémentation |
-|---|---|
-| Structure sémantique | `<header>`, `<main>`, `<nav>`, `<section>` partout |
-| Hiérarchie `h1→h6` | Un seul h1 par page, jamais de saut de niveau |
-| Labels | Tous les inputs ont un `<label>` associé (`htmlFor`) |
-| `aria-label` | Icônes sans texte ont un `aria-label` |
-| `aria-hidden` | Icônes purement décoratives |
-| `aria-describedby` | Messages d'aide liés aux inputs |
-| `aria-live` | Messages d'erreur annoncés (`polite`) |
-| Navigation clavier | Tab/Shift+Tab, Escape (dialogs), Enter/Space |
-| Focus visible | Ring via Radix UI `focus-visible` |
-| Contraste | Palette Tailwind respectant ratio 4.5:1 (texte normal) |
-| Skip link | Présent sur les pages dashboard |
-| ARIA widgets | Tabs, Dialog, Checkbox, Select via Radix UI (conformes WAI-ARIA) |
-
-### 6.2 Tests automatisés
-
-- `@axe-core/playwright` exécuté sur **6 pages** :
-  - `/`, `/inscription`, `/dashboard`, `/dashboard/analytics`, `/dashboard/nutrition`, `/dashboard/settings`
-- **0 violation critique/serious** sur toutes les pages
-- Tags testés : `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`
-- Rapport HTML généré : `npm run test:a11y:report`
-
-### 6.3 CI / CD
-
-- GitHub Actions exécute les tests axe-core sur chaque PR
-- Le build échoue si des violations critiques sont détectées
-- Rapport uploadé en artifact (30 jours de rétention)
-
----
-
-## 7. Sécurité
-
-### 7.1 Authentification
-
-- **Better Auth** avec sessions cookies HttpOnly (pas accessible via JS)
-- Middleware Next.js vérifie le cookie sur `/dashboard/*`
-- Redirection automatique vers `/connexion` si pas de session
-
-### 7.2 Protection des routes
-
-- **Côté serveur** : middleware.ts (Edge) → bloque avant le rendu
-- **Côté backend** : middleware Hono + `premiumGuard('premium' | 'premium_plus')` → retourne 403
-- **Côté frontend** : `PremiumGuard` composant → masque visuellement (mais NE protège pas seul)
-
-### 7.3 XSS / CSRF
-
-- React échappe le contenu par défaut (pas de `dangerouslySetInnerHTML` sauf cas justifié)
-- Cookies en `SameSite=Lax`
-- CORS restrictif côté backend (`localhost:3000`, `localhost:3001`, `https://next.medev-tech.fr`)
-
----
-
-## 8. Performance
-
-### 8.1 Optimisations appliquées
-
-- **Server Components par défaut** (JS bundle minimal)
-- **Client Components ciblés** (`"use client"` uniquement quand nécessaire)
-- **Turbopack** (build 10-30× plus rapide que Webpack en dev)
-- **Code splitting automatique** par route
-- **Images** : Next/Image avec lazy loading
-- **Cache API** (TTL 30s) évite les refetchs inutiles
-- **Recharts `ResponsiveContainer`** évite les recalculs au resize
-
-### 8.2 Métriques (build production)
-
-- Build sans erreur, toutes les pages pre-rendered (`○ Static`)
-- Middleware déployé en Edge (`ƒ Proxy`)
-- Lighthouse ciblé : **Performance 90+, Accessibility 100, SEO 95+**
-
----
-
-## 9. Tests
-
-### 9.1 Couverture (33 tests Playwright)
-
-| Suite | Tests | Description |
-|---|---|---|
-| Landing Page | 4 | Hero, pricing, navigation, footer |
-| Inscription Wizard | 4 | Flow complet, validations, navigation |
-| Connexion | 2 | Formulaire, lien inscription |
-| Auth Protection | 8 | Redirection pour 8 routes `/dashboard/*` |
-| Responsive | 4 | Mobile + tablette (375, 768px) |
-| User Journey | 5 | Landing → Wizard, redirections |
-| Accessibilité WCAG AA | 6 | axe-core sur 6 pages |
-| **Total** | **33** | **100% passent ✅** |
-
-### 9.2 Scripts disponibles
-
-```bash
-npm run test            # Tous les tests
-npm run test:e2e        # User journey uniquement
-npm run test:a11y       # Accessibilité uniquement
-npm run test:a11y:report # + rapport HTML
-npm run test:report     # Ouvre le rapport Playwright
+```tsx
+try {
+    const res = await cachedFetch('/api/home');
+    setData(res.data);
+} catch {
+    setData(DEMO_DATA);
+    setIsDemo(true);
+}
 ```
 
-### 9.3 CI GitHub Actions
+Quand `isDemo === true`, on affiche un bandeau jaune en haut pour prévenir l'utilisateur. C'est pas parfait (on voudrait des vraies données) mais c'est mieux qu'une page cassée.
 
-- Tests e2e sur chaque push
-- Tests d'accessibilité sur chaque push
-- Rapport HTML uploadé comme artifact (30 jours)
-- Échec du build si violations a11y critiques
+## Tests
 
----
+On a 57 tests Playwright qui passent tous. Détail dans le fichier `04-Accessibilite-WCAG-RGAA.md` pour les tests d'a11y et dans le CI.
 
-## 10. Déploiement
+Rapide récap :
+- `user-journey.spec.ts` : 5 tests, parcours principal
+- `pages.spec.ts` : 22 tests, couverture de toutes les routes
+- `accessibility.spec.ts` : 6 tests (axe-core sur 6 pages)
+- `auth-flow.spec.ts` : 10 tests, login/signup avec mocks
+- `dashboard-mocked.spec.ts` : 14 tests, dashboard authentifié avec mocks
 
-### 10.1 Environnements
+Les tests qui ont besoin d'une session utilisent `page.route()` pour mocker les réponses API. On évite comme ça la dépendance à un backend running pendant les tests CI.
 
-| Environnement | URL | Branche |
-|---|---|---|
-| Development | `localhost:3000` | feature/* |
-| Preview | (Vercel auto) | PR |
-| Production | `next.medev-tech.fr` | `main` |
+## Déploiement
 
-### 10.2 Variables d'environnement
+En local : `npm install && npm run dev`. Par défaut ça tape sur `http://localhost:3002` pour l'API (variable `NEXT_PUBLIC_API_URL`).
 
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:3002  # ou prod URL
+En prod on a un Vercel branché sur le repo GitHub. Le main se déploie automatiquement. Les PR ont leur preview URL.
+
+Variables d'env prod :
+```
+NEXT_PUBLIC_API_URL=https://hono.medev-tech.fr
 ```
 
-### 10.3 Commandes
+## Trucs à savoir
 
-```bash
-npm install        # Installer les dépendances
-npm run dev        # Dev local (Turbopack)
-npm run build      # Build production
-npm run start      # Démarrer en prod
-npm run lint       # Linter ESLint
-npm run test       # Tests Playwright
-```
+- On utilise toujours `<Image>` de Next pour les images (lazy loading + optimisation)
+- Server Components par défaut. `"use client"` uniquement quand on a besoin de state ou d'événements
+- Pas de CSS modules, tout en Tailwind
+- Les composants Shadcn sont copiés dans le repo, donc modifiables librement
+- `npm run lint` doit être clean avant de push
+- `npm test` avant de push si on touche aux flows critiques
 
----
+## Améliorations prévues après MVP
 
-## 11. Évolutions futures
-
-- Intégration objets connectés (Premium+) via Web Bluetooth API
-- Consultations en ligne (WebRTC)
-- Notifications push (PWA + Service Worker)
-- Internationalisation (i18n) — FR/EN
-- Mode hors-ligne (Service Worker + IndexedDB)
-- Thème dynamique B2B (tokens CSS variables déjà en place)
-
----
-
-## 12. Références
-
-- Next.js : https://nextjs.org/docs
-- Shadcn UI : https://ui.shadcn.com
-- Radix UI : https://www.radix-ui.com
-- WCAG 2.1 : https://www.w3.org/TR/WCAG21/
-- RGAA 4 : https://accessibilite.numerique.gouv.fr/
-- axe-core : https://www.deque.com/axe/
+- Internationalisation (i18n) FR/EN via `next-intl`
+- PWA + service worker pour le mode offline
+- Notifications push (pour les rappels quotidiens)
+- Storybook des composants UI
+- TanStack Query à la place de notre cache maison si on grossit
+- Migration vers Server Actions pour les mutations (au lieu de fetch)

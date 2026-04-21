@@ -69,269 +69,187 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2em 0; }
     <li><a href="#annexe">Annexe : Captures d'ecran</a></li>
   </ol>
 </div>
-<h1 id="benchmark-frontend-healthnext">Benchmark Frontend — HealthNext</h1>
-<h2 id="1-contexte">1. Contexte</h2>
-<p>Dans le cadre du développement de la plateforme <strong>HealthAI Coach</strong>, un choix technologique devait être fait pour l'interface utilisateur. L'application cible les Millennials/Gen Z, doit être responsive (mobile, tablette, desktop), accessible (WCAG/RGAA AA), et capable de consommer plusieurs APIs (IA, gRPC, backend métier).</p>
-<p>Ce document présente le benchmark réalisé pour justifier le choix de <strong>Next.js 16 (React 19)</strong> comme framework frontend.</p>
-<hr />
-<h2 id="2-criteres-devaluation">2. Critères d'évaluation</h2>
+<h1 id="benchmark-frontend">Benchmark Frontend</h1>
+<h2 id="contexte-du-choix">Contexte du choix</h2>
+<p>Pour la partie front de HealthAI Coach, on devait trancher entre plusieurs frameworks avant d'écrire la moindre ligne. Le but c'était pas de prendre "le plus hype" mais celui qui collait vraiment à nos contraintes : une app web pensée mobile d'abord, accessible (on a l'exigence WCAG AA dans le cahier des charges), qui doit causer à plusieurs APIs (IA de vision, gRPC côté backend Go, microservices nutrition et activité), et qu'une équipe de 4 personnes puisse maintenir sans galérer.</p>
+<p>Au final on a pris <strong>Next.js 16 avec React 19</strong>. Ce doc explique pourquoi, avec les alternatives qu'on a regardées sérieusement.</p>
+<h2 id="ce-quon-a-regarde">Ce qu'on a regardé</h2>
+<p>Avant de comparer les frameworks, on a listé nos vrais besoins, pondérés selon leur importance :</p>
 <table>
 <thead>
 <tr>
 <th>Critère</th>
-<th>Pondération</th>
-<th>Justification</th>
+<th>Importance</th>
+<th>Pourquoi c'est important pour nous</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Performance (SSR/hydration)</td>
-<td>★★★★★</td>
-<td>Temps de chargement critique sur mobile</td>
+<td>Rendu serveur / hydratation</td>
+<td>Très haut</td>
+<td>La landing doit charger vite sur mobile, et être indexée</td>
 </tr>
 <tr>
-<td>Écosystème &amp; communauté</td>
-<td>★★★★★</td>
-<td>Recrutement futur, maintenance long terme</td>
+<td>Écosystème</td>
+<td>Très haut</td>
+<td>On ne veut pas réécrire des composants triviaux</td>
 </tr>
 <tr>
-<td>TypeScript natif</td>
-<td>★★★★☆</td>
-<td>Sécurité du code, DX</td>
+<td>Support TypeScript</td>
+<td>Haut</td>
+<td>Typage partout, zéro <code>any</code> en principe</td>
 </tr>
 <tr>
-<td>SEO / Rendu côté serveur</td>
-<td>★★★★☆</td>
-<td>Landing page indexable</td>
+<td>Accessibilité native</td>
+<td>Très haut</td>
+<td>WCAG AA exigé, on peut pas bricoler à la main</td>
 </tr>
 <tr>
-<td>Accessibilité (a11y)</td>
-<td>★★★★★</td>
-<td>WCAG AA exigé par le cahier des charges</td>
+<td>Design system dispo</td>
+<td>Haut</td>
+<td>Shadcn/Radix nous plaisait déjà</td>
 </tr>
 <tr>
 <td>Courbe d'apprentissage</td>
-<td>★★★☆☆</td>
-<td>Équipe de 4 personnes, formation rapide</td>
-</tr>
-<tr>
-<td>Compatibilité design system</td>
-<td>★★★★☆</td>
-<td>Shadcn UI, Tailwind</td>
+<td>Moyen</td>
+<td>4 personnes, formation limitée</td>
 </tr>
 <tr>
 <td>Bundle size</td>
-<td>★★★★☆</td>
-<td>Perf mobile</td>
+<td>Haut</td>
+<td>Cible mobile = compte chaque ko</td>
+</tr>
+<tr>
+<td>Recrutement long terme</td>
+<td>Moyen</td>
+<td>Si quelqu'un part, faut pouvoir remplacer</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="3-comparatif-des-frameworks">3. Comparatif des frameworks</h2>
-<h3 id="31-react-nextjs-choix-retenu">3.1 React (Next.js) — <strong>CHOIX RETENU</strong></h3>
-<p><strong>Points forts :</strong>
-- <strong>Rendu hybride</strong> (SSR, SSG, ISR, Client) : parfait pour une landing page indexable + un dashboard interactif
-- <strong>Écosystème le plus mature</strong> : Shadcn UI, Radix UI, React Hook Form, Zustand, Recharts, TanStack Query — tout ce qu'on utilise a des intégrations natives
-- <strong>Tooling Next.js 16</strong> : Turbopack, App Router, Server Components, middleware natif pour l'auth
-- <strong>TypeScript natif</strong> : typage complet, autocomplétion
-- <strong>React 19</strong> : nouveau compiler, meilleures perfs de base
-- <strong>Communauté</strong> : +227k ⭐ sur GitHub (React), support LTS garanti par Vercel
-- <strong>Accessibilité</strong> : Radix UI fournit des composants accessibles par défaut (ARIA, keyboard)</p>
-<p><strong>Points faibles :</strong>
-- Build plus lent que Vite (mais Turbopack comble l'écart)
-- Hydration parfois lourde si mal optimisée
-- Courbe d'apprentissage plus raide (App Router, Server Components)</p>
-<h3 id="32-vuejs-nuxt-3">3.2 Vue.js (Nuxt 3)</h3>
-<p><strong>Points forts :</strong>
-- Syntaxe Single-File Components très lisible
-- Nuxt 3 offre du SSR comparable à Next.js
-- Moins verbose que React pour les petits projets
-- Bundle initial plus léger</p>
-<p><strong>Points faibles :</strong>
-- Écosystème <strong>moins riche</strong> pour notre stack (Shadcn UI principal port est React ; Vue a son équivalent mais moins mature)
-- Moins de composants accessibles prêts à l'emploi (Radix UI n'a pas d'équivalent aussi complet côté Vue)
-- Recrutement plus difficile (marché du travail dominé par React)
-- Composition API moins intuitive pour les débutants React</p>
-<h3 id="33-angular">3.3 Angular</h3>
-<p><strong>Points forts :</strong>
-- Framework "batteries included" (routing, HTTP, forms, i18n intégrés)
-- TypeScript first-class depuis le début
-- Bon pour les grosses applications d'entreprise
-- Excellents outils CLI (ng generate, ng build)</p>
-<p><strong>Points faibles :</strong>
-- <strong>Beaucoup trop lourd</strong> pour notre scope (MVP 4 personnes, 6 pages)
-- Syntaxe verbose (decorators, modules, injection)
-- Bundle initial plus important
-- Courbe d'apprentissage très raide
-- Moins agile pour itérer sur des composants UI
-- Écosystème design system moins vibrant (pas d'équivalent Shadcn UI)</p>
-<h3 id="34-sveltekit">3.4 SvelteKit</h3>
-<p><strong>Points forts :</strong>
-- Performance exceptionnelle (compilation AOT)
-- Bundle extrêmement léger
-- Syntaxe simple et claire</p>
-<p><strong>Points faibles :</strong>
-- Écosystème encore immature
-- Moins de composants accessibles prêts à l'emploi
-- Recrutement plus difficile
-- Communauté plus petite (risque sur la pérennité)</p>
-<hr />
-<h2 id="4-matrice-de-decision">4. Matrice de décision</h2>
+<h2 id="les-candidats">Les candidats</h2>
+<h3 id="nextjs-react-retenu">Next.js (React) — retenu</h3>
+<p>C'est clairement le choix le plus "safe" vu le contexte. L'argument principal pour nous c'était pas React en soi, mais tout ce qui gravite autour : Shadcn UI a son port principal sur React, Radix UI idem, et la plupart des tutos modernes partent du principe qu'on est sur React. On voulait pas perdre du temps à chercher un équivalent Vue ou Svelte pour chaque lib.</p>
+<p>L'App Router de Next.js 16 nous intéressait pour plusieurs raisons. D'abord le rendu mixte (Server Components par défaut, Client Components quand on en a besoin), ce qui permet de garder un bundle JS minimal. Ensuite le middleware natif, qu'on utilise pour protéger <code>/dashboard/*</code> côté serveur, avant même que la page soit servie. Et puis Turbopack en dev, qui est effectivement beaucoup plus rapide que Webpack (c'est pas du marketing, la différence est flagrante).</p>
+<p>Points qui nous ont fait hésiter : la courbe d'apprentissage de l'App Router est réelle. Entre Server Components, Client Components, les Server Actions, le caching Next, il faut du temps pour tout maitriser. Mais une fois la phase d'appropriation passée, le gain est net.</p>
+<h3 id="vuejs-avec-nuxt-3">Vue.js avec Nuxt 3</h3>
+<p>Techniquement Nuxt 3 couvre les mêmes besoins que Next.js (SSR, SSG, middleware, etc). La syntaxe Single-File Component est objectivement plus lisible que le JSX, surtout pour des débutants. Le bundle initial est parfois un peu plus léger aussi.</p>
+<p>Ce qui nous a fait dire non :
+- Shadcn-Vue existe mais c'est un port, toujours un peu en retard sur la version React
+- Pareil pour les composants Radix : l'équivalent côté Vue (Radix-Vue) est bien mais moins étoffé
+- Sur le marché du travail en France, les devs React sont plus nombreux que les devs Vue. Si quelqu'un de l'équipe part ou passe à autre chose, on a plus de chances de retrouver quelqu'un facilement</p>
+<h3 id="angular">Angular</h3>
+<p>On l'a regardé par devoir (c'est le framework "officiel" des grosses boites françaises) mais on a rapidement abandonné. Angular est pensé pour les grosses applications d'entreprise, pas pour un MVP que 4 personnes doivent livrer en quelques semaines. Tout y est verbose : les modules, les décorateurs, l'injection de dépendances, les services. Pour itérer sur des composants UI, c'est lent.</p>
+<p>L'écosystème design system est aussi beaucoup moins vibrant. Angular Material fait le job mais n'a pas la souplesse de Shadcn. Et le bundle initial d'une app Angular est historiquement plus lourd.</p>
+<h3 id="sveltekit">SvelteKit</h3>
+<p>Celui-là on aurait aimé le prendre pour la perf (c'est vraiment impressionnant) mais deux problèmes :
+1. Pas de design system équivalent à Shadcn. On aurait passé un temps fou à styler nous-mêmes
+2. Recrutement : Svelte reste une niche, retrouver un dev Svelte en France c'est galère</p>
+<p>Dommage, parce que côté DX c'est probablement le plus agréable des 4.</p>
+<h2 id="decision-finale">Décision finale</h2>
+<p>Matrice simplifiée après élimination :</p>
 <table>
 <thead>
 <tr>
 <th>Critère</th>
-<th style="text-align: center;">Next.js (React)</th>
-<th style="text-align: center;">Nuxt (Vue)</th>
+<th style="text-align: center;">Next.js</th>
+<th style="text-align: center;">Nuxt</th>
 <th style="text-align: center;">Angular</th>
 <th style="text-align: center;">SvelteKit</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Performance SSR</td>
-<td style="text-align: center;">✅ Excellent</td>
-<td style="text-align: center;">✅ Excellent</td>
-<td style="text-align: center;">⚠️ Bon</td>
-<td style="text-align: center;">✅ Excellent</td>
+<td>SSR de qualité</td>
+<td style="text-align: center;">Oui</td>
+<td style="text-align: center;">Oui</td>
+<td style="text-align: center;">Partiel</td>
+<td style="text-align: center;">Oui</td>
 </tr>
 <tr>
-<td>Écosystème</td>
-<td style="text-align: center;">✅ 5/5</td>
-<td style="text-align: center;">⚠️ 4/5</td>
-<td style="text-align: center;">⚠️ 4/5</td>
-<td style="text-align: center;">❌ 2/5</td>
+<td>Écosystème React/Shadcn</td>
+<td style="text-align: center;">Oui</td>
+<td style="text-align: center;">Non (port)</td>
+<td style="text-align: center;">Non</td>
+<td style="text-align: center;">Non</td>
 </tr>
 <tr>
-<td>TypeScript</td>
-<td style="text-align: center;">✅ Natif</td>
-<td style="text-align: center;">⚠️ Bon</td>
-<td style="text-align: center;">✅ Natif</td>
-<td style="text-align: center;">⚠️ Bon</td>
+<td>TS natif</td>
+<td style="text-align: center;">Oui</td>
+<td style="text-align: center;">OK</td>
+<td style="text-align: center;">Oui</td>
+<td style="text-align: center;">OK</td>
 </tr>
 <tr>
-<td>Accessibilité</td>
-<td style="text-align: center;">✅ Radix UI</td>
-<td style="text-align: center;">⚠️ Partiel</td>
-<td style="text-align: center;">⚠️ Partiel</td>
-<td style="text-align: center;">❌ Manuel</td>
+<td>A11y out-of-the-box</td>
+<td style="text-align: center;">Radix</td>
+<td style="text-align: center;">Radix-Vue</td>
+<td style="text-align: center;">Angular Material</td>
+<td style="text-align: center;">Rien</td>
 </tr>
 <tr>
-<td>Design system</td>
-<td style="text-align: center;">✅ Shadcn UI</td>
-<td style="text-align: center;">⚠️ Shadcn-Vue</td>
-<td style="text-align: center;">❌ Angular Material</td>
-<td style="text-align: center;">❌ Manuel</td>
+<td>Vitesse de dev</td>
+<td style="text-align: center;">Bonne</td>
+<td style="text-align: center;">Bonne</td>
+<td style="text-align: center;">Lente</td>
+<td style="text-align: center;">Bonne</td>
 </tr>
 <tr>
-<td>SEO</td>
-<td style="text-align: center;">✅ Excellent</td>
-<td style="text-align: center;">✅ Excellent</td>
-<td style="text-align: center;">⚠️ Bon</td>
-<td style="text-align: center;">✅ Excellent</td>
+<td>Bundle</td>
+<td style="text-align: center;">Moyen</td>
+<td style="text-align: center;">Léger</td>
+<td style="text-align: center;">Lourd</td>
+<td style="text-align: center;">Léger</td>
 </tr>
 <tr>
-<td>Apprentissage</td>
-<td style="text-align: center;">⚠️ Moyen</td>
-<td style="text-align: center;">✅ Facile</td>
-<td style="text-align: center;">❌ Difficile</td>
-<td style="text-align: center;">✅ Facile</td>
-</tr>
-<tr>
-<td>Communauté</td>
-<td style="text-align: center;">✅ 227k ⭐</td>
-<td style="text-align: center;">✅ 208k ⭐</td>
-<td style="text-align: center;">⚠️ 96k ⭐</td>
-<td style="text-align: center;">⚠️ 78k ⭐</td>
-</tr>
-<tr>
-<td>Recrutement</td>
-<td style="text-align: center;">✅ Facile</td>
-<td style="text-align: center;">⚠️ Moyen</td>
-<td style="text-align: center;">⚠️ Moyen</td>
-<td style="text-align: center;">❌ Difficile</td>
-</tr>
-<tr>
-<td><strong>TOTAL</strong></td>
-<td style="text-align: center;"><strong>9/9</strong></td>
-<td style="text-align: center;"><strong>5/9</strong></td>
-<td style="text-align: center;"><strong>3/9</strong></td>
-<td style="text-align: center;"><strong>2/9</strong></td>
+<td>Recrutement FR</td>
+<td style="text-align: center;">Facile</td>
+<td style="text-align: center;">Moyen</td>
+<td style="text-align: center;">Moyen</td>
+<td style="text-align: center;">Dur</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="5-choix-des-librairies-associees">5. Choix des librairies associées</h2>
-<h3 id="51-design-system-shadcn-ui-radix-ui-tailwind-css">5.1 Design System : Shadcn UI + Radix UI + Tailwind CSS</h3>
-<p><strong>Pourquoi ?</strong>
-- Composants headless (pas de style imposé) → personnalisation totale
-- Accessibilité WCAG AA <strong>by default</strong> via Radix UI (ARIA, keyboard, focus trap)
-- Tailwind CSS = utility-first, design cohérent, contrôle total du design system
-- Code installable et modifiable (pas de dépendance npm opaque)</p>
-<p><strong>Alternatives évaluées :</strong>
-- Material UI (MUI) → trop opinionné, difficile à customiser, bundle lourd
-- Chakra UI → bon mais plus limité, pas de composants dialog/combobox headless
-- Ant Design → look trop "enterprise", pas adapté à notre cible (jeune, moderne)</p>
-<h3 id="52-graphiques-recharts">5.2 Graphiques : Recharts</h3>
-<p><strong>Pourquoi ?</strong>
-- API déclarative React-friendly
-- Responsive par défaut
-- Suffisant pour nos 3 graphiques (poids, calories, macros)
-- Bundle plus léger que D3.js (~90ko vs 250ko+)</p>
-<p><strong>Alternatives évaluées :</strong>
-- D3.js → trop bas niveau, overkill pour nos besoins
-- Chart.js → impératif (Canvas), moins React-friendly
-- Plotly.js → trop lourd (~900ko), overkill</p>
-<h3 id="53-state-management-zustand">5.3 State management : Zustand</h3>
-<p><strong>Pourquoi ?</strong>
-- API minimaliste (hook unique)
-- Middleware <code>persist</code> natif (stockage localStorage pour le wizard)
-- Pas de boilerplate contrairement à Redux
-- TypeScript natif</p>
-<p><strong>Alternatives évaluées :</strong>
-- Redux Toolkit → overkill pour un MVP
-- React Context → pas de persistance, re-renders inutiles
-- Jotai → excellent mais moins connu, moins d'exemples</p>
-<h3 id="54-formulaires-react-hook-form-zod">5.4 Formulaires : React Hook Form + Zod</h3>
-<p><strong>Pourquoi ?</strong>
-- Validation schema-based avec Zod (réutilisable côté API)
-- Performance (pas de re-render inutile)
-- Intégration Shadcn UI native</p>
-<h3 id="55-auth-better-auth">5.5 Auth : Better Auth</h3>
-<p><strong>Pourquoi ?</strong>
-- Moderne, TypeScript, gère sessions via cookies HttpOnly
-- Support email/password out-of-the-box
-- Middleware Next.js simple à intégrer</p>
-<hr />
-<h2 id="6-conclusion">6. Conclusion</h2>
-<p><strong>Next.js 16 (React 19) + Shadcn UI + Tailwind CSS + Recharts + Zustand + Better Auth</strong> a été retenu car cette stack :</p>
-<ol>
-<li><strong>Couvre tous les besoins</strong> exprimés dans le cahier des charges (responsive, accessible, APIs IA, visualisations)</li>
-<li><strong>Maximise la vélocité</strong> de développement (4 devs, 50h de formation)</li>
-<li><strong>Garantit la pérennité</strong> (écosystème le plus riche, Vercel comme sponsor principal)</li>
-<li><strong>Respecte WCAG AA</strong> par défaut via Radix UI</li>
-<li><strong>Permet le déploiement B2B en marque blanche</strong> (tokens CSS customisables, theming dynamique)</li>
-</ol>
-<p>Cette stack est également celle privilégiée par les acteurs référents du marché (Vercel, Linear, Cal.com, Shadcn ecosystem).</p><h1 id="documentation-technique-frontend-healthnext">Documentation technique — Frontend HealthNext</h1>
-<h2 id="1-vue-densemble">1. Vue d'ensemble</h2>
-<p><strong>HealthNext</strong> est l'interface web de la plateforme <strong>HealthAI Coach</strong>. C'est une application Next.js 16 (React 19) qui expose aux utilisateurs finaux et aux clients B2B les fonctionnalités IA de nutrition et d'activité physique.</p>
-<h3 id="11-stack-technique">1.1 Stack technique</h3>
+<p>Next.js gagne surtout sur l'écosystème et le recrutement. La perf n'est pas parfaite sur cette colonne mais compense par tout le reste.</p>
+<h2 id="les-librairies-quon-a-choisies-autour">Les librairies qu'on a choisies autour</h2>
+<h3 id="design-system-shadcn-ui-radix-tailwind">Design system : Shadcn UI + Radix + Tailwind</h3>
+<p>Shadcn c'est pas vraiment une librairie, c'est plutôt un générateur de composants qu'on installe dans le projet. Le code source des boutons, modals, forms, etc est copié dans <code>components/ui/</code>. On peut le modifier librement. Ça évite la dépendance à une lib externe qu'on ne maîtrise pas (comme MUI par exemple).</p>
+<p>Radix UI fournit les "primitives" headless derrière, c'est à dire la logique des widgets complexes (Dialog, Tabs, Select, Combobox, Checkbox) avec toute l'accessibilité ARIA gérée pour nous. Ça répond directement à l'exigence WCAG du cahier des charges.</p>
+<p>Tailwind v4 pour le style. On a hésité avec CSS modules ou Vanilla Extract, mais Tailwind c'est ce avec quoi l'équipe est la plus à l'aise et c'est ce que préconise Shadcn.</p>
+<p>Alternatives éliminées : MUI (trop rigide), Chakra (pas assez de composants avancés), Ant Design (look trop "corporate", pas adapté à notre cible Gen Z).</p>
+<h3 id="graphiques-recharts">Graphiques : Recharts</h3>
+<p>On avait 3 graphiques à faire (poids, calories, macros). Pour ça, pas besoin de D3.js. Recharts a une API déclarative qui s'intègre bien avec React, le bundle fait ~90ko (contre 250+ pour D3), et la gestion responsive est automatique.</p>
+<h3 id="state-zustand">State : Zustand</h3>
+<p>Pour le wizard d'inscription qui a 6 étapes, on avait besoin d'un state partagé qui survive aux refresh. Zustand avec son middleware <code>persist</code> fait ça en 10 lignes. On a évité Redux (overkill pour un MVP) et Context (pas de persistance et re-renders indésirables).</p>
+<h3 id="formulaires-react-hook-form-zod">Formulaires : React Hook Form + Zod</h3>
+<p>Zod pour les schémas de validation (réutilisables côté backend en théorie), React Hook Form pour éviter les re-renders à chaque keystroke. Intégration native avec Shadcn. Pas mieux dans l'écosystème React actuellement.</p>
+<h3 id="auth-better-auth">Auth : Better Auth</h3>
+<p>Plus moderne que NextAuth/Auth.js, full TypeScript, gestion des sessions via cookies HttpOnly par défaut. L'équipe backend l'avait déjà choisi, donc logique de suivre.</p>
+<h2 id="ce-quon-a-perdu-en-choisissant-ca">Ce qu'on a perdu en choisissant ça</h2>
+<p>Faut être honnête, aucun choix n'est parfait :
+- On dépend de l'écosystème Vercel (sponsors principaux de Next.js). Si demain ils changent de modèle économique, ça peut poser question
+- React 19 est très récent, on a eu 2 ou 3 bugs liés à l'hydratation qu'il a fallu contourner
+- La taille du bundle Next.js est perfectible, surtout avec Turbopack en dev qui charge pas mal de code</p>
+<p>Globalement on est satisfaits du choix mais on aurait pu prendre Nuxt et avoir quelque chose de comparable.</p><h1 id="documentation-technique-du-frontend">Documentation technique du frontend</h1>
+<h2 id="de-quoi-on-parle">De quoi on parle</h2>
+<p>HealthNext c'est l'interface web de HealthAI Coach. Une app Next.js 16 qui tourne chez nous en local sur le port 3000, en préprod/prod derrière <code>next.medev-tech.fr</code>. Elle expose toutes les fonctionnalités côté utilisateur : inscription, dashboard avec ses stats, upload de photos de repas analysées par l'IA, plans de repas, programmes sport, panel B2B pour les clients marque blanche, etc.</p>
+<p>Le front communique avec un seul backend (Hono sur le port 3002) qui sert de gateway. C'est ce backend qui orchestre ensuite les appels gRPC vers le moteur Go, les appels HTTP vers l'API Python de classification d'images, et les différents microservices (nutrition, meal plan, activity). Côté front on s'en fiche complètement, on voit qu'une seule URL.</p>
+<h2 id="stack-complete">Stack complète</h2>
 <table>
 <thead>
 <tr>
 <th>Couche</th>
-<th>Technologie</th>
+<th>Techno</th>
 <th>Version</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Framework</td>
-<td>Next.js (App Router, Turbopack)</td>
+<td>Next.js App Router</td>
 <td>16.1.6</td>
 </tr>
 <tr>
-<td>UI Library</td>
+<td>UI</td>
 <td>React</td>
 <td>19.2.3</td>
 </tr>
@@ -341,14 +259,14 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2em 0; }
 <td>5.x</td>
 </tr>
 <tr>
-<td>Design System</td>
-<td>Shadcn UI + Radix UI</td>
-<td>dernière</td>
-</tr>
-<tr>
 <td>Styling</td>
 <td>Tailwind CSS</td>
 <td>4.x</td>
+</tr>
+<tr>
+<td>Composants</td>
+<td>Shadcn UI + Radix UI</td>
+<td>latest</td>
 </tr>
 <tr>
 <td>Graphiques</td>
@@ -357,12 +275,17 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2em 0; }
 </tr>
 <tr>
 <td>Formulaires</td>
-<td>React Hook Form + Zod</td>
-<td>7.71 / 4.3</td>
+<td>React Hook Form</td>
+<td>7.71</td>
 </tr>
 <tr>
-<td>State</td>
-<td>Zustand + persist middleware</td>
+<td>Validation</td>
+<td>Zod</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td>State global</td>
+<td>Zustand (+ persist)</td>
 <td>5.0</td>
 </tr>
 <tr>
@@ -376,14 +299,9 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2em 0; }
 <td>12.31</td>
 </tr>
 <tr>
-<td>Tests e2e</td>
-<td>Playwright</td>
-<td>1.58</td>
-</tr>
-<tr>
-<td>Accessibilité</td>
-<td>@axe-core/playwright</td>
-<td>4.11</td>
+<td>Icônes</td>
+<td>Lucide React</td>
+<td>0.563</td>
 </tr>
 <tr>
 <td>Upload</td>
@@ -391,497 +309,140 @@ hr { border: none; border-top: 2px solid #e5e7eb; margin: 2em 0; }
 <td>14.4</td>
 </tr>
 <tr>
-<td>Icônes</td>
-<td>Lucide React</td>
-<td>0.563</td>
+<td>Tests e2e</td>
+<td>Playwright</td>
+<td>1.58</td>
+</tr>
+<tr>
+<td>Tests a11y</td>
+<td>@axe-core/playwright</td>
+<td>4.11</td>
 </tr>
 </tbody>
 </table>
-<h3 id="12-architecture-en-couches">1.2 Architecture en couches</h3>
-<pre><code>┌──────────────────────────────────────────────────────────┐
-│  Pages (app/)                                            │
-│  - Server Components (SEO, initial data)                 │
-│  - Client Components (interactivité)                     │
-├──────────────────────────────────────────────────────────┤
-│  Components (components/)                                │
-│  - UI (Shadcn)                                           │
-│  - Charts (Recharts)                                     │
-│  - Dashboard (layout, sidebar)                           │
-│  - Nutrition, Wizard, Premium                            │
-├──────────────────────────────────────────────────────────┤
-│  Lib (lib/)                                              │
-│  - api.ts (fetch + cache + gestion erreurs)              │
-│  - actions/ (Server Actions)                             │
-│  - stores/ (Zustand)                                     │
-│  - hooks/ (use-premium-status)                           │
-│  - auth-client.ts                                        │
-├──────────────────────────────────────────────────────────┤
-│  Middleware (middleware.ts)                              │
-│  - Protection auth sur /dashboard/*                      │
-└──────────────────────────────────────────────────────────┘
-                         ↓
-              ┌──────────────────────┐
-              │  Backend Hono :3002  │
-              │  API Gateway         │
-              └──────────────────────┘
-                         ↓
-      ┌────────────────────────────────────┐
-      │   gRPC (engine-go :50051)          │
-      │   IA-Python FastAPI (:8000)        │
-      │   Microservices (nutrition, meal)  │
-      └────────────────────────────────────┘
+<p>Toutes les dépendances sont dans <code>package.json</code>. Rien d'exotique, tout est sur npm.</p>
+<h2 id="architecture">Architecture</h2>
+<p>L'archi suit les conventions de Next.js App Router. Rapidement :</p>
+<pre><code>┌───────────────────────────────────────────────┐
+│  app/   (les routes, une par dossier)         │
+│   ├── page.tsx           → landing publique   │
+│   ├── connexion/         → login              │
+│   ├── inscription/       → wizard 6 étapes    │
+│   └── dashboard/                              │
+│       ├── layout.tsx     → sidebar + shell    │
+│       ├── page.tsx       → dashboard accueil  │
+│       ├── nutrition/                          │
+│       ├── workouts/                           │
+│       ├── analytics/                          │
+│       ├── clients/                            │
+│       └── settings/                           │
+├───────────────────────────────────────────────┤
+│  components/                                  │
+│   ├── ui/       → Shadcn (button, card, ...)  │
+│   ├── charts/   → Recharts                    │
+│   ├── nutrition/                              │
+│   ├── wizard/                                 │
+│   ├── premium/  → PremiumGuard, UpgradeDialog │
+│   └── providers/                              │
+├───────────────────────────────────────────────┤
+│  lib/                                         │
+│   ├── api.ts              → fetch + cache     │
+│   ├── actions/            → Server Actions    │
+│   ├── stores/             → Zustand           │
+│   ├── hooks/              → use-premium, ...  │
+│   └── auth-client.ts                          │
+├───────────────────────────────────────────────┤
+│  middleware.ts  → auth guard sur /dashboard   │
+└───────────────────────────────────────────────┘
+                       │
+                       ▼
+              Backend Hono (:3002)
 </code></pre>
-<hr />
-<h2 id="2-structure-du-projet">2. Structure du projet</h2>
-<pre><code>health-next/
-├── app/                          # App Router Next.js
-│   ├── page.tsx                  # Landing page (3 offres)
-│   ├── connexion/page.tsx        # Login
-│   ├── inscription/page.tsx      # Wizard multi-étapes
-│   ├── dashboard/
-│   │   ├── layout.tsx            # Layout commun (sidebar)
-│   │   ├── page.tsx              # Dashboard (KPIs + graphiques)
-│   │   ├── analytics/page.tsx    # Analytics avancées (tabs)
-│   │   ├── nutrition/
-│   │   │   ├── page.tsx          # Upload + résultats IA
-│   │   │   ├── history/page.tsx  # Historique repas
-│   │   │   └── meal-plan/page.tsx # Plans de repas (Premium)
-│   │   ├── workouts/page.tsx     # Programmes sport (Premium)
-│   │   ├── clients/page.tsx      # B2B (Premium+)
-│   │   └── settings/page.tsx     # Profil, objectifs, abonnement
-│   └── layout.tsx                # Root layout (Toaster, thème)
-├── components/
-│   ├── ui/                       # Shadcn UI (Button, Card, Dialog, ...)
-│   ├── charts/                   # Recharts (Weight, Calories, Macros)
-│   ├── dashboard/                # Layout, Sidebar, BmiCard
-│   ├── nutrition/                # Tracker, Uploader, ResultTable, Suggestions
-│   ├── wizard/                   # Multi-step inscription
-│   ├── premium/                  # PremiumGuard, UpgradeDialog
-│   └── providers/                # DynamicThemeProvider
-├── lib/
-│   ├── api.ts                    # Client API + cache + ApiError
-│   ├── actions/                  # Server Actions (nutrition)
-│   ├── stores/                   # Zustand (wizard, theme)
-│   ├── hooks/                    # use-premium-status
-│   └── auth-client.ts            # Better Auth
-├── e2e/
-│   ├── user-journey.spec.ts      # 5 tests parcours critique
-│   ├── pages.spec.ts             # 22 tests de couverture
-│   └── accessibility.spec.ts     # 6 tests WCAG AA
-├── docs/                         # Documentation
-├── middleware.ts                 # Auth middleware
-├── next.config.ts
-├── tailwind.config.ts
-└── playwright.config.ts
+<p>Le middleware est vraiment minimal (une vingtaine de lignes). Il check juste la présence du cookie <code>better-auth.session_token</code>. Il valide pas la session auprès du backend, c'est volontaire : tout endpoint appelé derrière revalide de toute façon, donc inutile de rajouter une requête réseau au middleware et de ralentir le premier render.</p>
+<h2 id="les-pages">Les pages</h2>
+<p>Je vais pas détailler chaque composant mais voici en gros ce que fait chaque page.</p>
+<h3 id="landing">Landing <code>/</code></h3>
+<p>Page publique, sans session. Trois cards pour les trois offres (Freemium 0€, Premium 9,99€, Premium+ 19,99€), un hero avec CTA, un footer. Indexable (Server Component, rendu côté serveur). On a fait attention aux metadata pour le SEO, tout en sémantique HTML correcte (<code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;section aria-labelledby&gt;</code>, etc).</p>
+<h3 id="inscription-inscription">Inscription <code>/inscription</code></h3>
+<p>Wizard en 6 étapes : âge → poids/taille → objectifs → allergies → récap → création compte. L'état est stocké dans Zustand avec le middleware <code>persist</code>, donc si l'utilisateur ferme l'onglet et revient plus tard, il retrouve sa progression. Une fois l'inscription réussie, on appelle <code>resetWizard()</code> pour nettoyer le localStorage.</p>
+<p>Chaque étape a sa propre validation Zod. Les messages d'erreur sont annoncés aux lecteurs d'écran via <code>aria-live="polite"</code>.</p>
+<h3 id="connexion-connexion">Connexion <code>/connexion</code></h3>
+<p>Formulaire simple email + password. Utilise <code>authClient.signIn.email()</code> de Better Auth. Gestion des 401 et 422 avec des toasts explicites. Un lien vers <code>/inscription</code> en bas.</p>
+<h3 id="dashboard-dashboard">Dashboard <code>/dashboard</code></h3>
+<p>Le coeur de l'app. 4 KPI cards en haut (poids, calories du jour, protéines, séances), une carte IMC calculée côté client à partir de poids+taille, puis deux graphiques (évolution du poids et calories de la semaine).</p>
+<p>Les données des KPI viennent de <code>/api/home</code> (une agrégation BFF). Les graphiques font leurs propres requêtes vers <code>/api/stats/weight-history</code> et <code>/api/stats/calories-history</code> pour pouvoir être réutilisés à plusieurs endroits (dashboard + analytics) sans refetcher à chaque fois.</p>
+<p>Si l'API retourne une erreur, on a un fallback avec des données de démo et un bandeau jaune qui prévient "Mode démonstration". L'utilisateur voit pas un écran blanc, il voit quelque chose d'exploitable mais il est prévenu que c'est pas ses vraies stats.</p>
+<h3 id="nutrition-dashboardnutrition">Nutrition <code>/dashboard/nutrition</code></h3>
+<p>C'est là qu'est le flow principal d'interaction avec l'IA. L'utilisateur drag-and-drop une photo de plat (via react-dropzone), elle est envoyée au backend qui la forwarde à l'API Python. La réponse arrive avec la classe détectée (parmi 101 classes de plats), la confiance, et une estimation calorique. On affiche ça dans une table éditable (l'utilisateur peut corriger manuellement les macros s'il juge l'estimation fausse), plus un composant <code>MealSuggestions</code> qui donne des conseils selon les objectifs de l'utilisateur.</p>
+<p>Le sous-menu contient aussi :
+- <code>/dashboard/nutrition/history</code> : liste des repas passés avec filtres (aujourd'hui, 7 jours, 30 jours, tout), tri par date
+- <code>/dashboard/nutrition/meal-plan</code> : génération de plan hebdo par l'IA (Premium)</p>
+<h3 id="analytics-dashboardanalytics">Analytics <code>/dashboard/analytics</code></h3>
+<p>Trois onglets (Tabs de Radix) : Vue d'ensemble, Nutrition, Poids. Les graphiques Macros sont derrière un <code>PremiumGuard</code> pour les utilisateurs Freemium.</p>
+<h3 id="workouts-dashboardworkouts">Workouts <code>/dashboard/workouts</code></h3>
+<p>Génération de programmes sportifs via l'endpoint <code>/api/workout/generate</code>. Les exercices réels viennent de la base Postgres côté backend Go. On a seedé 15 exercices de base (pompes, squats, burpees, dips, etc). Le moteur Go choisit selon l'équipement dispo, les blessures, et le niveau.</p>
+<p>Côté front, on distribue les exercices sur 5 jours (Lun → Ven) avec des onglets par jour.</p>
+<h3 id="clients-dashboardclients">Clients <code>/dashboard/clients</code></h3>
+<p>Réservé aux comptes Premium+. Affiche un tableau de bord anonymisé des clients d'un partenaire B2B (salle de sport, mutuelle). Pour l'instant c'est des données de démo parce qu'on n'a pas encore de table clients en base. Le <code>premiumGuard('premium_plus')</code> côté backend retourne un 403 aux non-Premium+, et côté front le message "Accès réservé" s'affiche.</p>
+<h3 id="settings-dashboardsettings">Settings <code>/dashboard/settings</code></h3>
+<p>Trois onglets : Profil (email, âge, poids, taille), Objectifs &amp; allergies, Abonnement (badge tier, CTA upgrade). Les modifs sont envoyées via <code>POST /api/user/profile</code> (qui appelle le gRPC <code>UpdateHealthProfile</code> côté Go).</p>
+<h2 id="comment-on-cause-au-backend">Comment on cause au backend</h2>
+<h3 id="le-client-api">Le client API</h3>
+<p>Tout passe par <code>lib/api.ts</code>. Deux fonctions principales :</p>
+<pre><code class="language-typescript">apiFetch&lt;T&gt;(endpoint, options)      // requête standard
+cachedFetch&lt;T&gt;(endpoint, options)   // avec cache mémoire (TTL 30s)
 </code></pre>
-<hr />
-<h2 id="3-fonctionnalites-principales">3. Fonctionnalités principales</h2>
-<h3 id="31-landing-page">3.1 Landing Page (<code>/</code>)</h3>
-<ul>
-<li>Page publique présentant les 3 offres (Freemium 0€, Premium 9,99€, Premium+ 19,99€)</li>
-<li>Grille responsive 3 colonnes → 1 colonne sur mobile</li>
-<li>CTAs vers <code>/inscription</code> et <code>/connexion</code></li>
-<li>SEO optimisé (metadata, sémantique HTML)</li>
-</ul>
-<h3 id="32-inscription-inscription">3.2 Inscription (<code>/inscription</code>)</h3>
-<p><strong>Wizard multi-étapes (6 étapes)</strong> :
-1. Âge (validation : 18-100 ans)
-2. Poids + Taille (30-300 kg / 100-250 cm)
-3. Objectifs (checkboxes multi-sélection)
-4. Allergies (checkboxes + option "Aucune")
-5. Récapitulatif
-6. Création de compte (email + mot de passe)</p>
-<p><strong>Caractéristiques :</strong>
-- État persistant dans <code>localStorage</code> via Zustand <code>persist</code> middleware
-- Un refresh (F5) ne perd pas la progression
-- Nettoyage automatique après inscription réussie
-- Validation Zod à chaque étape
-- Navigation Précédent/Suivant avec sauvegarde</p>
-<h3 id="33-dashboard-dashboard">3.3 Dashboard (<code>/dashboard</code>)</h3>
-<p><strong>4 KPI cards</strong> (données réelles via <code>/api/home</code>) :
-- Poids actuel
-- Calories du jour
-- Protéines
-- Nombre de séances</p>
-<p><strong>Graphiques</strong> (données réelles via <code>/api/stats/*</code>) :
-- Évolution du poids (LineChart, 30 jours)
-- Calories journalières (BarChart, 7 jours)
-- Carte BMI (calcul client-side : <code>poids / (taille/100)²</code>)</p>
-<p><strong>Fallback</strong> : Si l'API est indisponible, bandeau "Mode démonstration" + données fictives (expérience dégradée, pas d'écran blanc).</p>
-<h3 id="34-analytics-dashboardanalytics">3.4 Analytics (<code>/dashboard/analytics</code>)</h3>
-<p><strong>3 onglets</strong> :
-- Vue d'ensemble (poids + calories + macros)
-- Nutrition (calories + macros)
-- Poids (évolution)</p>
-<p><strong>Macros Chart</strong> (PieChart) protégé par <code>PremiumGuard</code> pour les utilisateurs Freemium.</p>
-<h3 id="35-nutrition">3.5 Nutrition</h3>
-<p><strong>Upload (<code>/dashboard/nutrition</code>)</strong> :
-- Drag &amp; drop via <code>react-dropzone</code> (image/<em>, max 10MB)
-- Envoi au backend qui forwarde à </em><em>ia-python</em>* (<code>POST /predict/upload</code>)
-- Réponse : classe détectée + calories + macros estimées
-- Affichage tabulaire éditable (correction utilisateur possible)
-- Suggestions contextualisées (déficit / équilibre / excès)</p>
-<p><strong>Historique (<code>/dashboard/nutrition/history</code>)</strong> :
-- Liste des repas loggés
-- Filtre par période (aujourd'hui, semaine, mois)
-- Tri ascendant/descendant par date
-- 3 cards : total repas, calories cumulées, moyenne/repas</p>
-<p><strong>Meal Plan (<code>/dashboard/nutrition/meal-plan</code>)</strong> — <strong>Premium</strong> :
-- Bouton "Générer un plan" → <code>POST /api/generate-menu</code>
-- Plan sur 5 jours (petit-déj, déjeuner, dîner, collation)
-- Contraintes prises en compte : allergies, régime, budget
-- Cards détaillées par repas (macros, ingrédients)</p>
-<h3 id="36-workouts-dashboardworkouts-premium">3.6 Workouts (<code>/dashboard/workouts</code>) — Premium</h3>
-<ul>
-<li>Bouton "Générer un programme" → <code>POST /api/workout/generate</code></li>
-<li>Distribution sur 5 jours (Lun → Ven)</li>
-<li>Chaque jour : liste d'exercices avec séries, répétitions, repos</li>
-<li>Paramètres : durée, équipement, blessures</li>
-</ul>
-<h3 id="37-clients-b2b-dashboardclients-premium">3.7 Clients B2B (<code>/dashboard/clients</code>) — Premium+</h3>
-<ul>
-<li>Tableau de bord B2B (marque blanche)</li>
-<li>Liste des clients abonnés</li>
-<li>Stats : total, actifs 7j, taux Premium, calories moyennes</li>
-<li>Données anonymisées (confidentialité)</li>
-</ul>
-<h3 id="38-settings-dashboardsettings">3.8 Settings (<code>/dashboard/settings</code>)</h3>
-<p><strong>3 onglets</strong> :
-- Profil (email, âge, poids, taille)
-- Objectifs &amp; Allergies
-- Abonnement (badge tier, CTA upgrade)</p>
-<p>Sauvegarde via <code>POST /api/user/profile</code> avec toast de confirmation.</p>
-<hr />
-<h2 id="4-principes-dergonomie-appliques">4. Principes d'ergonomie appliqués</h2>
-<h3 id="41-navigation">4.1 Navigation</h3>
-<ul>
-<li><strong>Sidebar fixe desktop</strong> avec icônes Lucide + labels</li>
-<li><strong>Sidebar collapsible tablette/mobile</strong> (menu hamburger)</li>
-<li><strong>Breadcrumb implicite</strong> via le titre de page (<code>h1</code>)</li>
-<li><strong>Retour arrière natif</strong> du navigateur préservé (pas de SPA cassée)</li>
-<li><strong>Liens actifs</strong> mis en évidence (couleur primaire + fond)</li>
-</ul>
-<h3 id="42-feedback-utilisateur">4.2 Feedback utilisateur</h3>
-<ul>
-<li><strong>Toasts</strong> (Sonner) pour confirmations et erreurs</li>
-<li><strong>Skeletons</strong> pendant les chargements (pas de spinner bloquant)</li>
-<li><strong>Bandeaux "Mode démonstration"</strong> transparents quand données mockées</li>
-<li><strong>Messages d'erreur</strong> explicites (pas de code HTTP brut)</li>
-<li><strong>Validation en temps réel</strong> dans les formulaires</li>
-</ul>
-<h3 id="43-hierarchie-visuelle">4.3 Hiérarchie visuelle</h3>
-<ul>
-<li><strong>Titre h1</strong> unique par page (SEO + a11y)</li>
-<li><strong>Cards</strong> pour regrouper l'information (Card/CardHeader/CardContent/CardFooter)</li>
-<li><strong>Couleurs sémantiques</strong> (primary = vert, destructive = rouge, muted = gris)</li>
-<li><strong>Tailles typographiques</strong> cohérentes (via <code>text-sm</code>, <code>text-xl</code>, <code>text-4xl</code>)</li>
-</ul>
-<h3 id="44-cognitive-load">4.4 Cognitive load</h3>
-<ul>
-<li><strong>6 liens maximum</strong> dans la sidebar</li>
-<li><strong>Wizard découpé</strong> en 6 étapes courtes plutôt qu'un formulaire long</li>
-<li><strong>Messages d'aide</strong> sous chaque champ (<code>description</code>)</li>
-<li><strong>Premium Guard</strong> avec blur + CTA clair (pas de murs opaques)</li>
-</ul>
-<h3 id="45-responsive">4.5 Responsive</h3>
-<table>
-<thead>
-<tr>
-<th>Breakpoint</th>
-<th>Comportement</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>&lt; 640px</code> (mobile)</td>
-<td>Sidebar cachée, grille 1 colonne, navigation bottom/top</td>
-</tr>
-<tr>
-<td><code>640-1024px</code> (tablet)</td>
-<td>Grille 2 colonnes, sidebar collapsible</td>
-</tr>
-<tr>
-<td><code>&gt; 1024px</code> (desktop)</td>
-<td>Sidebar fixe 264px, grille 3-4 colonnes</td>
-</tr>
-</tbody>
-</table>
-<p>Testé sur viewports 375×812 (iPhone SE), 768×1024 (iPad), 1920×1080 (desktop).</p>
-<hr />
-<h2 id="5-gestion-des-apis">5. Gestion des APIs</h2>
-<h3 id="51-client-api-centralise-libapits">5.1 Client API centralisé (<code>lib/api.ts</code>)</h3>
-<pre><code class="language-typescript">// Requêtes classiques
-apiFetch&lt;T&gt;(endpoint, options)
-
-// Requêtes avec cache TTL (30s par défaut)
-cachedFetch&lt;T&gt;(endpoint, options, ttl)
-
-// Invalidation
-invalidateCache(endpoint)
+<p>Il y a aussi une classe <code>ApiError</code> avec les champs <code>status</code> et <code>required_tier</code> pour distinguer les cas d'erreur. On a des comportements automatiques :
+- 401 : redirect vers <code>/connexion</code> (window.location)
+- 403 avec <code>required_tier</code> : toast + ouverture de <code>UpgradeDialog</code>
+- 429 : toast "trop de requêtes"
+- 5xx : fallback sur données demo, bandeau jaune</p>
+<h3 id="le-cache">Le cache</h3>
+<p>Ajouté relativement tard dans le projet. Avant, chaque page qui montait son composant déclenchait un refetch de <code>/api/home</code>. Maintenant, le premier appel met en cache pendant 30 secondes (Map en mémoire). Les GET avec la même URL tapent dans le cache. Les mutations POST/PUT/PATCH bypassent évidemment.</p>
+<p>C'est volontairement basique. Si on avait voulu faire les choses bien on aurait pris TanStack Query (ex-React Query). On n'en avait pas besoin pour un MVP.</p>
+<h3 id="fallback-demo">Fallback demo</h3>
+<p>Le principe c'est de jamais laisser l'utilisateur sur un écran blanc. Chaque page principale a sa constante <code>DEMO_DATA</code> en haut du fichier. Le pattern est toujours le même :</p>
+<pre><code class="language-tsx">try {
+    const res = await cachedFetch('/api/home');
+    setData(res.data);
+} catch {
+    setData(DEMO_DATA);
+    setIsDemo(true);
+}
 </code></pre>
-<h3 id="52-cache-intelligent">5.2 Cache intelligent</h3>
-<ul>
-<li>Cache en mémoire (Map)</li>
-<li>TTL 30 secondes par défaut</li>
-<li>Appliqué aux endpoints stables : <code>/api/home</code>, <code>/api/stats/*</code></li>
-<li>Les mutations (POST/PUT/PATCH) bypassent le cache automatiquement</li>
-<li>Clé = URL complète (inclut les query params)</li>
-</ul>
-<h3 id="53-gestion-derreurs">5.3 Gestion d'erreurs</h3>
-<p><strong>Classe <code>ApiError</code></strong> :
-- <code>status</code> (HTTP code)
-- <code>required_tier</code> (pour 403 premium)
-- <code>message</code> (humain)</p>
-<p><strong>Comportements</strong> :
-- <strong>401</strong> → redirect automatique vers <code>/connexion</code>
-- <strong>403</strong> → toast "Premium requis" + overlay UpgradeDialog
-- <strong>429</strong> → toast "Trop de requêtes, réessayez"
-- <strong>5xx</strong> → fallback demo + bandeau + logged en console</p>
-<h3 id="54-fallbacks-continuite-de-service">5.4 Fallbacks (continuité de service)</h3>
-<p>Chaque page principale a des <strong>DEMO_DATA</strong> utilisées en cas d'erreur API :
-- Pas d'écran blanc
-- Bandeau jaune "Mode démonstration" transparent
-- L'utilisateur comprend que les données ne sont pas réelles</p>
-<hr />
-<h2 id="6-accessibilite-wcag-21-aa-rgaa">6. Accessibilité (WCAG 2.1 AA / RGAA)</h2>
-<h3 id="61-mesures-appliquees">6.1 Mesures appliquées</h3>
-<table>
-<thead>
-<tr>
-<th>Critère</th>
-<th>Implémentation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Structure sémantique</td>
-<td><code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;section&gt;</code> partout</td>
-</tr>
-<tr>
-<td>Hiérarchie <code>h1→h6</code></td>
-<td>Un seul h1 par page, jamais de saut de niveau</td>
-</tr>
-<tr>
-<td>Labels</td>
-<td>Tous les inputs ont un <code>&lt;label&gt;</code> associé (<code>htmlFor</code>)</td>
-</tr>
-<tr>
-<td><code>aria-label</code></td>
-<td>Icônes sans texte ont un <code>aria-label</code></td>
-</tr>
-<tr>
-<td><code>aria-hidden</code></td>
-<td>Icônes purement décoratives</td>
-</tr>
-<tr>
-<td><code>aria-describedby</code></td>
-<td>Messages d'aide liés aux inputs</td>
-</tr>
-<tr>
-<td><code>aria-live</code></td>
-<td>Messages d'erreur annoncés (<code>polite</code>)</td>
-</tr>
-<tr>
-<td>Navigation clavier</td>
-<td>Tab/Shift+Tab, Escape (dialogs), Enter/Space</td>
-</tr>
-<tr>
-<td>Focus visible</td>
-<td>Ring via Radix UI <code>focus-visible</code></td>
-</tr>
-<tr>
-<td>Contraste</td>
-<td>Palette Tailwind respectant ratio 4.5:1 (texte normal)</td>
-</tr>
-<tr>
-<td>Skip link</td>
-<td>Présent sur les pages dashboard</td>
-</tr>
-<tr>
-<td>ARIA widgets</td>
-<td>Tabs, Dialog, Checkbox, Select via Radix UI (conformes WAI-ARIA)</td>
-</tr>
-</tbody>
-</table>
-<h3 id="62-tests-automatises">6.2 Tests automatisés</h3>
-<ul>
-<li><code>@axe-core/playwright</code> exécuté sur <strong>6 pages</strong> :</li>
-<li><code>/</code>, <code>/inscription</code>, <code>/dashboard</code>, <code>/dashboard/analytics</code>, <code>/dashboard/nutrition</code>, <code>/dashboard/settings</code></li>
-<li><strong>0 violation critique/serious</strong> sur toutes les pages</li>
-<li>Tags testés : <code>wcag2a</code>, <code>wcag2aa</code>, <code>wcag21a</code>, <code>wcag21aa</code></li>
-<li>Rapport HTML généré : <code>npm run test:a11y:report</code></li>
-</ul>
-<h3 id="63-ci-cd">6.3 CI / CD</h3>
-<ul>
-<li>GitHub Actions exécute les tests axe-core sur chaque PR</li>
-<li>Le build échoue si des violations critiques sont détectées</li>
-<li>Rapport uploadé en artifact (30 jours de rétention)</li>
-</ul>
-<hr />
-<h2 id="7-securite">7. Sécurité</h2>
-<h3 id="71-authentification">7.1 Authentification</h3>
-<ul>
-<li><strong>Better Auth</strong> avec sessions cookies HttpOnly (pas accessible via JS)</li>
-<li>Middleware Next.js vérifie le cookie sur <code>/dashboard/*</code></li>
-<li>Redirection automatique vers <code>/connexion</code> si pas de session</li>
-</ul>
-<h3 id="72-protection-des-routes">7.2 Protection des routes</h3>
-<ul>
-<li><strong>Côté serveur</strong> : middleware.ts (Edge) → bloque avant le rendu</li>
-<li><strong>Côté backend</strong> : middleware Hono + <code>premiumGuard('premium' | 'premium_plus')</code> → retourne 403</li>
-<li><strong>Côté frontend</strong> : <code>PremiumGuard</code> composant → masque visuellement (mais NE protège pas seul)</li>
-</ul>
-<h3 id="73-xss-csrf">7.3 XSS / CSRF</h3>
-<ul>
-<li>React échappe le contenu par défaut (pas de <code>dangerouslySetInnerHTML</code> sauf cas justifié)</li>
-<li>Cookies en <code>SameSite=Lax</code></li>
-<li>CORS restrictif côté backend (<code>localhost:3000</code>, <code>localhost:3001</code>, <code>https://next.medev-tech.fr</code>)</li>
-</ul>
-<hr />
-<h2 id="8-performance">8. Performance</h2>
-<h3 id="81-optimisations-appliquees">8.1 Optimisations appliquées</h3>
-<ul>
-<li><strong>Server Components par défaut</strong> (JS bundle minimal)</li>
-<li><strong>Client Components ciblés</strong> (<code>"use client"</code> uniquement quand nécessaire)</li>
-<li><strong>Turbopack</strong> (build 10-30× plus rapide que Webpack en dev)</li>
-<li><strong>Code splitting automatique</strong> par route</li>
-<li><strong>Images</strong> : Next/Image avec lazy loading</li>
-<li><strong>Cache API</strong> (TTL 30s) évite les refetchs inutiles</li>
-<li><strong>Recharts <code>ResponsiveContainer</code></strong> évite les recalculs au resize</li>
-</ul>
-<h3 id="82-metriques-build-production">8.2 Métriques (build production)</h3>
-<ul>
-<li>Build sans erreur, toutes les pages pre-rendered (<code>○ Static</code>)</li>
-<li>Middleware déployé en Edge (<code>ƒ Proxy</code>)</li>
-<li>Lighthouse ciblé : <strong>Performance 90+, Accessibility 100, SEO 95+</strong></li>
-</ul>
-<hr />
-<h2 id="9-tests">9. Tests</h2>
-<h3 id="91-couverture-33-tests-playwright">9.1 Couverture (33 tests Playwright)</h3>
-<table>
-<thead>
-<tr>
-<th>Suite</th>
-<th>Tests</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Landing Page</td>
-<td>4</td>
-<td>Hero, pricing, navigation, footer</td>
-</tr>
-<tr>
-<td>Inscription Wizard</td>
-<td>4</td>
-<td>Flow complet, validations, navigation</td>
-</tr>
-<tr>
-<td>Connexion</td>
-<td>2</td>
-<td>Formulaire, lien inscription</td>
-</tr>
-<tr>
-<td>Auth Protection</td>
-<td>8</td>
-<td>Redirection pour 8 routes <code>/dashboard/*</code></td>
-</tr>
-<tr>
-<td>Responsive</td>
-<td>4</td>
-<td>Mobile + tablette (375, 768px)</td>
-</tr>
-<tr>
-<td>User Journey</td>
-<td>5</td>
-<td>Landing → Wizard, redirections</td>
-</tr>
-<tr>
-<td>Accessibilité WCAG AA</td>
-<td>6</td>
-<td>axe-core sur 6 pages</td>
-</tr>
-<tr>
-<td><strong>Total</strong></td>
-<td><strong>33</strong></td>
-<td><strong>100% passent ✅</strong></td>
-</tr>
-</tbody>
-</table>
-<h3 id="92-scripts-disponibles">9.2 Scripts disponibles</h3>
-<pre><code class="language-bash">npm run test            # Tous les tests
-npm run test:e2e        # User journey uniquement
-npm run test:a11y       # Accessibilité uniquement
-npm run test:a11y:report # + rapport HTML
-npm run test:report     # Ouvre le rapport Playwright
+<p>Quand <code>isDemo === true</code>, on affiche un bandeau jaune en haut pour prévenir l'utilisateur. C'est pas parfait (on voudrait des vraies données) mais c'est mieux qu'une page cassée.</p>
+<h2 id="tests">Tests</h2>
+<p>On a 57 tests Playwright qui passent tous. Détail dans le fichier <code>04-Accessibilite-WCAG-RGAA.md</code> pour les tests d'a11y et dans le CI.</p>
+<p>Rapide récap :
+- <code>user-journey.spec.ts</code> : 5 tests, parcours principal
+- <code>pages.spec.ts</code> : 22 tests, couverture de toutes les routes
+- <code>accessibility.spec.ts</code> : 6 tests (axe-core sur 6 pages)
+- <code>auth-flow.spec.ts</code> : 10 tests, login/signup avec mocks
+- <code>dashboard-mocked.spec.ts</code> : 14 tests, dashboard authentifié avec mocks</p>
+<p>Les tests qui ont besoin d'une session utilisent <code>page.route()</code> pour mocker les réponses API. On évite comme ça la dépendance à un backend running pendant les tests CI.</p>
+<h2 id="deploiement">Déploiement</h2>
+<p>En local : <code>npm install &amp;&amp; npm run dev</code>. Par défaut ça tape sur <code>http://localhost:3002</code> pour l'API (variable <code>NEXT_PUBLIC_API_URL</code>).</p>
+<p>En prod on a un Vercel branché sur le repo GitHub. Le main se déploie automatiquement. Les PR ont leur preview URL.</p>
+<p>Variables d'env prod :</p>
+<pre><code>NEXT_PUBLIC_API_URL=https://hono.medev-tech.fr
 </code></pre>
-<h3 id="93-ci-github-actions">9.3 CI GitHub Actions</h3>
+<h2 id="trucs-a-savoir">Trucs à savoir</h2>
 <ul>
-<li>Tests e2e sur chaque push</li>
-<li>Tests d'accessibilité sur chaque push</li>
-<li>Rapport HTML uploadé comme artifact (30 jours)</li>
-<li>Échec du build si violations a11y critiques</li>
+<li>On utilise toujours <code>&lt;Image&gt;</code> de Next pour les images (lazy loading + optimisation)</li>
+<li>Server Components par défaut. <code>"use client"</code> uniquement quand on a besoin de state ou d'événements</li>
+<li>Pas de CSS modules, tout en Tailwind</li>
+<li>Les composants Shadcn sont copiés dans le repo, donc modifiables librement</li>
+<li><code>npm run lint</code> doit être clean avant de push</li>
+<li><code>npm test</code> avant de push si on touche aux flows critiques</li>
 </ul>
-<hr />
-<h2 id="10-deploiement">10. Déploiement</h2>
-<h3 id="101-environnements">10.1 Environnements</h3>
-<table>
-<thead>
-<tr>
-<th>Environnement</th>
-<th>URL</th>
-<th>Branche</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Development</td>
-<td><code>localhost:3000</code></td>
-<td>feature/*</td>
-</tr>
-<tr>
-<td>Preview</td>
-<td>(Vercel auto)</td>
-<td>PR</td>
-</tr>
-<tr>
-<td>Production</td>
-<td><code>next.medev-tech.fr</code></td>
-<td><code>main</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="102-variables-denvironnement">10.2 Variables d'environnement</h3>
-<pre><code class="language-bash">NEXT_PUBLIC_API_URL=http://localhost:3002  # ou prod URL
-</code></pre>
-<h3 id="103-commandes">10.3 Commandes</h3>
-<pre><code class="language-bash">npm install        # Installer les dépendances
-npm run dev        # Dev local (Turbopack)
-npm run build      # Build production
-npm run start      # Démarrer en prod
-npm run lint       # Linter ESLint
-npm run test       # Tests Playwright
-</code></pre>
-<hr />
-<h2 id="11-evolutions-futures">11. Évolutions futures</h2>
+<h2 id="ameliorations-prevues-apres-mvp">Améliorations prévues après MVP</h2>
 <ul>
-<li>Intégration objets connectés (Premium+) via Web Bluetooth API</li>
-<li>Consultations en ligne (WebRTC)</li>
-<li>Notifications push (PWA + Service Worker)</li>
-<li>Internationalisation (i18n) — FR/EN</li>
-<li>Mode hors-ligne (Service Worker + IndexedDB)</li>
-<li>Thème dynamique B2B (tokens CSS variables déjà en place)</li>
-</ul>
-<hr />
-<h2 id="12-references">12. Références</h2>
-<ul>
-<li>Next.js : https://nextjs.org/docs</li>
-<li>Shadcn UI : https://ui.shadcn.com</li>
-<li>Radix UI : https://www.radix-ui.com</li>
-<li>WCAG 2.1 : https://www.w3.org/TR/WCAG21/</li>
-<li>RGAA 4 : https://accessibilite.numerique.gouv.fr/</li>
-<li>axe-core : https://www.deque.com/axe/</li>
+<li>Internationalisation (i18n) FR/EN via <code>next-intl</code></li>
+<li>PWA + service worker pour le mode offline</li>
+<li>Notifications push (pour les rappels quotidiens)</li>
+<li>Storybook des composants UI</li>
+<li>TanStack Query à la place de notre cache maison si on grossit</li>
+<li>Migration vers Server Actions pour les mutations (au lieu de fetch)</li>
 </ul><h1 id="maquettes-design-system-healthnext">Maquettes &amp; Design System — HealthNext</h1>
 <h2 id="1-approche-design">1. Approche design</h2>
 <p>HealthNext adopte une approche <strong>design-first</strong> basée sur :
