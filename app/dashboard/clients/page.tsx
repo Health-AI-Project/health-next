@@ -6,7 +6,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -158,26 +157,6 @@ export default function ClientsPage() {
                 </div>
             </section>
 
-            <section aria-labelledby="clients-table-heading">
-                <h2 id="clients-table-heading" className="sr-only">Liste des clients</h2>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Liste des clients</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-col items-center justify-center py-12 space-y-4 text-center">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                                <ShieldCheck className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-                            </div>
-                            <p className="text-sm text-muted-foreground max-w-sm">
-                                Les donnees personnelles des clients (nom, email) sont protegees.
-                                Seuls les administrateurs autorises peuvent consulter cette liste.
-                            </p>
-                            <Badge variant="outline">Acces administrateur requis</Badge>
-                        </div>
-                    </CardContent>
-                </Card>
-            </section>
         </div>
     );
 }
