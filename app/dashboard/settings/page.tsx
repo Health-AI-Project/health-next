@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toaster";
 import { GOALS_OPTIONS, ALLERGIES_OPTIONS } from "@/lib/schemas/wizard-schemas";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, invalidateCache } from "@/lib/api";
 import { Save, User, Target, CreditCard, Crown, Gem } from "lucide-react";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -91,6 +91,7 @@ export default function SettingsPage() {
                     allergies: (settings?.allergies?.length ? settings.allergies : ["none"]),
                 }),
             });
+            invalidateCache("/api/home");
             toast.success("Profil mis a jour");
         } catch {
             toast.error("Impossible de sauvegarder (backend non disponible)");
@@ -116,6 +117,7 @@ export default function SettingsPage() {
                     allergies: (settings?.allergies?.length ? settings.allergies : ["none"]),
                 }),
             });
+            invalidateCache("/api/home");
             toast.success("Objectifs mis a jour");
         } catch {
             toast.error("Impossible de sauvegarder (backend non disponible)");

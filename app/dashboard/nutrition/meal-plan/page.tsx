@@ -168,9 +168,23 @@ export default function MealPlanPage() {
 
     async function fetchPlan() {
         try {
-            const recipes = await apiFetch<BackendRecipe[]>("/api/my-meals");
-            if (Array.isArray(recipes) && recipes.length > 0) {
-                setPlan(recipesToDayPlans(recipes));
+            const response = await apiFetch<
+                BackendRecipe[] | { days: Array<{ day: string; lunch?: BackendRecipe; dinner?: BackendRecipe }> }
+            >("/api/my-meals");
+
+            // Nouveau format : { days: [...] } structure par jour
+            if (response && !Array.isArray(response) && Array.isArray(response.days) && response.days.length > 0) {
+                const dayPlans: DayPlan[] = response.days.map((d) => ({
+                    day: d.day,
+                    breakfast: { name: "Petit-dejeuner libre", calories: 400, proteins: 15, carbs: 50, fats: 12, ingredients: [] },
+                    lunch: d.lunch ? recipeToMeal(d.lunch) : recipeToMeal(d.dinner!),
+                    dinner: d.dinner ? recipeToMeal(d.dinner) : recipeToMeal(d.lunch!),
+                }));
+                setPlan(dayPlans);
+                setIsDemo(false);
+            } else if (Array.isArray(response) && response.length > 0) {
+                // Ancien format : tableau plat
+                setPlan(recipesToDayPlans(response));
                 setIsDemo(false);
             } else {
                 setPlan(DEMO_MEAL_PLAN);

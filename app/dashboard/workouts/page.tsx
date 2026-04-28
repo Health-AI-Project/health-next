@@ -10,10 +10,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { PremiumGuard } from "@/components/premium/premium-guard";
 import { apiFetch } from "@/lib/api";
 import { toast } from "@/components/ui/toaster";
-import { Dumbbell, Clock, Flame, Target, Trophy, RefreshCw, Loader2 } from "lucide-react";
+import { Dumbbell, Clock, Flame, Target, Trophy, RefreshCw, Loader2, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Exercise {
@@ -39,9 +58,27 @@ interface BackendExercise {
     type: string;
 }
 
+interface BackendStructuredExercise {
+    name: string;
+    muscle: string;
+    sets: number;
+    reps: string;
+    rest: string;
+}
+
+interface BackendDay {
+    day: string;
+    focus: string;
+    difficulty: "Debutant" | "Intermediaire" | "Avance";
+    duration_minutes: number;
+    calories: number;
+    exercises: BackendStructuredExercise[];
+}
+
 interface BackendWorkoutPlan {
-    exercises: BackendExercise[];
-    total_duration: number;
+    exercises?: BackendExercise[];
+    days?: BackendDay[];
+    total_duration?: number;
 }
 
 const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
@@ -117,23 +154,45 @@ const DEMO_WORKOUT_PLAN: DayWorkout[] = [
 ];
 
 function backendToDayWorkouts(plan: BackendWorkoutPlan): DayWorkout[] {
+    // Format structure (preferable) : un programme par jour avec sets/reps/rest reels
+    if (Array.isArray(plan.days) && plan.days.length > 0) {
+        return plan.days.map((d) => ({
+            day: d.day,
+            focus: d.focus,
+            duration: `${d.duration_minutes} min`,
+            calories: d.calories,
+            difficulty: d.difficulty,
+            exercises: d.exercises.map((e) => ({
+                name: e.name,
+                sets: e.sets,
+                reps: e.reps,
+                rest: e.rest,
+                muscle: e.muscle,
+            })),
+        }));
+    }
+
+    // Fallback ancien format (durees en secondes) : on convertit en minutes,
+    // on repartit equitablement sur les 5 jours.
     const exercises = plan.exercises || [];
+    if (exercises.length === 0) return [];
     const perDay = Math.max(1, Math.ceil(exercises.length / DAYS.length));
     const days: DayWorkout[] = [];
 
     for (let i = 0; i < DAYS.length && i * perDay < exercises.length; i++) {
         const dayExercises = exercises.slice(i * perDay, (i + 1) * perDay);
-        const dayDuration = dayExercises.reduce((sum, e) => sum + e.duration, 0);
+        const dayDurationSec = dayExercises.reduce((sum, e) => sum + e.duration, 0);
+        const dayDurationMin = Math.round(dayDurationSec / 60);
         days.push({
             day: DAYS[i],
             focus: dayExercises[0]?.type || "Entrainement",
-            duration: `${dayDuration} min`,
-            calories: Math.round(dayDuration * 7),
+            duration: `${dayDurationMin} min`,
+            calories: Math.round(dayDurationMin * 7),
             difficulty: "Intermediaire",
             exercises: dayExercises.map((e) => ({
                 name: e.name,
                 sets: 3,
-                reps: `${e.duration} min`,
+                reps: "10-12",
                 rest: "60s",
                 muscle: e.type,
             })),
@@ -153,25 +212,58 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     return <Badge variant={c.variant} className={c.className}>{difficulty}</Badge>;
 }
 
+const MUSCLE_OPTIONS = [
+    { id: "pectoraux", label: "Pectoraux" },
+    { id: "dos", label: "Dos" },
+    { id: "epaules", label: "Epaules" },
+    { id: "bras", label: "Bras (biceps/triceps)" },
+    { id: "jambes", label: "Jambes" },
+    { id: "abdominaux", label: "Abdominaux" },
+    { id: "cardio", label: "Cardio" },
+];
+
+interface WorkoutParams {
+    sessions_per_week: number;
+    duration: number;
+    level: "Debutant" | "Intermediaire" | "Avance";
+    equipment: "GYM" | "NONE";
+    target_muscles: string[];
+    injuries: string[];
+}
+
+const DEFAULT_PARAMS: WorkoutParams = {
+    sessions_per_week: 4,
+    duration: 50,
+    level: "Intermediaire",
+    equipment: "GYM",
+    target_muscles: ["pectoraux", "dos", "jambes"],
+    injuries: [],
+};
+
 export default function WorkoutsPage() {
     const [plan, setPlan] = useState<DayWorkout[]>([]);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [isDemo, setIsDemo] = useState(false);
+    const [paramsOpen, setParamsOpen] = useState(false);
+    const [params, setParams] = useState<WorkoutParams>(DEFAULT_PARAMS);
+    const [draftParams, setDraftParams] = useState<WorkoutParams>(DEFAULT_PARAMS);
 
     async function fetchPlan() {
         try {
-            const response = await apiFetch<BackendWorkoutPlan>("/api/workout/generate", {
-                method: "POST",
-                body: JSON.stringify({
-                    duration: 45,
-                    equipment: "GYM",
-                    injuries: [],
-                }),
-            });
-            if (response?.exercises?.length > 0) {
-                setPlan(backendToDayWorkouts(response));
-                setIsDemo(false);
+            const response = await apiFetch<{ plan: BackendWorkoutPlan | null; params?: WorkoutParams }>(
+                "/api/workout/current",
+            );
+            if (response?.plan) {
+                const days = backendToDayWorkouts(response.plan);
+                if (days.length > 0) {
+                    setPlan(days);
+                    setIsDemo(false);
+                    if (response.params) setParams(response.params);
+                } else {
+                    setPlan(DEMO_WORKOUT_PLAN);
+                    setIsDemo(true);
+                }
             } else {
                 setPlan(DEMO_WORKOUT_PLAN);
                 setIsDemo(true);
@@ -184,21 +276,21 @@ export default function WorkoutsPage() {
         }
     }
 
-    async function handleGenerate() {
+    async function handleGenerate(custom?: WorkoutParams) {
+        const p = custom ?? params;
         setGenerating(true);
         try {
             const response = await apiFetch<BackendWorkoutPlan>("/api/workout/generate", {
                 method: "POST",
-                body: JSON.stringify({
-                    duration: 45,
-                    equipment: "GYM",
-                    injuries: [],
-                }),
+                body: JSON.stringify(p),
             });
-            if (response?.exercises?.length > 0) {
-                setPlan(backendToDayWorkouts(response));
+            const days = backendToDayWorkouts(response);
+            if (days.length > 0) {
+                setPlan(days);
                 setIsDemo(false);
+                setParams(p);
                 toast.success("Programme genere !");
+                setParamsOpen(false);
             } else {
                 toast.error("Aucun exercice retourne par le serveur");
             }
@@ -209,8 +301,23 @@ export default function WorkoutsPage() {
         }
     }
 
+    function toggleMuscle(id: string) {
+        setDraftParams((prev) => ({
+            ...prev,
+            target_muscles: prev.target_muscles.includes(id)
+                ? prev.target_muscles.filter((m) => m !== id)
+                : [...prev.target_muscles, id],
+        }));
+    }
+
+    function openParams() {
+        setDraftParams(params);
+        setParamsOpen(true);
+    }
+
     useEffect(() => {
         fetchPlan();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const weeklyCalories = plan.reduce((sum, d) => sum + d.calories, 0);
@@ -242,19 +349,120 @@ export default function WorkoutsPage() {
                         Votre programme d&apos;entrainement personnalise par l&apos;IA
                     </p>
                 </div>
-                <Button
-                    variant="default"
-                    className="gap-2"
-                    onClick={handleGenerate}
-                    disabled={generating}
-                >
-                    {generating ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                    )}
-                    {generating ? "Generation..." : "Generer un programme"}
-                </Button>
+                <Dialog open={paramsOpen} onOpenChange={setParamsOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="default" className="gap-2" onClick={openParams} disabled={generating}>
+                            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings2 className="h-4 w-4" aria-hidden="true" />}
+                            {generating ? "Generation..." : "Generer un programme"}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>Parametrer votre programme</DialogTitle>
+                            <DialogDescription>
+                                Ajustez seances, duree, niveau et muscles cibles avant de generer.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="grid gap-4 py-2">
+                            <div className="grid gap-2">
+                                <Label htmlFor="sessions">Seances par semaine</Label>
+                                <Input
+                                    id="sessions"
+                                    type="number"
+                                    min={1}
+                                    max={7}
+                                    value={draftParams.sessions_per_week}
+                                    onChange={(e) =>
+                                        setDraftParams({ ...draftParams, sessions_per_week: Math.min(7, Math.max(1, Number(e.target.value) || 1)) })
+                                    }
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="duration">Duree par seance (minutes)</Label>
+                                <Input
+                                    id="duration"
+                                    type="number"
+                                    min={20}
+                                    max={120}
+                                    step={5}
+                                    value={draftParams.duration}
+                                    onChange={(e) =>
+                                        setDraftParams({ ...draftParams, duration: Math.min(120, Math.max(20, Number(e.target.value) || 30)) })
+                                    }
+                                />
+                            </div>
+
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="level">Niveau</Label>
+                                    <Select
+                                        value={draftParams.level}
+                                        onValueChange={(v) => setDraftParams({ ...draftParams, level: v as WorkoutParams["level"] })}
+                                    >
+                                        <SelectTrigger id="level" aria-label="Niveau">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Debutant">Debutant</SelectItem>
+                                            <SelectItem value="Intermediaire">Intermediaire</SelectItem>
+                                            <SelectItem value="Avance">Avance</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="equipment">Equipement</Label>
+                                    <Select
+                                        value={draftParams.equipment}
+                                        onValueChange={(v) => setDraftParams({ ...draftParams, equipment: v as WorkoutParams["equipment"] })}
+                                    >
+                                        <SelectTrigger id="equipment" aria-label="Equipement">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="GYM">Salle de sport</SelectItem>
+                                            <SelectItem value="NONE">A la maison (sans materiel)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Muscles cibles</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {MUSCLE_OPTIONS.map((m) => {
+                                        const checked = draftParams.target_muscles.includes(m.id);
+                                        return (
+                                            <label
+                                                key={m.id}
+                                                className="flex items-center gap-2 rounded-md border border-border bg-card p-2 text-sm cursor-pointer hover:bg-accent"
+                                            >
+                                                <Checkbox
+                                                    checked={checked}
+                                                    onCheckedChange={() => toggleMuscle(m.id)}
+                                                    aria-label={m.label}
+                                                />
+                                                {m.label}
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setParamsOpen(false)} disabled={generating}>
+                                Annuler
+                            </Button>
+                            <Button onClick={() => handleGenerate(draftParams)} disabled={generating} className="gap-2">
+                                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                {generating ? "Generation..." : "Generer"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </header>
 
             {isDemo && (
