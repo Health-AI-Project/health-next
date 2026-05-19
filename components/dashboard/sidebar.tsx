@@ -1,0 +1,165 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/providers/dynamic-theme-provider";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    LayoutDashboard,
+    BarChart3,
+    Settings,
+    Users,
+    Dumbbell,
+    Sun,
+    Moon,
+    Monitor,
+    Utensils,
+    Crown,
+    LogOut,
+} from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
+const navItems = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/nutrition", label: "Nutrition", icon: Utensils },
+    { href: "/dashboard/workouts", label: "Entrainement", icon: Dumbbell, premium: true },
+    { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, premium: true },
+    { href: "/dashboard/clients", label: "Clients", icon: Users },
+    { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
+];
+
+export function Sidebar() {
+    const pathname = usePathname();
+    const router = useRouter();
+    const {
+        currentTheme,
+        setTheme,
+        availableThemes,
+        colorMode,
+        setColorMode,
+    } = useTheme();
+
+    async function handleSignOut() {
+        await authClient.signOut();
+        router.push("/connexion");
+    }
+
+    return (
+        <aside
+            className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar-background text-sidebar-foreground"
+        >
+            <div className="flex h-16 items-center gap-3 border-b px-6">
+                <currentTheme.icon className="h-8 w-8 text-primary" aria-label={`Logo ${currentTheme.name}`} />
+                <span className="text-lg font-bold">{currentTheme.name}</span>
+            </div>
+
+            <nav className="flex-1 space-y-1 p-4" aria-label="Navigation principale">
+                {navItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                isActive
+                                    ? "bg-primary text-primary-foreground"
+                                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            )}
+                            aria-current={isActive ? "page" : undefined}
+                        >
+                            <item.icon className="h-5 w-5" aria-hidden="true" />
+                            {item.label}
+                            {"premium" in item && item.premium && (
+                                <Badge variant="outline" className="ml-auto text-[10px] px-1.5 py-0 gap-1">
+                                    <Crown className="h-3 w-3" aria-hidden="true" />
+                                    Pro
+                                </Badge>
+                            )}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <div className="border-t p-4 space-y-4">
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                        Entreprise
+                    </Label>
+                    <Select value={currentTheme.id} onValueChange={setTheme}>
+                        <SelectTrigger aria-label="Sélectionner une entreprise">
+                            <SelectValue placeholder="Sélectionner une entreprise" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableThemes.map((theme) => (
+                                <SelectItem key={theme.id} value={theme.id}>
+                                    {theme.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                        Mode
+                    </Label>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start gap-2" aria-label="Sélectionner le mode d'affichage">
+                                {colorMode === "light" && <Sun className="h-4 w-4" aria-hidden="true" />}
+                                {colorMode === "dark" && <Moon className="h-4 w-4" aria-hidden="true" />}
+                                {colorMode === "system" && <Monitor className="h-4 w-4" aria-hidden="true" />}
+                                <span>
+                                    {colorMode === "light" && "Mode clair"}
+                                    {colorMode === "dark" && "Mode sombre"}
+                                    {colorMode === "system" && "Mode système"}
+                                </span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                            <DropdownMenuItem onClick={() => setColorMode("light")}>
+                                <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode clair</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setColorMode("dark")}>
+                                <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode sombre</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setColorMode("system")}>
+                                <Monitor className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Mode système</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
+                    onClick={handleSignOut}
+                >
+                    <LogOut className="h-4 w-4" aria-hidden="true" />
+                    Se deconnecter
+                </Button>
+            </div>
+        </aside>
+    );
+}
