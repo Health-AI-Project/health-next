@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || 'dev-healthai-key';
 
 // --- Cache intelligent ---
 interface CacheEntry<T> {
@@ -70,6 +71,9 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     // Automatically set Content-Type to application/json if not FormData and not already set
     if (!isFormData && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/json';
+    }
+    if (API_KEY && !headers['X-API-Key']) {
+        headers['X-API-Key'] = API_KEY;
     }
 
     // Browser must set multipart boundary automatically for FormData

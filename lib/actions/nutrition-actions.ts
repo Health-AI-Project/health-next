@@ -14,19 +14,26 @@ export async function analyzeImage(file: File): Promise<NutritionData[]> {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await apiFetch<{ id?: string; macros: { calories: number; protein: number; carbs: number; fat: number } }>('/api/nutrition/upload', {
+        const response = await apiFetch<{
+            data: {
+                prediction_id: string;
+                top_prediction: { class_name: string };
+                calories: { top1: { estimated_kcal: number } };
+            };
+        }>('/api/v1/predictions/upload', {
             method: 'POST',
             body: formData,
         });
 
+        const calories = response.data.calories.top1.estimated_kcal;
         return [
             {
-                id: response.id || 'new_meal',
-                name: "Analyse IA",
-                calories: response.macros.calories,
-                proteins: response.macros.protein,
-                carbs: response.macros.carbs,
-                fats: response.macros.fat
+                id: response.data.prediction_id,
+                name: response.data.top_prediction.class_name || "Analyse IA",
+                calories,
+                proteins: Math.round(calories * 0.18 / 4),
+                carbs: Math.round(calories * 0.48 / 4),
+                fats: Math.round(calories * 0.34 / 9)
             }
         ];
     } catch (err) {
@@ -39,7 +46,7 @@ export async function analyzeImage(file: File): Promise<NutritionData[]> {
 
 export async function saveNutritionData(id: string, data: Partial<NutritionData>): Promise<{ success: boolean }> {
     try {
-        await apiFetch(`/api/nutrition/${id}`, {
+        await apiFetch(`/api/v1/nutrition/entries/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(data),
         });

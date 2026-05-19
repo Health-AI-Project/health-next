@@ -25,7 +25,7 @@ export function usePremiumStatus(): PremiumState & {
             try {
                 const response = await apiFetch<{
                     data: { user?: { is_premium?: boolean; subscription_tier?: string } };
-                }>("/api/home");
+                }>("/api/v1/analytics/summary");
                 const user = response.data.user;
                 let tier: SubscriptionTier = "free";
                 if (user?.subscription_tier === "premium_plus") {

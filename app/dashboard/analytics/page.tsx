@@ -39,7 +39,7 @@ export default function AnalyticsPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await cachedFetch<{ data: AnalyticsData }>("/api/home");
+                const response = await cachedFetch<{ data: AnalyticsData }>("/api/v1/analytics/summary");
                 setData(response.data);
             } catch {
                 setData(DEMO_DATA);

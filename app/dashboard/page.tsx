@@ -40,7 +40,7 @@ export default function DashboardPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await cachedFetch<{ data: DashboardData }>('/api/home');
+                const response = await cachedFetch<{ data: DashboardData }>('/api/v1/analytics/summary');
                 setData(response.data);
                 setIsDemo(false);
             } catch {
@@ -152,4 +152,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-

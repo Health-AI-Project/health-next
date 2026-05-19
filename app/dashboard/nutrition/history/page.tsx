@@ -34,32 +34,6 @@ interface MealHistoryItem {
     fats: number;
 }
 
-interface BackendMealHistory {
-    id: string;
-    date: string;
-    imageUrl?: string;
-    name?: string;
-    macros: {
-        calories: number;
-        protein: number;
-        carbs: number;
-        fat: number;
-    };
-}
-
-function backendToMealHistory(meals: BackendMealHistory[]): MealHistoryItem[] {
-    return meals.map((m, i) => ({
-        id: m.id || String(i),
-        date: m.date,
-        name: m.name || "Repas analyse",
-        items: m.imageUrl ? [m.imageUrl] : [],
-        calories: m.macros?.calories || 0,
-        proteins: m.macros?.protein || 0,
-        carbs: m.macros?.carbs || 0,
-        fats: m.macros?.fat || 0,
-    }));
-}
-
 const DEMO_HISTORY: MealHistoryItem[] = [
     {
         id: "1",
@@ -161,16 +135,28 @@ export default function MealHistoryPage() {
     useEffect(() => {
         async function fetchHistory() {
             try {
-                const response = await apiFetch<BackendMealHistory[] | { data: MealHistoryItem[] }>("/api/nutrition/history");
-                if (Array.isArray(response)) {
-                    // Backend returns flat array with macros object
-                    setMeals(backendToMealHistory(response));
-                } else if (response.data) {
-                    // Already in expected format
-                    setMeals(response.data);
-                } else {
-                    setMeals(DEMO_HISTORY);
-                }
+                const response = await apiFetch<{
+                    data: Array<{
+                        id: string;
+                        meal_date: string;
+                        meal_type: string;
+                        food_name: string;
+                        calories: number;
+                        protein_g: number;
+                        carbs_g: number;
+                        fat_g: number;
+                    }>;
+                }>("/api/v1/nutrition/entries");
+                setMeals(response.data.map((entry) => ({
+                    id: String(entry.id),
+                    date: entry.meal_date,
+                    name: entry.meal_type,
+                    items: [entry.food_name],
+                    calories: Number(entry.calories),
+                    proteins: Number(entry.protein_g),
+                    carbs: Number(entry.carbs_g),
+                    fats: Number(entry.fat_g),
+                })));
             } catch {
                 setMeals(DEMO_HISTORY);
             } finally {
