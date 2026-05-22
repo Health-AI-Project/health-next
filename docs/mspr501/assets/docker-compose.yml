@@ -1,0 +1,102 @@
+name: healthai-coach
+
+# Stack globale HealthAI Coach — MSPR501
+# Orchestration : postgres + ia-python + backend-hono + health-next
+# Usage : docker compose up -d  (depuis Health-AI-project/)
+# Vars : copier .env.example en .env et ajuster
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthai-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-healthai}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-healthai_dev_password}
+      POSTGRES_DB: ${DB_NAME:-healthai}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./ia-python/sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-healthai} -d ${DB_NAME:-healthai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  ia-python:
+    build:
+      context: ./ia-python
+      dockerfile: Dockerfile
+    container_name: healthai-ia-python
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-healthai}:${DB_PASSWORD:-healthai_dev_password}@postgres:5432/${DB_NAME:-healthai}
+      DB_USER: ${DB_USER:-healthai}
+      DB_PASSWORD: ${DB_PASSWORD:-healthai_dev_password}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-healthai}
+      API_KEY: ${IA_API_KEY:-dev-healthai-key}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3002}
+    ports:
+      - "${IA_PORT:-8000}:8000"
+    volumes:
+      - ./ia-python/data:/app/data
+      - ./ia-python/models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend-hono:
+    build:
+      context: ./backend-hono
+      dockerfile: Dockerfile
+    container_name: healthai-backend-hono
+    depends_on:
+      ia-python:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      IA_SERVICE_URL: http://ia-python:8000
+      IA_API_KEY: ${IA_API_KEY:-dev-healthai-key}
+      DATABASE_URL: postgresql://${DB_USER:-healthai}:${DB_PASSWORD:-healthai_dev_password}@postgres:5432/${DB_NAME:-healthai}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me-in-prod}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3002}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "${HONO_PORT:-3002}:3002"
+    restart: unless-stopped
+
+  health-next:
+    build:
+      context: ./health-next
+      dockerfile: Dockerfile
+    container_name: healthai-health-next
+    depends_on:
+      - backend-hono
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_KEY: ${IA_API_KEY:-dev-healthai-key}
+      NEXT_PUBLIC_BFF_URL: ${NEXT_PUBLIC_BFF_URL:-http://localhost:3002}
+    ports:
+      - "${NEXT_PORT:-3000}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: healthai-network
