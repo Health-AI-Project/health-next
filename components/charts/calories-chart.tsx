@@ -26,6 +26,19 @@ const DEMO_DATA: Record<string, number | string>[] = [
     { jour: "Dim", calories: 1900, objectif: 2000 },
 ];
 
+interface ApiNutritionEntry {
+    day?: string;
+    calories?: number | string;
+}
+
+function formatDay(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+    return date.toLocaleDateString("fr-FR", { weekday: "short" });
+}
+
 export function CaloriesChart() {
     const colors = useChartColors();
     const [caloriesData, setCaloriesData] = useState<Record<string, number | string>[]>(DEMO_DATA);
@@ -35,14 +48,16 @@ export function CaloriesChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await cachedFetch<{ data: Record<string, number | string>[] }>('/api/stats/calories-history?days=7');
+                const res = await cachedFetch<{ data: ApiNutritionEntry[] }>('/api/v1/analytics/nutrition');
                 if (res.data && res.data.length > 0) {
-                    setCaloriesData(res.data);
+                    const mapped = res.data.slice(-7).map((entry) => ({
+                        jour: formatDay(String(entry.day || "")),
+                        calories: Number(entry.calories),
+                        objectif: 2000,
+                    })).filter((entry) => !Number.isNaN(entry.calories));
+                    setCaloriesData(mapped);
                     setIsDemo(false);
-                    const firstObjectif = res.data[0]?.objectif;
-                    if (typeof firstObjectif === 'number') {
-                        setObjectif(firstObjectif);
-                    }
+                    setObjectif(2000);
                 }
             } catch {
                 // keep demo data

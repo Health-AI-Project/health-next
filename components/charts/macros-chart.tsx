@@ -19,6 +19,12 @@ const DEMO_DATA = [
     { name: "Lipides", value: 20 },
 ];
 
+interface ApiNutritionEntry {
+    protein_g?: number | string;
+    carbs_g?: number | string;
+    fat_g?: number | string;
+}
+
 export function MacrosChart() {
     const colors = useChartColors();
     const [macrosData, setMacrosData] = useState(DEMO_DATA);
@@ -27,9 +33,24 @@ export function MacrosChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await cachedFetch<{ data: { name: string; value: number }[] | null }>('/api/stats/macros');
+                const res = await cachedFetch<{ data: ApiNutritionEntry[] }>('/api/v1/analytics/nutrition');
                 if (res.data && res.data.length > 0) {
-                    setMacrosData(res.data);
+                    const totals = res.data.reduce(
+                        (acc, entry) => ({
+                            protein: acc.protein + Number(entry.protein_g || 0),
+                            carbs: acc.carbs + Number(entry.carbs_g || 0),
+                            fat: acc.fat + Number(entry.fat_g || 0),
+                        }),
+                        { protein: 0, carbs: 0, fat: 0 },
+                    );
+                    const total = totals.protein + totals.carbs + totals.fat;
+                    if (total > 0) {
+                        setMacrosData([
+                            { name: "Proteines", value: Math.round((totals.protein / total) * 100) },
+                            { name: "Glucides", value: Math.round((totals.carbs / total) * 100) },
+                            { name: "Lipides", value: Math.round((totals.fat / total) * 100) },
+                        ]);
+                    }
                     setIsDemo(false);
                 }
             } catch {

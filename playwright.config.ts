@@ -51,7 +51,8 @@ export default defineConfig({
 
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: "npm run build && npx next start -p 3001",
+        command:
+            "npm run build && cp -R public .next/standalone/ && mkdir -p .next/standalone/.next && cp -R .next/static .next/standalone/.next/static && PORT=3001 HOSTNAME=0.0.0.0 node .next/standalone/server.js",
         url: "http://localhost:3001",
         reuseExistingServer: !process.env.CI,
         timeout: 120000,

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type BrowserContext, type Page, type Route } from "@playwright/test";
 
 /**
  * Tests du dashboard avec session mockée.
@@ -68,33 +68,33 @@ const MACROS_DATA = {
     ],
 };
 
-async function setupAuth(context: any) {
+async function setupAuth(context: BrowserContext) {
     await context.addCookies([SESSION_COOKIE]);
 }
 
-async function mockStandardAPIs(page: any, premium = false) {
-    await page.route("**/api/home", async (route: any) => {
+async function mockStandardAPIs(page: Page, premium = false) {
+    await page.route("**/api/home", async (route: Route) => {
         await route.fulfill({
             status: 200,
             contentType: "application/json",
             body: JSON.stringify(premium ? HOME_DATA_PREMIUM : HOME_DATA),
         });
     });
-    await page.route("**/api/stats/calories-history**", async (route: any) => {
+    await page.route("**/api/stats/calories-history**", async (route: Route) => {
         await route.fulfill({
             status: 200,
             contentType: "application/json",
             body: JSON.stringify(CALORIES_HISTORY),
         });
     });
-    await page.route("**/api/stats/weight-history**", async (route: any) => {
+    await page.route("**/api/stats/weight-history**", async (route: Route) => {
         await route.fulfill({
             status: 200,
             contentType: "application/json",
             body: JSON.stringify(WEIGHT_HISTORY),
         });
     });
-    await page.route("**/api/stats/macros", async (route: any) => {
+    await page.route("**/api/stats/macros", async (route: Route) => {
         await route.fulfill({
             status: 200,
             contentType: "application/json",
@@ -276,7 +276,7 @@ test.describe("API Error Handling", () => {
     });
 
     test("should handle 401 by redirecting to login", async ({ page }) => {
-        await page.route("**/api/home", async (route) => {
+        await page.route("**/api/v1/analytics/summary", async (route) => {
             await route.fulfill({ status: 401, body: '{"error":"unauthorized"}' });
         });
 

@@ -26,6 +26,7 @@ import {
     Settings,
     Users,
     Dumbbell,
+    ClipboardCheck,
     Sun,
     Moon,
     Monitor,
@@ -41,6 +42,7 @@ const navItems = [
     { href: "/dashboard/nutrition", label: "Nutrition", icon: Utensils },
     { href: "/dashboard/workouts", label: "Entrainement", icon: Dumbbell, premium: true },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, premium: true },
+    { href: "/dashboard/data-quality", label: "Qualite", icon: ClipboardCheck },
     { href: "/dashboard/clients", label: "Clients", icon: Users },
     { href: "/dashboard/settings", label: "Paramètres", icon: Settings },
 ];
