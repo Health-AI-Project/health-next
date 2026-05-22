@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, XCircle, Clock, AlertTriangle, Eye } from "lucide-react";
-import { mockValidationQueue, DATASET_LABELS, STATUS_LABELS } from "@/lib/mocks/admin";
+import { DATASET_LABELS, STATUS_LABELS } from "@/lib/mocks/admin";
+import {
+    approveValidationItem,
+    fetchValidationQueue,
+    rejectValidationItem,
+} from "@/lib/api/admin";
 import type { ValidationItem, ValidationStatus } from "@/types/admin";
 import { toast } from "sonner";
 
@@ -100,9 +106,24 @@ function DiffView({ item }: DiffViewProps) {
 }
 
 export default function ValidationPage() {
-    const [items, setItems] = useState<ValidationItem[]>(mockValidationQueue);
+    const [items, setItems] = useState<ValidationItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [viewing, setViewing] = useState<ValidationItem | null>(null);
     const [viewOpen, setViewOpen] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchValidationQueue()
+            .then((data) => {
+                if (!cancelled) setItems(data);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const pending = useMemo(() => items.filter((i) => i.status === "PENDING"), [items]);
     const history = useMemo(() => items.filter((i) => i.status !== "PENDING"), [items]);
@@ -117,11 +138,12 @@ export default function ValidationPage() {
         ).length,
     };
 
-    const handleApprove = (id: number) => {
+    const handleApprove = async (id: number) => {
+        const result = await approveValidationItem(id);
         setItems((current) =>
             current.map((i) =>
                 i.id === id
-                    ? {
+                    ? result ?? {
                         ...i,
                         status: "VALIDATED",
                         reviewed_by: "admin@healthai.coach",
@@ -133,11 +155,12 @@ export default function ValidationPage() {
         toast.success("Lot approuvé — passage en production");
     };
 
-    const handleReject = (id: number) => {
+    const handleReject = async (id: number) => {
+        const result = await rejectValidationItem(id);
         setItems((current) =>
             current.map((i) =>
                 i.id === id
-                    ? {
+                    ? result ?? {
                         ...i,
                         status: "REJECTED",
                         reviewed_by: "admin@healthai.coach",
@@ -298,6 +321,23 @@ export default function ValidationPage() {
             ),
         },
     ];
+
+    if (loading) {
+        return (
+            <div className="space-y-8">
+                <header className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Validation</h1>
+                    <p className="text-muted-foreground">Chargement de la file d&apos;attente...</p>
+                </header>
+                <div className="grid gap-4 sm:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-32" />
+                    ))}
+                </div>
+                <Skeleton className="h-96" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">

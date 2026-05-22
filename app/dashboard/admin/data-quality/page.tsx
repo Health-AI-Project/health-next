@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     BarChart,
     Bar,
@@ -23,13 +24,13 @@ import {
     XCircle,
     Clock,
 } from "lucide-react";
-import {
-    mockEtlRuns,
-    mockDataQualityMetrics,
-    DATASET_LABELS,
-    STATUS_LABELS,
-} from "@/lib/mocks/admin";
-import type { EtlRun, EtlRunStatus } from "@/types/admin";
+import { DATASET_LABELS, STATUS_LABELS } from "@/lib/mocks/admin";
+import { fetchDataQualityMetrics, fetchEtlRuns } from "@/lib/api/admin";
+import type {
+    DataQualityMetrics,
+    EtlRun,
+    EtlRunStatus,
+} from "@/types/admin";
 
 function StatusBadge({ status }: { status: EtlRunStatus }) {
     const config: Record<EtlRunStatus, { variant: "default" | "outline" | "destructive" | "secondary"; className: string }> = {
@@ -63,13 +64,49 @@ function formatRelative(iso: string): string {
 }
 
 export default function DataQualityPage() {
-    const [metrics] = useState(mockDataQualityMetrics);
-    const [runs] = useState(mockEtlRuns);
+    const [metrics, setMetrics] = useState<DataQualityMetrics | null>(null);
+    const [runs, setRuns] = useState<EtlRun[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([fetchDataQualityMetrics(), fetchEtlRuns(50)])
+            .then(([m, r]) => {
+                if (!cancelled) {
+                    setMetrics(m);
+                    setRuns(r);
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const successRate = useMemo(() => {
-        if (metrics.total_runs_24h === 0) return 0;
+        if (!metrics || metrics.total_runs_24h === 0) return 0;
         return (metrics.successful_runs_24h / metrics.total_runs_24h) * 100;
     }, [metrics]);
+
+    if (loading || !metrics) {
+        return (
+            <div className="space-y-8">
+                <header className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Qualité des données</h1>
+                    <p className="text-muted-foreground">Chargement des métriques...</p>
+                </header>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-32" />
+                    ))}
+                </div>
+                <Skeleton className="h-80" />
+                <Skeleton className="h-96" />
+            </div>
+        );
+    }
 
     const sourceChartData = metrics.by_source.map((s) => ({
         source: DATASET_LABELS[s.source] ?? s.source,

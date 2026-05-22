@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
-import { notFound, useRouter } from "next/navigation";
+import { use, useEffect, useMemo, useState } from "react";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
-import { ExportButton, downloadAsFile, toCsv } from "@/components/ui/export-button";
+import { ExportButton } from "@/components/ui/export-button";
 import {
     ArrowLeft,
     AlertTriangle,
@@ -25,7 +26,8 @@ import {
     XCircle,
     Pencil,
 } from "lucide-react";
-import { mockDatasetsBySource, DATASET_LABELS, STATUS_LABELS } from "@/lib/mocks/admin";
+import { DATASET_LABELS, STATUS_LABELS, mockDatasetsBySource } from "@/lib/mocks/admin";
+import { buildExportUrl, fetchDatasetRows } from "@/lib/api/admin";
 import type {
     DatasetRow,
     DatasetSource,
@@ -181,16 +183,30 @@ function EditDialog({ row, open, onOpenChange, onSave, onReject, onValidate }: E
 
 export default function DatasetSourcePage({ params }: { params: Promise<{ source: string }> }) {
     const { source } = use(params);
-    const router = useRouter();
 
     if (!(source in mockDatasetsBySource)) {
         notFound();
     }
 
     const sourceTyped = source as DatasetSource;
-    const [rows, setRows] = useState<DatasetRow[]>(mockDatasetsBySource[sourceTyped]);
+    const [rows, setRows] = useState<DatasetRow[]>([]);
+    const [loading, setLoading] = useState(true);
     const [editingRow, setEditingRow] = useState<DatasetRow | null>(null);
     const [editOpen, setEditOpen] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchDatasetRows(sourceTyped, 100)
+            .then((data) => {
+                if (!cancelled) setRows(data);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [sourceTyped]);
 
     const handleEdit = (row: DatasetRow) => {
         setEditingRow(row);
@@ -215,19 +231,9 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
     };
 
     const handleExport = (format: ExportFormat) => {
-        const dataToExport = rows.map((r) => ({
-            id: r.id,
-            ...r.data,
-            validation_status: r.validation_status,
-            anomalies_count: r.anomalies.length,
-            ingested_at: r.ingested_at,
-        }));
-        if (format === "json") {
-            downloadAsFile(JSON.stringify(dataToExport, null, 2), `${source}.json`, "application/json");
-        } else {
-            downloadAsFile(toCsv(dataToExport), `${source}.csv`, "text/csv");
-        }
-        toast.success(`Export ${format.toUpperCase()} téléchargé`);
+        const url = buildExportUrl(sourceTyped, format);
+        window.open(url, "_blank");
+        toast.success(`Export ${format.toUpperCase()} demandé`);
     };
 
     const allKeys = useMemo(() => {

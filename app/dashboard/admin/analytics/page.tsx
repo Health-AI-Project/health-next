@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
     BarChart,
@@ -28,12 +29,17 @@ import {
     TrendingUp,
 } from "lucide-react";
 import {
-    mockUserDemographics,
-    mockNutritionTrends,
-    mockFitnessStats,
-    mockBusinessKpis,
-} from "@/lib/mocks/admin";
-import type { FitnessStat } from "@/types/admin";
+    fetchBusinessKpis,
+    fetchDemographics,
+    fetchFitnessStats,
+    fetchNutritionTrends,
+} from "@/lib/api/admin";
+import type {
+    BusinessKpi,
+    FitnessStat,
+    NutritionTrend,
+    UserDemographics,
+} from "@/types/admin";
 
 const TIER_COLORS: Record<string, string> = {
     FREE: "hsl(217, 91%, 60%)",
@@ -43,9 +49,39 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function AnalyticsAdminPage() {
+    const [demographics, setDemographics] = useState<UserDemographics[]>([]);
+    const [nutritionTrends, setNutritionTrends] = useState<NutritionTrend[]>([]);
+    const [fitnessStats, setFitnessStats] = useState<FitnessStat[]>([]);
+    const [businessKpis, setBusinessKpis] = useState<BusinessKpi[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        Promise.all([
+            fetchDemographics(),
+            fetchNutritionTrends(30),
+            fetchFitnessStats(10),
+            fetchBusinessKpis(),
+        ])
+            .then(([d, n, f, k]) => {
+                if (!cancelled) {
+                    setDemographics(d);
+                    setNutritionTrends(n);
+                    setFitnessStats(f);
+                    setBusinessKpis(k);
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const ageDistribution = useMemo(() => {
         const buckets: Record<string, Record<string, number>> = {};
-        for (const d of mockUserDemographics) {
+        for (const d of demographics) {
             buckets[d.age_bucket] = buckets[d.age_bucket] ?? {};
             buckets[d.age_bucket][d.subscription_status] = d.user_count;
         }
@@ -56,29 +92,46 @@ export default function AnalyticsAdminPage() {
             PREMIUM_PLUS: tiers.PREMIUM_PLUS ?? 0,
             B2B: tiers.B2B ?? 0,
         }));
-    }, []);
+    }, [demographics]);
 
     const tierDistribution = useMemo(() => {
         const tiers: Record<string, number> = {};
-        for (const d of mockUserDemographics) {
+        for (const d of demographics) {
             tiers[d.subscription_status] = (tiers[d.subscription_status] ?? 0) + d.user_count;
         }
         return Object.entries(tiers).map(([name, value]) => ({ name, value }));
-    }, []);
+    }, [demographics]);
 
     const totalUsers = useMemo(() => tierDistribution.reduce((s, t) => s + t.value, 0), [tierDistribution]);
 
     const nutritionData = useMemo(
         () =>
-            mockNutritionTrends.map((d) => ({
+            nutritionTrends.map((d) => ({
                 date: d.date.slice(5),
                 calories: d.avg_calories,
                 protein: d.avg_protein_g,
                 carbs: d.avg_carbs_g,
                 fat: d.avg_fat_g,
             })),
-        [],
+        [nutritionTrends],
     );
+
+    if (loading) {
+        return (
+            <div className="space-y-8">
+                <header className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Analytics business</h1>
+                    <p className="text-muted-foreground">Chargement des indicateurs...</p>
+                </header>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <Skeleton key={i} className="h-32" />
+                    ))}
+                </div>
+                <Skeleton className="h-96" />
+            </div>
+        );
+    }
 
     const fitnessColumns: DataTableColumn<FitnessStat>[] = [
         {
@@ -138,7 +191,7 @@ export default function AnalyticsAdminPage() {
             <section aria-labelledby="biz-kpis">
                 <h2 id="biz-kpis" className="sr-only">KPIs business</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {mockBusinessKpis.map((kpi) => (
+                    {businessKpis.map((kpi) => (
                         <KpiCard
                             key={kpi.label}
                             label={kpi.label}
@@ -359,7 +412,7 @@ export default function AnalyticsAdminPage() {
                         <CardContent>
                             <DataTable
                                 columns={fitnessColumns}
-                                data={mockFitnessStats}
+                                data={fitnessStats}
                                 rowId={(s) => s.exercise_name}
                                 pageSize={10}
                                 searchableKeys={["exercise_name", "exercise_type"]}
