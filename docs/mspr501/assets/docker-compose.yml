@@ -28,7 +28,7 @@ services:
   ia-python:
     build:
       context: ./ia-python
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.mspr501
     container_name: healthai-ia-python
     depends_on:
       postgres:
