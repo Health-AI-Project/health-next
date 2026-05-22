@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sliders, Database, CheckCircle2, BarChart3, Workflow } from "lucide-react";
+import { Sliders, Database, CheckCircle2, BarChart3, Workflow, Users } from "lucide-react";
 
 const sections = [
     {
@@ -10,6 +10,12 @@ const sections = [
         label: "Qualité des données",
         description: "Tableau de bord en temps réel : volumétrie, taux d'erreur, statut des runs ETL.",
         icon: Sliders,
+    },
+    {
+        href: "/dashboard/admin/sources",
+        label: "Sources",
+        description: "Registre dynamique des sources : ajout, modification, désactivation.",
+        icon: Database,
     },
     {
         href: "/dashboard/admin/datasets",
@@ -28,6 +34,12 @@ const sections = [
         label: "Analytics business",
         description: "Indicateurs métier : démographie, tendances nutrition, top exercices, KPIs business.",
         icon: BarChart3,
+    },
+    {
+        href: "/dashboard/admin/users",
+        label: "Utilisateurs",
+        description: "Gestion des comptes : promotion en admin, changement de tier, suppression.",
+        icon: Users,
     },
     {
         href: "/dashboard/admin/flow",

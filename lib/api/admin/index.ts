@@ -10,8 +10,10 @@ import {
     mockValidationQueue,
 } from '@/lib/mocks/admin';
 import type {
+    AdminUser,
     BusinessKpi,
     DataQualityMetrics,
+    DataSourceRegistry,
     DatasetRow,
     DatasetSource,
     EtlRun,
@@ -100,6 +102,163 @@ export function fetchDatasetRows(source: DatasetSource, limit = 50): Promise<Dat
         `/api/admin/datasets/${source}?limit=${limit}`,
         mockDatasetsBySource[source] ?? [],
     );
+}
+
+export async function updateDatasetRow(
+    source: DatasetSource,
+    rowId: string,
+    data: Record<string, string | number | boolean | null>,
+): Promise<DatasetRow | null> {
+    if (USE_MOCKS) return null;
+    try {
+        const res = await bffFetch<ApiResponse<DatasetRow>>(
+            `/api/admin/datasets/${source}/${encodeURIComponent(rowId)}`,
+            { method: 'PATCH', body: JSON.stringify({ data }) },
+        );
+        return res.data;
+    } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.warn(`[admin API] PATCH ${source}/${rowId} failed:`, error);
+        }
+        return null;
+    }
+}
+
+export async function createDatasetRow(
+    source: DatasetSource,
+    data: Record<string, string | number | boolean | null>,
+): Promise<DatasetRow | null> {
+    if (USE_MOCKS) return null;
+    try {
+        const res = await bffFetch<ApiResponse<DatasetRow>>(
+            `/api/admin/datasets/${source}`,
+            { method: 'POST', body: JSON.stringify({ data }) },
+        );
+        return res.data;
+    } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.warn(`[admin API] POST ${source} failed:`, error);
+        }
+        return null;
+    }
+}
+
+export async function deleteDatasetRow(
+    source: DatasetSource,
+    rowId: string,
+): Promise<boolean> {
+    if (USE_MOCKS) return true;
+    try {
+        await bffFetch<ApiResponse<unknown>>(
+            `/api/admin/datasets/${source}/${encodeURIComponent(rowId)}`,
+            { method: 'DELETE' },
+        );
+        return true;
+    } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.warn(`[admin API] DELETE ${source}/${rowId} failed:`, error);
+        }
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Registre dynamique des sources de données
+// ---------------------------------------------------------------------------
+
+export function fetchDataSources(): Promise<DataSourceRegistry[]> {
+    return callOrFallback<DataSourceRegistry[]>('/api/admin/sources', []);
+}
+
+export async function createDataSource(
+    data: Partial<DataSourceRegistry> & { code: string; label: string; format: string },
+): Promise<DataSourceRegistry | null> {
+    if (USE_MOCKS) return null;
+    try {
+        const res = await bffFetch<ApiResponse<DataSourceRegistry>>('/api/admin/sources', {
+            method: 'POST',
+            body: JSON.stringify({ data }),
+        });
+        return res.data;
+    } catch {
+        return null;
+    }
+}
+
+export async function updateDataSource(
+    id: number,
+    data: Partial<DataSourceRegistry>,
+): Promise<DataSourceRegistry | null> {
+    if (USE_MOCKS) return null;
+    try {
+        const res = await bffFetch<ApiResponse<DataSourceRegistry>>(`/api/admin/sources/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ data }),
+        });
+        return res.data;
+    } catch {
+        return null;
+    }
+}
+
+export async function deactivateDataSource(id: number): Promise<boolean> {
+    if (USE_MOCKS) return true;
+    try {
+        await bffFetch(`/api/admin/sources/${id}`, { method: 'DELETE' });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Users management
+// ---------------------------------------------------------------------------
+
+export function fetchUsers(search?: string, limit = 100): Promise<AdminUser[]> {
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    if (search) params.set('search', search);
+    return callOrFallback<AdminUser[]>(`/api/admin/users?${params}`, []);
+}
+
+export async function updateUserSubscription(
+    userId: string,
+    subscriptionStatus: AdminUser['subscription_status'],
+): Promise<AdminUser | null> {
+    if (USE_MOCKS) return null;
+    try {
+        const res = await bffFetch<ApiResponse<AdminUser>>(
+            `/api/admin/users/${encodeURIComponent(userId)}`,
+            { method: 'PATCH', body: JSON.stringify({ data: { subscription_status: subscriptionStatus } }) },
+        );
+        return res.data;
+    } catch {
+        return null;
+    }
+}
+
+export async function deleteUser(userId: string): Promise<boolean> {
+    if (USE_MOCKS) return true;
+    try {
+        await bffFetch(`/api/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+export async function triggerEtlRun(includeApi = false): Promise<{ started: boolean; message?: string }> {
+    if (USE_MOCKS) return { started: true, message: 'Mock run started' };
+    try {
+        const res = await bffFetch<ApiResponse<unknown>>('/api/admin/etl/run', {
+            method: 'POST',
+            body: JSON.stringify({ include_api: includeApi }),
+        });
+        return { started: true, message: JSON.stringify(res.data).slice(0, 200) };
+    } catch (error) {
+        return { started: false, message: String(error) };
+    }
 }
 
 // ---------------------------------------------------------------------------

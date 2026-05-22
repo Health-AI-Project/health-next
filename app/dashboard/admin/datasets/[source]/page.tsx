@@ -23,11 +23,19 @@ import {
     ArrowLeft,
     AlertTriangle,
     CheckCircle2,
+    Plus,
     XCircle,
     Pencil,
+    Trash2,
 } from "lucide-react";
 import { DATASET_LABELS, STATUS_LABELS, mockDatasetsBySource } from "@/lib/mocks/admin";
-import { buildExportUrl, fetchDatasetRows } from "@/lib/api/admin";
+import {
+    buildExportUrl,
+    createDatasetRow,
+    deleteDatasetRow,
+    fetchDatasetRows,
+    updateDatasetRow,
+} from "@/lib/api/admin";
 import type {
     DatasetRow,
     DatasetSource,
@@ -193,6 +201,7 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
     const [loading, setLoading] = useState(true);
     const [editingRow, setEditingRow] = useState<DatasetRow | null>(null);
     const [editOpen, setEditOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -213,8 +222,34 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
         setEditOpen(true);
     };
 
-    const handleSave = (updated: DatasetRow) => {
-        setRows((current) => current.map((r) => (r.id === updated.id ? updated : r)));
+    const handleSave = async (updated: DatasetRow) => {
+        // Calcule le diff vs la ligne en BDD pour n'envoyer que les colonnes modifiées
+        const original = rows.find((r) => r.id === updated.id);
+        const diff: Record<string, string | number | boolean | null> = {};
+        for (const [k, v] of Object.entries(updated.data)) {
+            if (!original || original.data[k] !== v) {
+                diff[k] = v;
+            }
+        }
+        if (Object.keys(diff).length === 0) {
+            setRows((current) => current.map((r) => (r.id === updated.id ? updated : r)));
+            return;
+        }
+        const serverRow = await updateDatasetRow(sourceTyped, updated.id, diff);
+        if (serverRow) {
+            // Merge la réponse serveur avec les anomalies/validation_status locaux
+            setRows((current) =>
+                current.map((r) =>
+                    r.id === updated.id
+                        ? { ...updated, data: serverRow.data }
+                        : r,
+                ),
+            );
+            toast.success("Modification persistée en BDD");
+        } else {
+            setRows((current) => current.map((r) => (r.id === updated.id ? updated : r)));
+            toast.warning("Modification locale uniquement (backend indisponible)");
+        }
     };
 
     const handleValidate = (id: string) => {
@@ -228,6 +263,28 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
             current.map((r) => (r.id === id ? { ...r, validation_status: "REJECTED" } : r)),
         );
         toast.success("Ligne rejetée");
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm(`Supprimer définitivement la ligne ${id} ?`)) return;
+        const ok = await deleteDatasetRow(sourceTyped, id);
+        if (ok) {
+            setRows((current) => current.filter((r) => r.id !== id));
+            toast.success("Ligne supprimée");
+        } else {
+            toast.error("Échec suppression");
+        }
+    };
+
+    const handleCreate = async (data: Record<string, string | number | boolean | null>) => {
+        const newRow = await createDatasetRow(sourceTyped, data);
+        if (newRow) {
+            setRows((current) => [newRow, ...current]);
+            toast.success("Ligne créée");
+            return true;
+        }
+        toast.error("Échec création (vérifie les champs requis)");
+        return false;
     };
 
     const handleExport = (format: ExportFormat) => {
@@ -284,21 +341,36 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
             header: "Actions",
             sortable: false,
             accessor: (r) => (
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(r);
-                    }}
-                    aria-label={`Éditer la ligne ${r.id}`}
-                >
-                    <Pencil className="h-4 w-4" aria-hidden="true" />
-                    Éditer
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(r);
+                        }}
+                        aria-label={`Éditer la ligne ${r.id}`}
+                    >
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                        Éditer
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-rose-700 hover:text-rose-900 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/30"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(r.id);
+                        }}
+                        aria-label={`Supprimer la ligne ${r.id}`}
+                    >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                </div>
             ),
-            className: "w-32",
+            className: "w-44",
         },
     ];
 
@@ -327,7 +399,18 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
                         {stats.total} lignes — {stats.pending} à valider, {stats.validated} validées, {stats.rejected} rejetées
                     </p>
                 </div>
-                <ExportButton onExport={handleExport} disabled={rows.length === 0} />
+                <div className="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setCreateOpen(true)}
+                        aria-label="Ajouter une nouvelle ligne"
+                    >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                        Nouveau
+                    </Button>
+                    <ExportButton onExport={handleExport} disabled={rows.length === 0} />
+                </div>
             </header>
 
             <Card>
@@ -356,6 +439,139 @@ export default function DatasetSourcePage({ params }: { params: Promise<{ source
                 onReject={handleReject}
                 onValidate={handleValidate}
             />
+
+            <CreateDialog
+                source={sourceTyped}
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+                onCreate={handleCreate}
+            />
         </div>
+    );
+}
+
+// Templates de colonnes requises par source (côté front — affichés à l'admin)
+const CREATE_TEMPLATES: Record<DatasetSource, { fields: string[]; placeholders: Record<string, string> }> = {
+    daily_food_nutrition: {
+        fields: ["user_id", "logged_at", "calories", "protein", "carbs", "fat"],
+        placeholders: {
+            user_id: "ID user (ex: u_001)",
+            logged_at: "YYYY-MM-DD",
+            calories: "ex: 320",
+            protein: "ex: 18",
+            carbs: "ex: 35",
+            fat: "ex: 12",
+        },
+    },
+    diet_recommendations: { fields: [], placeholders: {} },
+    exercisedb: {
+        fields: ["id", "name", "type", "difficulty", "required_equipment"],
+        placeholders: {
+            id: "ex-mspr-001",
+            name: "Squat sauté",
+            type: "strength | cardio | flexibility",
+            difficulty: "beginner | intermediate | advanced",
+            required_equipment: "none | bodyweight | dumbbell",
+        },
+    },
+    gym_members: {
+        fields: ["user_id", "date", "type", "duration"],
+        placeholders: {
+            user_id: "ID user (ex: u_001)",
+            date: "YYYY-MM-DD",
+            type: "cardio | strength",
+            duration: "minutes (ex: 45)",
+        },
+    },
+    fitness_tracker: { fields: [], placeholders: {} },
+};
+
+interface CreateDialogProps {
+    source: DatasetSource;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onCreate: (data: Record<string, string | number | boolean | null>) => Promise<boolean>;
+}
+
+function CreateDialog({ source, open, onOpenChange, onCreate }: CreateDialogProps) {
+    const template = CREATE_TEMPLATES[source];
+    const [values, setValues] = useState<Record<string, string>>({});
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        const data: Record<string, string | number | boolean | null> = {};
+        for (const [k, v] of Object.entries(values)) {
+            if (v === "") {
+                data[k] = null;
+            } else if (!isNaN(Number(v)) && v.trim() !== "") {
+                data[k] = Number(v);
+            } else {
+                data[k] = v;
+            }
+        }
+        setSubmitting(true);
+        const ok = await onCreate(data);
+        setSubmitting(false);
+        if (ok) {
+            setValues({});
+            onOpenChange(false);
+        }
+    };
+
+    if (template.fields.length === 0) {
+        return (
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Création non supportée</DialogTitle>
+                        <DialogDescription>
+                            La source <span className="font-mono">{source}</span> n&apos;est pas encore mappée à une table éditable.
+                            Utilise le pipeline ETL pour ingérer de nouvelles lignes.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button onClick={() => onOpenChange(false)}>Fermer</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Nouvelle ligne — {source}</DialogTitle>
+                    <DialogDescription>
+                        Tous les champs sont requis. La ligne sera insérée directement en base.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-3 py-2">
+                    {template.fields.map((field) => (
+                        <div key={field} className="grid gap-1">
+                            <Label htmlFor={`create-${field}`} className="text-xs uppercase tracking-wide">
+                                {field}
+                            </Label>
+                            <Input
+                                id={`create-${field}`}
+                                placeholder={template.placeholders[field]}
+                                value={values[field] ?? ""}
+                                onChange={(e) => setValues((v) => ({ ...v, [field]: e.target.value }))}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <DialogFooter className="gap-2">
+                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        Annuler
+                    </Button>
+                    <Button type="button" onClick={handleSubmit} disabled={submitting}>
+                        {submitting ? "Création..." : "Créer"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

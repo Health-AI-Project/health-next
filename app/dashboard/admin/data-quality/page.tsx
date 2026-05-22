@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
     BarChart,
     Bar,
@@ -21,11 +23,13 @@ import {
     AlertTriangle,
     CheckCircle2,
     Database,
+    Play,
     XCircle,
     Clock,
+    Loader2,
 } from "lucide-react";
 import { DATASET_LABELS, STATUS_LABELS } from "@/lib/mocks/admin";
-import { fetchDataQualityMetrics, fetchEtlRuns } from "@/lib/api/admin";
+import { fetchDataQualityMetrics, fetchEtlRuns, triggerEtlRun } from "@/lib/api/admin";
 import type {
     DataQualityMetrics,
     EtlRun,
@@ -67,16 +71,17 @@ export default function DataQualityPage() {
     const [metrics, setMetrics] = useState<DataQualityMetrics | null>(null);
     const [runs, setRuns] = useState<EtlRun[]>([]);
     const [loading, setLoading] = useState(true);
+    const [running, setRunning] = useState(false);
+
+    const refresh = async () => {
+        const [m, r] = await Promise.all([fetchDataQualityMetrics(), fetchEtlRuns(50)]);
+        setMetrics(m);
+        setRuns(r);
+    };
 
     useEffect(() => {
         let cancelled = false;
-        Promise.all([fetchDataQualityMetrics(), fetchEtlRuns(50)])
-            .then(([m, r]) => {
-                if (!cancelled) {
-                    setMetrics(m);
-                    setRuns(r);
-                }
-            })
+        refresh()
             .finally(() => {
                 if (!cancelled) setLoading(false);
             });
@@ -84,6 +89,19 @@ export default function DataQualityPage() {
             cancelled = true;
         };
     }, []);
+
+    const handleRunEtl = async () => {
+        setRunning(true);
+        toast.info("Pipeline ETL en cours d'exécution...");
+        const result = await triggerEtlRun(false);
+        setRunning(false);
+        if (result.started) {
+            toast.success("Run ETL terminé — actualisation des données");
+            await refresh();
+        } else {
+            toast.error(`Échec : ${result.message?.slice(0, 100)}`);
+        }
+    };
 
     const successRate = useMemo(() => {
         if (!metrics || metrics.total_runs_24h === 0) return 0;
@@ -178,12 +196,32 @@ export default function DataQualityPage() {
 
     return (
         <div className="space-y-8">
-            <header className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Qualité des données</h1>
-                <p className="text-muted-foreground">
-                    Dashboard de pilotage en temps réel des pipelines ETL. Métriques calculées sur les 24 dernières
-                    heures.
-                </p>
+            <header className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Qualité des données</h1>
+                    <p className="text-muted-foreground">
+                        Dashboard de pilotage en temps réel des pipelines ETL. Métriques calculées sur les 24 dernières
+                        heures.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    onClick={handleRunEtl}
+                    disabled={running}
+                    aria-label="Lancer un nouveau run ETL"
+                >
+                    {running ? (
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                            En cours...
+                        </>
+                    ) : (
+                        <>
+                            <Play className="h-4 w-4" aria-hidden="true" />
+                            Lancer un run ETL
+                        </>
+                    )}
+                </Button>
             </header>
 
             <section aria-labelledby="kpis-title">

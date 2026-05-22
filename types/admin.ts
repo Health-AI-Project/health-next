@@ -136,9 +136,28 @@ export interface ValidationDecision {
     reviewed_by: string;
 }
 
+export interface DataSourceRegistry {
+    id: number;
+    code: string;
+    label: string;
+    format: "csv" | "json" | "xlsx" | "api";
+    description: string | null;
+    url: string | null;
+    license: string | null;
+    active: boolean;
+    created_at: string | null;
+    updated_at: string | null;
+}
+
 export interface AdminUser {
     id: string;
     email: string;
     name: string;
-    role: "admin" | "user";
+    age: number | null;
+    weight: number | null;
+    height: number | null;
+    subscription_status: "FREE" | "PREMIUM" | "PREMIUM_PLUS" | "B2B";
+    email_verified: boolean;
+    created_at: string;
+    updated_at: string;
 }

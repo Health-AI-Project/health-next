@@ -12,14 +12,17 @@ import {
     Workflow,
     ArrowLeft,
     Sliders,
+    Users,
 } from "lucide-react";
 
 const adminNavItems = [
     { href: "/dashboard/admin", label: "Vue d'ensemble", icon: Shield },
     { href: "/dashboard/admin/data-quality", label: "Qualité des données", icon: Sliders },
+    { href: "/dashboard/admin/sources", label: "Sources", icon: Database },
     { href: "/dashboard/admin/datasets", label: "Datasets", icon: Database },
     { href: "/dashboard/admin/validation", label: "Validation", icon: CheckCircle2 },
     { href: "/dashboard/admin/analytics", label: "Analytics business", icon: BarChart3 },
+    { href: "/dashboard/admin/users", label: "Utilisateurs", icon: Users },
     { href: "/dashboard/admin/flow", label: "Flux de données", icon: Workflow },
 ];
 
