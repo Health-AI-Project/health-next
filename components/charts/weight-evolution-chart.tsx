@@ -25,6 +25,20 @@ const DEMO_DATA: Record<string, number | string>[] = [
     { date: "30/03", poids: 74.5, objectif: 74 },
 ];
 
+interface ApiWeightEntry {
+    day?: string;
+    measured_at?: string;
+    weight_kg?: number | string;
+}
+
+function formatDay(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+    return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+}
+
 export function WeightEvolutionChart() {
     const colors = useChartColors();
     const [weightData, setWeightData] = useState<Record<string, number | string>[]>(DEMO_DATA);
@@ -33,9 +47,14 @@ export function WeightEvolutionChart() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await cachedFetch<{ data: Record<string, number | string>[] }>('/api/stats/weight-history?days=30');
+                const res = await cachedFetch<{ data: ApiWeightEntry[] }>('/api/v1/analytics/weight');
                 if (res.data && res.data.length > 0) {
-                    setWeightData(res.data);
+                    const mapped = res.data.map((entry) => ({
+                        date: formatDay(String(entry.day || entry.measured_at || "")),
+                        poids: Number(entry.weight_kg),
+                        objectif: 74,
+                    })).filter((entry) => !Number.isNaN(entry.poids));
+                    setWeightData(mapped);
                     setIsDemo(false);
                 }
             } catch {

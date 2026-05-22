@@ -317,7 +317,6 @@ export default function WorkoutsPage() {
 
     useEffect(() => {
         fetchPlan();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const weeklyCalories = plan.reduce((sum, d) => sum + d.calories, 0);
