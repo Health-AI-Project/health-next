@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# health-next — Frontend HealthAI Coach
 
-## Getting Started
+Interface web de la plateforme HealthAI Coach. Couvre :
+- **Espace utilisateur** : inscription wizard, dashboard, nutrition, workouts, settings (MSPR502)
+- **Espace admin** : qualité données, datasets, validation, analytics, flux (MSPR501)
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, Turbopack)
+- **React 19** + TypeScript 5
+- **Shadcn UI** (Radix + Tailwind 4) — composants accessibles WCAG AA
+- **Better Auth** — sessions cookies HttpOnly
+- **Recharts** — graphiques
+- **Playwright** + **axe-core** — tests e2e + a11y
+- **Zustand** — state global léger (wizard)
+
+## Démarrage rapide
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Installation
+npm install
+
+# Dev
+npm run dev          # http://localhost:3000
+
+# Build production
+npm run build && npm start
+
+# Tests
+npm run test         # Playwright e2e (57 tests)
+npm run test:a11y    # axe-core sur toutes les pages
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables d'environnement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Créer `.env.local` à la racine :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Backend metier (FastAPI Python)
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_KEY=dev-healthai-key
 
-## Learn More
+# BFF (Hono — gateway pour /api/admin/*)
+NEXT_PUBLIC_BFF_URL=http://localhost:3002
 
-To learn more about Next.js, take a look at the following resources:
+# Toggle mocks admin (1 = utilise mocks même si backend up)
+NEXT_PUBLIC_ADMIN_USE_MOCKS=0
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+health-next/
+├── app/                    # Routes Next.js (App Router)
+│   ├── (landing)/          # Pages publiques
+│   ├── connexion/          # Login
+│   ├── inscription/        # Wizard 6 étapes
+│   └── dashboard/
+│       ├── analytics/      # User : graphs poids/calories/macros
+│       ├── nutrition/      # User : upload + meal plan
+│       ├── workouts/       # User : programme d'entraînement
+│       ├── clients/        # B2B : liste clients (Premium+)
+│       ├── settings/       # User : profil + objectifs
+│       └── admin/          # ⭐ MSPR501 — espace admin
+│           ├── data-quality/
+│           ├── datasets/[source]/
+│           ├── validation/
+│           ├── analytics/
+│           └── flow/
+├── components/
+│   ├── admin/              # Sidebar admin
+│   ├── charts/             # Recharts wrappers
+│   ├── dashboard/          # Layout, sidebar user
+│   ├── ui/                 # Shadcn primitives + custom (data-table, kpi-card, etc.)
+│   └── ...
+├── lib/
+│   ├── api/                # ⭐ Wrappers fetch (bff.ts + admin/)
+│   ├── hooks/              # use-admin-guard, use-user-role, use-premium-status
+│   ├── mocks/              # Fixtures de dev (mocks admin)
+│   └── ...
+├── types/                  # Types partagés (admin.ts)
+├── e2e/                    # Tests Playwright
+│   ├── accessibility.spec.ts
+│   ├── admin-accessibility.spec.ts  # ⭐ MSPR501
+│   └── ...
+└── docs/
+    ├── mspr501/            # ⭐ Livrables MSPR501 (37 docs)
+    ├── mspr502/            # Anciens docs MSPR502
+    └── livraison/          # Docs PDF benchmark/conduite changement
+```
 
-## Deploy on Vercel
+## MSPR501
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pour la livraison MSPR501 — Bloc E6.1 (création du backend métier), voir :
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **[`docs/mspr501/TODO.md`](docs/mspr501/TODO.md)** — index des 37 tâches
+- **[`docs/mspr501/30-Rapport-Technique.md`](docs/mspr501/30-Rapport-Technique.md)** — rapport technique de synthèse
+- **[`docs/mspr501/32-Guide-Deploiement.md`](docs/mspr501/32-Guide-Deploiement.md)** — guide déploiement < 30 min
+- **[`docs/mspr501/29-Accessibilite-Admin-RGAA.md`](docs/mspr501/29-Accessibilite-Admin-RGAA.md)** — conformité RGAA AA
+
+Branche de travail : `feat/mspr501` (à merger sur `main` à la fin).
+
+## Architecture globale
+
+Ce repo est l'un des 5 composants de HealthAI Coach :
+
+```
+Health-AI-project/
+├── health-next/        ← vous êtes ici (frontend)
+├── backend-hono/       ← BFF / gateway (port 3002)
+├── ia-python/          ← FastAPI métier (port 8000)
+├── engine-go/          ← gRPC core (port 50051)
+└── flutter-ai/         ← App mobile (hors MSPR501)
+```
+
+Pour lancer la stack complète en local : `docker compose up -d` depuis le dossier parent (cf. guide de déploiement).
