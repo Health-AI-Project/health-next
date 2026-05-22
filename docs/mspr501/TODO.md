@@ -3,6 +3,8 @@
 > Cahier des charges : `MSPR501/2025-2026 CDA-DIADS - Sujet MSPR TPRE501.pdf`
 > Périmètre : développement et déploiement d'une application HealthAI Coach — backend métier pour collecte, nettoyage, visualisation des données.
 
+> **État au 2026-05-22** : 21/37 tâches terminées (57 %). Voir `30-Rapport-Technique.md` pour la synthèse.
+
 ---
 
 ## Vue d'ensemble — 8 livrables PDF + transverses
@@ -23,7 +25,7 @@
 
 ## L1 — Documentation des données et flux
 
-- [ ] **#4 — Rédiger rapport d'inventaire des sources de données**
+- [x] **#4 — Rédiger rapport d'inventaire des sources de données** → `04-Rapport-Inventaire-Sources.md`
   Document recensant : Daily Food Nutrition (Kaggle), Diet Recommendations (Kaggle), ExerciseDB (1300+), Gym Members (973 échantillons), Fitness Tracker. Pour chaque source : origine, format (CSV/JSON/XLSX), fréquence MAJ, règles qualité, justification du choix.
 
 - [ ] **#5 — Créer diagramme des flux de données**
