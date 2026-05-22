@@ -54,6 +54,27 @@ services:
       timeout: 10s
       retries: 3
 
+  etl-scheduler:
+    build:
+      context: ./ia-python
+      dockerfile: Dockerfile.mspr501
+    container_name: healthai-etl-scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ia-python:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-healthai}:${DB_PASSWORD:-healthai_dev_password}@postgres:5432/${DB_NAME:-healthai}
+      API_KEY: ${IA_API_KEY:-dev-healthai-key}
+      PYTHONPATH: /app
+      ETL_INTERVAL_HOURS: ${ETL_INTERVAL_HOURS:-24}
+      ETL_RUN_ON_START: ${ETL_RUN_ON_START:-0}
+    volumes:
+      - ./ia-python/data:/app/data:ro
+    command: ["python", "scripts/etl_scheduler.py"]
+    restart: unless-stopped
+
   backend-hono:
     build:
       context: ./backend-hono

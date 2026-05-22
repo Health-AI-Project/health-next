@@ -248,6 +248,22 @@ export async function deleteUser(userId: string): Promise<boolean> {
     }
 }
 
+export async function triggerEtlForSource(sourceCode: string): Promise<{ started: boolean; message?: string }> {
+    if (USE_MOCKS) return { started: true, message: 'Mock run started' };
+    try {
+        const res = await bffFetch<ApiResponse<{ run_id: number; status: string; rows_inserted: number; rows_rejected: number }>>(
+            `/api/admin/etl/run-source/${sourceCode}`,
+            { method: 'POST', body: JSON.stringify({}) },
+        );
+        return {
+            started: true,
+            message: `Run #${res.data.run_id} ${res.data.status} : ${res.data.rows_inserted} insérées, ${res.data.rows_rejected} rejetées`,
+        };
+    } catch (error) {
+        return { started: false, message: String(error) };
+    }
+}
+
 export async function triggerEtlRun(includeApi = false): Promise<{ started: boolean; message?: string }> {
     if (USE_MOCKS) return { started: true, message: 'Mock run started' };
     try {
