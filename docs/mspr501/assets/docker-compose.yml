@@ -75,6 +75,24 @@ services:
     command: ["python", "scripts/etl_scheduler.py"]
     restart: unless-stopped
 
+  auth-service:
+    build:
+      context: ./backend-hono/auth-service
+      dockerfile: Dockerfile
+    container_name: healthai-auth-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DATABASE_URL: ${AUTH_DATABASE_URL:-postgresql://${DB_USER:-healthai}:${DB_PASSWORD:-healthai_dev_password}@postgres:5432/${DB_NAME:-healthai}}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me-in-prod}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3002}
+    ports:
+      - "${AUTH_PORT:-3006}:3006"
+    restart: unless-stopped
+
   backend-hono:
     build:
       context: ./backend-hono
@@ -85,11 +103,14 @@ services:
         condition: service_started
       postgres:
         condition: service_healthy
+      auth-service:
+        condition: service_started
     environment:
       NODE_ENV: production
       PORT: 3002
       IA_SERVICE_URL: http://ia-python:8000
       IA_API_KEY: ${IA_API_KEY:-dev-healthai-key}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL:-http://auth-service:3006}
       DATABASE_URL: postgresql://${DB_USER:-healthai}:${DB_PASSWORD:-healthai_dev_password}@postgres:5432/${DB_NAME:-healthai}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me-in-prod}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3002}
